@@ -1,0 +1,177 @@
+import { loadFixture, MockProvider } from "ethereum-waffle";
+import { Wallet } from "ethers";
+import { parseEther } from "ethers/lib/utils";
+import { ethers } from "hardhat";
+import { DateTime } from "luxon";
+import {
+    KPITokensFactory,
+    KPITokensFactory__factory,
+    KPIToken,
+    KPIToken__factory,
+    Realitio,
+    Realitio__factory,
+    ERC20PresetMinterPauser,
+    ERC20PresetMinterPauser__factory,
+} from "../../typechain";
+import {
+    encodeRealityQuestion,
+    getKpiTokenAddressFromReceipt,
+    getRealityQuestionId,
+} from "../utils";
+
+export const preFactoryDeploymentFixture = async (
+    _: any,
+    provider: MockProvider
+) => {
+    const [, testAccount, oracleAccount] = provider.getWallets();
+
+    const realitioFactory = (await ethers.getContractFactory(
+        "Realitio"
+    )) as Realitio__factory;
+    const realitio = (await realitioFactory.deploy()) as Realitio;
+
+    const kpiTokenFactory = (await ethers.getContractFactory(
+        "KPIToken"
+    )) as KPIToken__factory;
+    const kpiToken = (await kpiTokenFactory.deploy()) as KPIToken;
+
+    const kpiTokensFactoryFactory = (await ethers.getContractFactory(
+        "KPITokensFactory"
+    )) as KPITokensFactory__factory;
+
+    const collateralTokenFactory = (await ethers.getContractFactory(
+        "ERC20PresetMinterPauser"
+    )) as ERC20PresetMinterPauser__factory;
+    const collateralToken = (await collateralTokenFactory.deploy(
+        "Collateral",
+        "CLT"
+    )) as ERC20PresetMinterPauser;
+
+    return {
+        testAccount,
+        oracleAccount,
+        kpiToken,
+        realitio,
+        kpiTokensFactoryFactory,
+        collateralToken,
+    };
+};
+
+export const fixture = async (_: any, provider: MockProvider) => {
+    const [, testAccount, oracleAccount] = provider.getWallets();
+
+    const realitioFactory = (await ethers.getContractFactory(
+        "Realitio"
+    )) as Realitio__factory;
+    const realitio = (await realitioFactory.deploy()) as Realitio;
+
+    const kpiTokenFactory = (await ethers.getContractFactory(
+        "KPIToken"
+    )) as KPIToken__factory;
+    const kpiToken = (await kpiTokenFactory.deploy()) as KPIToken;
+
+    const kpiTokensFactoryFactory = (await ethers.getContractFactory(
+        "KPITokensFactory"
+    )) as KPITokensFactory__factory;
+    const arbitrator = Wallet.createRandom(); // pseudo-random arbitrator for test purposes
+    const feeReceiver = Wallet.createRandom(); // pseudo-random fee receiver for test purposes
+    const voteTimeout = 120; // 3 minutes vote timeout
+    const kpiTokensFactory = (await kpiTokensFactoryFactory.deploy(
+        kpiToken.address,
+        realitio.address,
+        arbitrator.address,
+        30,
+        voteTimeout,
+        feeReceiver.address
+    )) as KPITokensFactory;
+
+    const collateralTokenFactory = (await ethers.getContractFactory(
+        "ERC20PresetMinterPauser"
+    )) as ERC20PresetMinterPauser__factory;
+    const collateralToken = (await collateralTokenFactory.deploy(
+        "Collateral",
+        "CLT"
+    )) as ERC20PresetMinterPauser;
+
+    return {
+        testAccount,
+        oracleAccount,
+        realitio,
+        kpiToken,
+        kpiTokensFactory,
+        collateralToken,
+        feeReceiver,
+        arbitrator,
+        voteTimeout,
+    };
+};
+
+export const testKpiTokenFixture = async (_: any, provider: MockProvider) => {
+    const {
+        kpiTokensFactory,
+        testAccount,
+        collateralToken,
+        realitio,
+        arbitrator,
+        voteTimeout,
+    } = await fixture(_, provider);
+    const collateralAmount = parseEther("10");
+
+    // mint collateral to caller
+    await collateralToken.mint(testAccount.address, collateralAmount);
+
+    // approving collateral to factory
+    await collateralToken
+        .connect(testAccount)
+        .approve(kpiTokensFactory.address, collateralAmount);
+
+    // creating kpi token
+    const oracleData = {
+        kpiExpiry: Math.floor(
+            DateTime.now().plus({ minutes: 5 }).toMillis() / 1000
+        ),
+        question: encodeRealityQuestion("Will this test pass?"),
+    };
+    const collateralData = {
+        token: collateralToken.address,
+        amount: collateralAmount,
+    };
+    const transaction = await kpiTokensFactory
+        .connect(testAccount)
+        .createKpiToken(
+            collateralData,
+            {
+                name: "Test KPI token",
+                symbol: "KPI",
+                totalSupply: parseEther("100000"),
+            },
+            oracleData
+        );
+    const receipt = await transaction.wait();
+
+    const kpiTokenFactory = (await ethers.getContractFactory(
+        "KPIToken"
+    )) as KPIToken__factory;
+    const kpiToken = kpiTokenFactory.attach(
+        getKpiTokenAddressFromReceipt(receipt)
+    );
+
+    return {
+        testAccount,
+        kpiToken,
+        collateralToken,
+        oracleData,
+        realitio,
+        realiyQuestionId: getRealityQuestionId(
+            0,
+            oracleData.kpiExpiry,
+            oracleData.question,
+            arbitrator.address,
+            voteTimeout,
+            kpiTokensFactory.address,
+            0
+        ),
+        voteTimeout,
+        collateralData,
+    };
+};

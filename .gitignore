@@ -1,0 +1,14 @@
+node_modules
+
+#Hardhat files
+cache
+artifacts
+coverage*
+typechain
+
+yarn-error.log
+
+/*.sol
+/interfaces/*.sol
+*.tgz
+.env*

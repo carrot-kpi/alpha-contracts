@@ -1,0 +1,34 @@
+pragma solidity ^0.8.4;
+
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+
+/**
+ * @title IKPIToken
+ * @dev IKPIToken contract
+ * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * SPDX-License-Identifier: GPL-3.0
+ */
+interface IKPIToken is IERC20Upgradeable {
+    struct Collateral {
+        address token;
+        uint256 initialAmount;
+    }
+
+    struct TokenData {
+        string name;
+        string symbol;
+        uint256 totalSupply;
+    }
+
+    function initialize(
+        bytes32 _kpiId,
+        address _oracle,
+        address _creator,
+        Collateral calldata _collateral,
+        TokenData calldata _tokenData
+    ) external;
+
+    function finalize() external;
+
+    function redeem() external;
+}
