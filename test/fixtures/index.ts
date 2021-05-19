@@ -106,7 +106,10 @@ export const fixture = async (_: any, provider: MockProvider) => {
     };
 };
 
-export const testKpiTokenFixture = async (_: any, provider: MockProvider) => {
+export const testBooleanKpiTokenFixture = async (
+    _: any,
+    provider: MockProvider
+) => {
     const {
         kpiTokensFactory,
         testAccount,
@@ -126,12 +129,10 @@ export const testKpiTokenFixture = async (_: any, provider: MockProvider) => {
         .approve(kpiTokensFactory.address, collateralAmount);
 
     // creating kpi token
-    const oracleData = {
-        kpiExpiry: Math.floor(
-            DateTime.now().plus({ minutes: 5 }).toMillis() / 1000
-        ),
-        question: encodeRealityQuestion("Will this test pass?"),
-    };
+    const kpiExpiry = Math.floor(
+        DateTime.now().plus({ minutes: 5 }).toMillis() / 1000
+    );
+    const question = encodeRealityQuestion("Will this test pass?");
     const collateralData = {
         token: collateralToken.address,
         amount: collateralAmount,
@@ -139,13 +140,15 @@ export const testKpiTokenFixture = async (_: any, provider: MockProvider) => {
     const transaction = await kpiTokensFactory
         .connect(testAccount)
         .createKpiToken(
+            question,
+            kpiExpiry,
             collateralData,
             {
                 name: "Test KPI token",
                 symbol: "KPI",
                 totalSupply: parseEther("100000"),
             },
-            oracleData
+            { lowerBound: 0, higherBound: 1 }
         );
     const receipt = await transaction.wait();
 
@@ -160,12 +163,13 @@ export const testKpiTokenFixture = async (_: any, provider: MockProvider) => {
         testAccount,
         kpiToken,
         collateralToken,
-        oracleData,
+        question,
+        kpiExpiry,
         realitio,
         realiyQuestionId: getRealityQuestionId(
             0,
-            oracleData.kpiExpiry,
-            oracleData.question,
+            kpiExpiry,
+            question,
             arbitrator.address,
             voteTimeout,
             kpiTokensFactory.address,

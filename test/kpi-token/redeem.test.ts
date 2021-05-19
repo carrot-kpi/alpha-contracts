@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { testKpiTokenFixture } from "../fixtures";
+import { testBooleanKpiTokenFixture } from "../fixtures";
 import { waffle } from "hardhat";
 import { fastForward, fastForwardTo } from "../utils";
 import { formatBytes32String } from "ethers/lib/utils";
@@ -8,7 +8,7 @@ const { loadFixture } = waffle;
 
 describe("KPIToken - Redeem", () => {
     it("should fail when the kpi token is not finalized", async () => {
-        const { kpiToken } = await loadFixture(testKpiTokenFixture);
+        const { kpiToken } = await loadFixture(testBooleanKpiTokenFixture);
         // voting start timestamp is 2 minutes in the future since KPI token
         // initialization by default, so this should fail
         await expect(kpiToken.redeem()).to.be.revertedWith("KT02");
@@ -17,13 +17,12 @@ describe("KPIToken - Redeem", () => {
     it("should fail when the kpi is finalized but a user with no token balance calls", async () => {
         const {
             kpiToken,
-            oracleData,
             realitio,
             realiyQuestionId,
             voteTimeout,
-            testAccount,
-        } = await loadFixture(testKpiTokenFixture);
-        await fastForwardTo(oracleData.kpiExpiry);
+            kpiExpiry,
+        } = await loadFixture(testBooleanKpiTokenFixture);
+        await fastForwardTo(kpiExpiry);
         await realitio.submitAnswer(
             realiyQuestionId,
             "0x0000000000000000000000000000000000000000000000000000000000000001",
@@ -38,13 +37,13 @@ describe("KPIToken - Redeem", () => {
     it("should succeed when the kpi is finalized to false (not reached) and a user with balance calls", async () => {
         const {
             kpiToken,
-            oracleData,
+            kpiExpiry,
             realitio,
             realiyQuestionId,
             voteTimeout,
             testAccount,
-        } = await loadFixture(testKpiTokenFixture);
-        await fastForwardTo(oracleData.kpiExpiry);
+        } = await loadFixture(testBooleanKpiTokenFixture);
+        await fastForwardTo(kpiExpiry);
         await realitio.submitAnswer(
             realiyQuestionId,
             formatBytes32String("0"),

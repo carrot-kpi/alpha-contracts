@@ -17,14 +17,11 @@ describe("KPITokensFactory - Create KPI token", () => {
         const { kpiTokensFactory } = await loadFixture(fixture);
         await expect(
             kpiTokensFactory.createKpiToken(
+                encodeRealityQuestion("Test?"),
+                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
                 { token: constants.AddressZero, amount: 1 },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
-                {
-                    question: encodeRealityQuestion("Test?"),
-                    kpiExpiry: Math.floor(
-                        DateTime.now().plus({ minutes: 2 }).toSeconds()
-                    ),
-                }
+                { lowerBound: 0, higherBound: 1 }
             )
         ).to.be.revertedWith("KF09");
     });
@@ -35,14 +32,11 @@ describe("KPITokensFactory - Create KPI token", () => {
         );
         await expect(
             kpiTokensFactory.createKpiToken(
+                encodeRealityQuestion("Test?"),
+                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
                 { token: collateralToken.address, amount: 0 },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
-                {
-                    question: encodeRealityQuestion("Test?"),
-                    kpiExpiry: Math.floor(
-                        DateTime.now().plus({ minutes: 2 }).toSeconds()
-                    ),
-                }
+                { lowerBound: 0, higherBound: 1 }
             )
         ).to.be.revertedWith("KF10");
     });
@@ -53,14 +47,11 @@ describe("KPITokensFactory - Create KPI token", () => {
         );
         await expect(
             kpiTokensFactory.createKpiToken(
+                encodeRealityQuestion("Test?"),
+                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
                 { token: collateralToken.address, amount: 1 },
                 { name: "", symbol: "TEST", totalSupply: 10 },
-                {
-                    question: encodeRealityQuestion("Test?"),
-                    kpiExpiry: Math.floor(
-                        DateTime.now().plus({ minutes: 2 }).toSeconds()
-                    ),
-                }
+                { lowerBound: 0, higherBound: 1 }
             )
         ).to.be.revertedWith("KF11");
     });
@@ -71,14 +62,11 @@ describe("KPITokensFactory - Create KPI token", () => {
         );
         await expect(
             kpiTokensFactory.createKpiToken(
+                encodeRealityQuestion("Test?"),
+                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
                 { token: collateralToken.address, amount: 1 },
                 { name: "Test", symbol: "", totalSupply: 10 },
-                {
-                    question: encodeRealityQuestion("Test?"),
-                    kpiExpiry: Math.floor(
-                        DateTime.now().plus({ minutes: 2 }).toSeconds()
-                    ),
-                }
+                { lowerBound: 0, higherBound: 1 }
             )
         ).to.be.revertedWith("KF12");
     });
@@ -89,14 +77,11 @@ describe("KPITokensFactory - Create KPI token", () => {
         );
         await expect(
             kpiTokensFactory.createKpiToken(
+                encodeRealityQuestion("Test?"),
+                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
                 { token: collateralToken.address, amount: 1 },
                 { name: "Test", symbol: "TEST", totalSupply: 0 },
-                {
-                    question: encodeRealityQuestion("Test?"),
-                    kpiExpiry: Math.floor(
-                        DateTime.now().plus({ minutes: 2 }).toSeconds()
-                    ),
-                }
+                { lowerBound: 0, higherBound: 1 }
             )
         ).to.be.revertedWith("KF13");
     });
@@ -107,14 +92,11 @@ describe("KPITokensFactory - Create KPI token", () => {
         );
         await expect(
             kpiTokensFactory.createKpiToken(
+                "",
+                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
                 { token: collateralToken.address, amount: 1 },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
-                {
-                    question: "",
-                    kpiExpiry: Math.floor(
-                        DateTime.now().plus({ minutes: 2 }).toSeconds()
-                    ),
-                }
+                { lowerBound: 0, higherBound: 1 }
             )
         ).to.be.revertedWith("KF14");
     });
@@ -125,14 +107,11 @@ describe("KPITokensFactory - Create KPI token", () => {
         );
         await expect(
             kpiTokensFactory.createKpiToken(
+                encodeRealityQuestion("Test?"),
+                Math.floor(DateTime.now().minus({ minutes: 2 }).toSeconds()),
                 { token: collateralToken.address, amount: 1 },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
-                {
-                    question: encodeRealityQuestion("Test?"),
-                    kpiExpiry: Math.floor(
-                        DateTime.now().minus({ minutes: 2 }).toSeconds()
-                    ),
-                }
+                { lowerBound: 0, higherBound: 1 }
             )
         ).to.be.revertedWith("KF15");
     });
@@ -143,14 +122,11 @@ describe("KPITokensFactory - Create KPI token", () => {
         );
         await expect(
             kpiTokensFactory.createKpiToken(
+                encodeRealityQuestion("Test?"),
+                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
                 { token: collateralToken.address, amount: 1 },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
-                {
-                    question: encodeRealityQuestion("Test?"),
-                    kpiExpiry: Math.floor(
-                        DateTime.now().plus({ minutes: 2 }).toSeconds()
-                    ),
-                }
+                { lowerBound: 0, higherBound: 1 }
             )
         ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
     });
@@ -165,14 +141,14 @@ describe("KPITokensFactory - Create KPI token", () => {
         await collateralToken.mint(testAccount.address, collateralAmount);
         await expect(
             kpiTokensFactory.connect(testAccount).createKpiToken(
-                { token: collateralToken.address, amount: collateralAmount },
-                { name: "Test", symbol: "TEST", totalSupply: 10 },
+                encodeRealityQuestion("Test?"),
+                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
                 {
-                    question: encodeRealityQuestion("Test?"),
-                    kpiExpiry: Math.floor(
-                        DateTime.now().plus({ minutes: 2 }).toSeconds()
-                    ),
-                }
+                    token: collateralToken.address,
+                    amount: collateralAmount,
+                },
+                { name: "Test", symbol: "TEST", totalSupply: 10 },
+                { lowerBound: 0, higherBound: 1 }
             )
         ).to.be.revertedWith("ERC20: transfer amount exceeds allowance");
     });
@@ -185,7 +161,6 @@ describe("KPITokensFactory - Create KPI token", () => {
             testAccount,
             feeReceiver,
             arbitrator,
-            realitio,
         } = await loadFixture(fixture);
         const collateralAmount = parseEther("100");
         await collateralToken.mint(testAccount.address, collateralAmount);
@@ -199,9 +174,11 @@ describe("KPITokensFactory - Create KPI token", () => {
         const transaction = await kpiTokensFactory
             .connect(testAccount)
             .createKpiToken(
+                question,
+                kpiExpiry,
                 { token: collateralToken.address, amount: collateralAmount },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
-                { question, kpiExpiry }
+                { lowerBound: 0, higherBound: 1 }
             );
         const receipt = await transaction.wait();
         expect(await collateralToken.balanceOf(testAccount.address)).to.equal(
@@ -240,7 +217,7 @@ describe("KPITokensFactory - Create KPI token", () => {
         expect(await createdKpiToken.creator()).to.be.equal(
             testAccount.address
         );
-        expect(await createdKpiToken.kpiReached()).to.be.false;
+        expect(await createdKpiToken.finalKpiProgress()).to.be.equal(0);
         expect(await createdKpiToken.finalized()).to.be.false;
     });
 });

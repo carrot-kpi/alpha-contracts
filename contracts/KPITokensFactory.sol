@@ -16,22 +16,6 @@ import "./interfaces/IKPIToken.sol";
 contract KPITokensFactory is Ownable {
     using SafeERC20 for IERC20;
 
-    struct Collateral {
-        address token;
-        uint256 amount;
-    }
-
-    struct KpiTokenData {
-        string name;
-        string symbol;
-        uint256 totalSupply;
-    }
-
-    struct OracleData {
-        string question;
-        uint32 kpiExpiry;
-    }
-
     uint16 private constant _10000 = 10000;
 
     uint16 public fee;
@@ -94,17 +78,20 @@ contract KPITokensFactory is Ownable {
     }
 
     function createKpiToken(
-        Collateral calldata _collateral,
-        KpiTokenData calldata _tokenData,
-        OracleData calldata _oracleData
+        string calldata _kpiQuestion,
+        uint32 _kpiExpiry,
+        IKPIToken.Collateral calldata _collateral,
+        IKPIToken.TokenData calldata _tokenData,
+        IKPIToken.ScalarData calldata _scalarData
     ) external {
         require(_collateral.token != address(0), "KF09");
         require(_collateral.amount > 0, "KF10");
         require(bytes(_tokenData.name).length > 0, "KF11");
         require(bytes(_tokenData.symbol).length > 0, "KF12");
         require(_tokenData.totalSupply > 0, "KF13");
-        require(bytes(_oracleData.question).length > 0, "KF14");
-        require(_oracleData.kpiExpiry > block.timestamp, "KF15");
+        require(bytes(_kpiQuestion).length > 0, "KF14");
+        require(_kpiExpiry > block.timestamp, "KF15");
+        require(_scalarData.lowerBound < _scalarData.higherBound, "KF16");
         address _kpiTokenProxy = Clones.clone(kpiTokenImplementation);
         IERC20(_collateral.token).safeTransferFrom(
             msg.sender,
@@ -121,10 +108,10 @@ contract KPITokensFactory is Ownable {
         bytes32 _kpiId =
             oracle.askQuestion(
                 0,
-                _oracleData.question,
+                _kpiQuestion,
                 arbitrator,
                 voteTimeout,
-                _oracleData.kpiExpiry,
+                _kpiExpiry,
                 0
             );
         IKPIToken(_kpiTokenProxy).initialize(
@@ -133,13 +120,10 @@ contract KPITokensFactory is Ownable {
             msg.sender,
             IKPIToken.Collateral({
                 token: _collateral.token,
-                initialAmount: _collateralAmountMinusFees
+                amount: _collateralAmountMinusFees
             }),
-            IKPIToken.TokenData({
-                name: _tokenData.name,
-                symbol: _tokenData.symbol,
-                totalSupply: _tokenData.totalSupply
-            })
+            _tokenData,
+            _scalarData
         );
         emit KpiTokenCreated(_kpiTokenProxy, _feeAmount);
     }
