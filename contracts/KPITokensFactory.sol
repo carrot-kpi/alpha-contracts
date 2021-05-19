@@ -107,7 +107,9 @@ contract KPITokensFactory is Ownable {
         );
         bytes32 _kpiId =
             oracle.askQuestion(
-                0,
+                _scalarData.lowerBound == 0 && _scalarData.higherBound == 1
+                    ? 0
+                    : 1,
                 _kpiQuestion,
                 arbitrator,
                 voteTimeout,
