@@ -84,9 +84,20 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
                 collateralToken.balanceOf(address(this))
             );
         } else {
-            finalKpiProgress = _oracleResult > scalarData.higherBound
-                ? scalarData.higherBound - scalarData.lowerBound
+            uint256 _kpiFullRange =
+                scalarData.higherBound - scalarData.lowerBound;
+            finalKpiProgress = _oracleResult >= scalarData.higherBound
+                ? _kpiFullRange
                 : _oracleResult - scalarData.lowerBound;
+            // transfer the unnecessary collateral back to the KPI creator
+            if (finalKpiProgress < _kpiFullRange) {
+                IERC20Upgradeable(collateralToken).transfer(
+                    creator,
+                    (IERC20Upgradeable(collateralToken).balanceOf(
+                        address(this)
+                    ) * (_kpiFullRange - finalKpiProgress)) / _kpiFullRange
+                );
+            }
         }
         finalized = true;
         emit Finalized(finalKpiProgress);

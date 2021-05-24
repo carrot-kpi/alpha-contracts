@@ -1,4 +1,4 @@
-import { constants, ContractReceipt } from "ethers";
+import { BigNumber, constants, ContractReceipt } from "ethers";
 import { solidityKeccak256, solidityPack } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -49,6 +49,11 @@ export const getRealityQuestionId = (
             ),
         ]
     );
+};
+
+export const getEvmTimestamp = async (): Promise<number> => {
+    const { timestamp } = await provider.getBlock("latest");
+    return timestamp;
 };
 
 export const fastForwardTo = async (timestamp: number) => {

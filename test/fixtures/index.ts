@@ -15,6 +15,7 @@ import {
 } from "../../typechain";
 import {
     encodeRealityQuestion,
+    getEvmTimestamp,
     getKpiTokenAddressFromReceipt,
     getRealityQuestionId,
 } from "../utils";
@@ -168,6 +169,78 @@ export const testBooleanKpiTokenFixture = async (
         realitio,
         realiyQuestionId: getRealityQuestionId(
             0,
+            kpiExpiry,
+            question,
+            arbitrator.address,
+            voteTimeout,
+            kpiTokensFactory.address,
+            0
+        ),
+        voteTimeout,
+        collateralData,
+    };
+};
+
+export const getScalarKpiTokenFixture = (
+    lowerBound: number,
+    higherBound: number
+) => async (_: any, provider: MockProvider) => {
+    const {
+        kpiTokensFactory,
+        testAccount,
+        collateralToken,
+        realitio,
+        arbitrator,
+        voteTimeout,
+    } = await fixture(_, provider);
+    const collateralAmount = parseEther("10");
+
+    // mint collateral to caller
+    await collateralToken.mint(testAccount.address, collateralAmount);
+
+    // approving collateral to factory
+    await collateralToken
+        .connect(testAccount)
+        .approve(kpiTokensFactory.address, collateralAmount);
+
+    // creating kpi token
+    const kpiExpiry = Math.floor((await getEvmTimestamp()) + 300); // 5 minutes from the current EVM timestamp
+    const question = encodeRealityQuestion("Will this test pass?");
+    const collateralData = {
+        token: collateralToken.address,
+        amount: collateralAmount,
+    };
+    const transaction = await kpiTokensFactory
+        .connect(testAccount)
+        .createKpiToken(
+            question,
+            kpiExpiry,
+            collateralData,
+            {
+                name: "Test KPI token",
+                symbol: "KPI",
+                totalSupply: parseEther("100000"),
+            },
+            { lowerBound, higherBound }
+        );
+    const receipt = await transaction.wait();
+
+    const kpiTokenFactory = (await ethers.getContractFactory(
+        "KPIToken"
+    )) as KPIToken__factory;
+    const kpiToken = kpiTokenFactory.attach(
+        getKpiTokenAddressFromReceipt(receipt)
+    );
+
+    return {
+        testAccount,
+        kpiToken,
+        collateralToken,
+        question,
+        kpiExpiry,
+        realitio,
+        realiyQuestionId: getRealityQuestionId(
+            1,
             kpiExpiry,
             question,
             arbitrator.address,
