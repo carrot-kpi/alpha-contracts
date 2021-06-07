@@ -13,7 +13,7 @@ interface TaskArguments {
     realityAddress: string;
     arbitratorAddress: string;
     voteTimeout: string;
-    feeReceiver: string;
+    feeReceiverAddress: string;
 }
 
 task(
@@ -37,7 +37,7 @@ task(
                 realityAddress,
                 arbitratorAddress,
                 voteTimeout,
-                feeReceiver,
+                feeReceiverAddress,
             }: TaskArguments,
             hre: HardhatRuntimeEnvironment
         ) => {
@@ -60,7 +60,7 @@ task(
                 arbitratorAddress,
                 fee,
                 voteTimeout,
-                feeReceiver
+                feeReceiverAddress
             )) as KPITokensFactory;
 
             if (verify) {
@@ -86,6 +86,7 @@ task(
                         arbitratorAddress,
                         fee,
                         voteTimeout,
+                        feeReceiverAddress,
                     ],
                 });
 

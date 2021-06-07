@@ -27,12 +27,11 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
 
     event Initialized(
         bytes32 kpiId,
-        string name,
-        string symbol,
-        uint256 totalSupply,
         address oracle,
-        address collateralToken,
-        address creator
+        address creator,
+        Collateral collateral,
+        TokenData tokenData,
+        ScalarData scalarData
     );
     event Finalized(uint256 finalKpiProgress);
     event Redeemed(uint256 burnedTokens, uint256 redeemedCollateral);
@@ -61,12 +60,11 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
 
         emit Initialized(
             _kpiId,
-            _tokenData.name,
-            _tokenData.symbol,
-            _tokenData.totalSupply,
             _oracle,
-            _collateral.token,
-            _creator
+            _creator,
+            _collateral,
+            _tokenData,
+            _scalarData
         );
     }
 

@@ -25,7 +25,11 @@ contract KPITokensFactory is Ownable {
     address public feeReceiver;
     IReality public oracle;
 
-    event KpiTokenCreated(address kpiToken, uint256 feeAmount);
+    event KpiTokenCreated(
+        address kpiToken,
+        uint256 feeAmount,
+        uint32 kpiExpiry
+    );
 
     constructor(
         address _kpiTokenImplementation,
@@ -127,6 +131,6 @@ contract KPITokensFactory is Ownable {
             _tokenData,
             _scalarData
         );
-        emit KpiTokenCreated(_kpiTokenProxy, _feeAmount);
+        emit KpiTokenCreated(_kpiTokenProxy, _feeAmount, _kpiExpiry);
     }
 }
