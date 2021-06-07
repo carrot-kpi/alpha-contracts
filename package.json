@@ -16,7 +16,7 @@
         "compile": "hardhat compile",
         "prepare": "husky install",
         "deploy:rinkeby": "hardhat deploy --network rinkeby --fee 30 --reality-address 0x3D00D77ee771405628a4bA4913175EcC095538da --arbitrator-address 0xcafa054b1b054581faf65adce667bf1c684b6ef0 --vote-timeout 120 --verify",
-        "create:rinkeby": "hardhat create-kpi-token --network rinkeby --factory-address 0x8041dE882401F119Dd95d9B6Fad55221fCC3aad2"
+        "create:rinkeby": "hardhat create-kpi-token --network rinkeby --factory-address 0xa60c831dc30A6564Aa23044Ade594C2f1e3c9929"
     },
     "devDependencies": {
         "@commitlint/cli": "^12.1.1",

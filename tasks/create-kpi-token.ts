@@ -1,8 +1,7 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DateTime } from "luxon";
-import { encodeRealityQuestion } from "../test/utils";
-import { KPITokensFactory__factory } from "../typechain";
+import { ERC20__factory, KPITokensFactory__factory } from "../typechain";
 
 interface TaskArguments {
     factoryAddress: string;
@@ -42,6 +41,14 @@ task("create-kpi-token", "Creates a KPI token")
             await hre.run("compile");
             const [signer] = await hre.ethers.getSigners();
 
+            const collateralErc20 = await ERC20__factory.connect(
+                collateralAddress,
+                signer
+            );
+            console.log("approving collateral");
+            await collateralErc20.approve(factoryAddress, collateralAmount);
+            console.log("collateral approved");
+
             const factory = await KPITokensFactory__factory.connect(
                 factoryAddress,
                 signer
@@ -53,7 +60,9 @@ task("create-kpi-token", "Creates a KPI token")
             console.log("creating");
             const transaction = await factory.createKpiToken(
                 encodedRealityQuestion,
-                Math.floor(DateTime.now().plus({ days: 3 }).toMillis() / 1000),
+                Math.floor(
+                    DateTime.now().plus({ minutes: 30 }).toMillis() / 1000
+                ),
                 {
                     token: collateralAddress,
                     amount: collateralAmount,
