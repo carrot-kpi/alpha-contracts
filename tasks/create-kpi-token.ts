@@ -1,3 +1,4 @@
+import { parseUnits } from "ethers/lib/utils";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DateTime } from "luxon";
@@ -46,7 +47,14 @@ task("create-kpi-token", "Creates a KPI token")
                 signer
             );
             console.log("approving collateral");
-            await collateralErc20.approve(factoryAddress, collateralAmount);
+            const properCollateralAmount = parseUnits(
+                collateralAmount,
+                await collateralErc20.decimals()
+            );
+            await collateralErc20.approve(
+                factoryAddress,
+                properCollateralAmount
+            );
             console.log("collateral approved");
 
             const factory = await KPITokensFactory__factory.connect(
@@ -61,11 +69,12 @@ task("create-kpi-token", "Creates a KPI token")
             const transaction = await factory.createKpiToken(
                 encodedRealityQuestion,
                 Math.floor(
-                    DateTime.now().plus({ minutes: 30 }).toMillis() / 1000
+                    DateTime.now().plus({ minutes: 30 }).toMillis() /
+                        1000
                 ),
                 {
                     token: collateralAddress,
-                    amount: collateralAmount,
+                    amount: properCollateralAmount,
                 },
                 {
                     name: tokenName,
