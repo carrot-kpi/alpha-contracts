@@ -47,7 +47,7 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
         require(
             IERC20Upgradeable(_collateral.token).balanceOf(address(this)) >=
                 _collateral.amount,
-            "KT06"
+            "KT01"
         );
 
         __ERC20_init(_tokenData.name, _tokenData.symbol);
@@ -69,7 +69,8 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
     }
 
     function finalize() external override {
-        require(oracle.isFinalized(kpiId), "KT01");
+        require(!finalized, "KT02");
+        require(oracle.isFinalized(kpiId), "KT03");
         uint256 _oracleResult = uint256(oracle.resultFor(kpiId));
         if (
             _oracleResult <= scalarData.lowerBound ||
@@ -101,9 +102,9 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
     }
 
     function redeem() external override {
-        require(finalized, "KT02");
+        require(finalized, "KT04");
         uint256 _kpiTokenBalance = balanceOf(msg.sender);
-        require(_kpiTokenBalance > 0, "KT03");
+        require(_kpiTokenBalance > 0, "KT05");
         if (finalKpiProgress == 0) {
             _burn(msg.sender, _kpiTokenBalance);
             emit Redeemed(_kpiTokenBalance, 0);

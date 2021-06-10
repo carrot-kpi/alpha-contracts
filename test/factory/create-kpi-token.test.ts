@@ -4,11 +4,11 @@ import { constants } from "ethers";
 import { waffle } from "hardhat";
 import {
     encodeRealityQuestion,
+    getCollateralAmountPlusFees,
     getKpiTokenAddressFromReceipt,
     getRealityQuestionId,
 } from "../utils";
 import { DateTime } from "luxon";
-import { parseEther } from "ethers/lib/utils";
 
 const { loadFixture } = waffle;
 
@@ -137,15 +137,15 @@ describe("KPITokensFactory - Create KPI token", () => {
             collateralToken,
             testAccount,
         } = await loadFixture(fixture);
-        const collateralAmount = parseEther("10");
-        await collateralToken.mint(testAccount.address, collateralAmount);
+        const { baseAmount, totalAmount } = getCollateralAmountPlusFees("10");
+        await collateralToken.mint(testAccount.address, totalAmount);
         await expect(
             kpiTokensFactory.connect(testAccount).createKpiToken(
                 encodeRealityQuestion("Test?"),
                 Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
                 {
                     token: collateralToken.address,
-                    amount: collateralAmount,
+                    amount: baseAmount,
                 },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
                 { lowerBound: 0, higherBound: 1 }
@@ -162,11 +162,15 @@ describe("KPITokensFactory - Create KPI token", () => {
             feeReceiver,
             arbitrator,
         } = await loadFixture(fixture);
-        const collateralAmount = parseEther("100");
-        await collateralToken.mint(testAccount.address, collateralAmount);
+        const {
+            baseAmount,
+            feeAmount,
+            totalAmount,
+        } = getCollateralAmountPlusFees("100");
+        await collateralToken.mint(testAccount.address, totalAmount);
         await collateralToken
             .connect(testAccount)
-            .approve(kpiTokensFactory.address, collateralAmount);
+            .approve(kpiTokensFactory.address, totalAmount);
         const question = encodeRealityQuestion("Test?");
         const kpiExpiry = Math.floor(
             DateTime.now().plus({ minutes: 2 }).toSeconds()
@@ -176,7 +180,7 @@ describe("KPITokensFactory - Create KPI token", () => {
             .createKpiToken(
                 question,
                 kpiExpiry,
-                { token: collateralToken.address, amount: collateralAmount },
+                { token: collateralToken.address, amount: baseAmount },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
                 { lowerBound: 0, higherBound: 1 }
             );
@@ -187,7 +191,6 @@ describe("KPITokensFactory - Create KPI token", () => {
         expect(
             await collateralToken.balanceOf(kpiTokensFactory.address)
         ).to.equal(0);
-        const feeAmount = collateralAmount.mul(30).div(10000); // 30 bips is the default fee
         expect(
             await collateralToken.balanceOf(feeReceiver.address)
         ).to.be.equal(feeAmount);
@@ -196,7 +199,7 @@ describe("KPITokensFactory - Create KPI token", () => {
         );
         expect(
             await collateralToken.balanceOf(createdKpiToken.address)
-        ).to.equal(collateralAmount.sub(feeAmount));
+        ).to.equal(baseAmount);
         expect(await createdKpiToken.collateralToken()).to.be.equal(
             collateralToken.address
         );

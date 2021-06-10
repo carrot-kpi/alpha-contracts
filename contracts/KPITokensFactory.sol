@@ -97,17 +97,16 @@ contract KPITokensFactory is Ownable {
         require(_kpiExpiry > block.timestamp, "KF15");
         require(_scalarData.lowerBound < _scalarData.higherBound, "KF16");
         address _kpiTokenProxy = Clones.clone(kpiTokenImplementation);
+        uint256 _feeAmount = (_collateral.amount * fee) / _10000;
         IERC20(_collateral.token).safeTransferFrom(
             msg.sender,
-            address(this),
-            _collateral.amount
+            feeReceiver,
+            _feeAmount
         );
-        uint256 _feeAmount = (_collateral.amount * fee) / _10000;
-        IERC20(_collateral.token).safeTransfer(feeReceiver, _feeAmount);
-        uint256 _collateralAmountMinusFees = _collateral.amount - _feeAmount;
-        IERC20(_collateral.token).safeTransfer(
+        IERC20(_collateral.token).safeTransferFrom(
+            msg.sender,
             _kpiTokenProxy,
-            _collateralAmountMinusFees
+            _collateral.amount
         );
         bytes32 _kpiId =
             oracle.askQuestion(
@@ -126,7 +125,7 @@ contract KPITokensFactory is Ownable {
             msg.sender,
             IKPIToken.Collateral({
                 token: _collateral.token,
-                amount: _collateralAmountMinusFees
+                amount: _collateral.amount
             }),
             _tokenData,
             _scalarData

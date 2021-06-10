@@ -1,5 +1,5 @@
 import { BigNumber, constants, ContractReceipt } from "ethers";
-import { solidityKeccak256, solidityPack } from "ethers/lib/utils";
+import { parseEther, solidityKeccak256, solidityPack } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 const { provider } = ethers;
@@ -63,4 +63,14 @@ export const fastForwardTo = async (timestamp: number) => {
 export const fastForward = async (seconds: number) => {
     const { timestamp: evmTimestamp } = await provider.getBlock("latest");
     await provider.send("evm_mine", [evmTimestamp + seconds]);
+};
+
+export const getCollateralAmountPlusFees = (baseAmount: string) => {
+    const properBaseAmount = parseEther(baseAmount);
+    const feeAmount = parseEther(baseAmount).mul(30).div(10000);
+    return {
+        baseAmount: properBaseAmount,
+        feeAmount,
+        totalAmount: properBaseAmount.add(feeAmount),
+    };
 };

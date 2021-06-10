@@ -15,6 +15,7 @@ import {
 } from "../../typechain";
 import {
     encodeRealityQuestion,
+    getCollateralAmountPlusFees,
     getEvmTimestamp,
     getKpiTokenAddressFromReceipt,
     getRealityQuestionId,
@@ -119,15 +120,15 @@ export const testBooleanKpiTokenFixture = async (
         arbitrator,
         voteTimeout,
     } = await fixture(_, provider);
-    const collateralAmount = parseEther("10");
+    const { baseAmount, totalAmount } = getCollateralAmountPlusFees("10");
 
     // mint collateral to caller
-    await collateralToken.mint(testAccount.address, collateralAmount);
+    await collateralToken.mint(testAccount.address, totalAmount);
 
     // approving collateral to factory
     await collateralToken
         .connect(testAccount)
-        .approve(kpiTokensFactory.address, collateralAmount);
+        .approve(kpiTokensFactory.address, totalAmount);
 
     // creating kpi token
     const kpiExpiry = Math.floor(
@@ -136,7 +137,7 @@ export const testBooleanKpiTokenFixture = async (
     const question = encodeRealityQuestion("Will this test pass?");
     const collateralData = {
         token: collateralToken.address,
-        amount: collateralAmount,
+        amount: baseAmount,
     };
     const transaction = await kpiTokensFactory
         .connect(testAccount)
@@ -193,22 +194,24 @@ export const getScalarKpiTokenFixture = (
         arbitrator,
         voteTimeout,
     } = await fixture(_, provider);
-    const collateralAmount = parseEther("10");
+    const { baseAmount, feeAmount, totalAmount } = getCollateralAmountPlusFees(
+        "10"
+    );
 
     // mint collateral to caller
-    await collateralToken.mint(testAccount.address, collateralAmount);
+    await collateralToken.mint(testAccount.address, totalAmount);
 
     // approving collateral to factory
     await collateralToken
         .connect(testAccount)
-        .approve(kpiTokensFactory.address, collateralAmount);
+        .approve(kpiTokensFactory.address, totalAmount);
 
     // creating kpi token
     const kpiExpiry = Math.floor((await getEvmTimestamp()) + 300); // 5 minutes from the current EVM timestamp
     const question = encodeRealityQuestion("Will this test pass?");
     const collateralData = {
         token: collateralToken.address,
-        amount: collateralAmount,
+        amount: baseAmount,
     };
     const transaction = await kpiTokensFactory
         .connect(testAccount)
