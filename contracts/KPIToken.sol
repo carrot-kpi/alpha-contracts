@@ -21,8 +21,10 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
     IReality public oracle;
     IERC20Upgradeable public collateralToken;
     address public creator;
-    uint256 public finalKpiProgress;
     bool public finalized;
+    uint256 public collateralAmount;
+    uint256 public initialSupply;
+    uint256 public finalKpiProgress;
     ScalarData public scalarData;
 
     event Initialized(
@@ -52,11 +54,13 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
 
         __ERC20_init(_tokenData.name, _tokenData.symbol);
         _mint(_creator, _tokenData.totalSupply);
+        initialSupply = _tokenData.totalSupply;
         kpiId = _kpiId;
         oracle = IReality(_oracle);
         collateralToken = IERC20Upgradeable(_collateral.token);
         creator = _creator;
         scalarData = _scalarData;
+        collateralAmount = _collateral.amount;
 
         emit Initialized(
             _kpiId,
@@ -78,10 +82,7 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
         ) {
             // kpi below the lower bound or invalid, transfer funds back to creator
             finalKpiProgress = 0;
-            collateralToken.safeTransfer(
-                creator,
-                collateralToken.balanceOf(address(this))
-            );
+            collateralToken.safeTransfer(creator, collateralAmount);
         } else {
             uint256 _kpiFullRange =
                 scalarData.higherBound - scalarData.lowerBound;
@@ -92,8 +93,8 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
             if (finalKpiProgress < _kpiFullRange) {
                 collateralToken.safeTransfer(
                     creator,
-                    (collateralToken.balanceOf(address(this)) *
-                        (_kpiFullRange - finalKpiProgress)) / _kpiFullRange
+                    (collateralAmount * (_kpiFullRange - finalKpiProgress)) /
+                        _kpiFullRange
                 );
             }
         }
@@ -110,13 +111,11 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
             emit Redeemed(_kpiTokenBalance, 0);
             return;
         }
-        uint256 _totalSupplyPreBurn = totalSupply();
         _burn(msg.sender, _kpiTokenBalance);
         uint256 _scalarRange = scalarData.higherBound - scalarData.lowerBound;
         uint256 _redeemableAmount =
-            (collateralToken.balanceOf(address(this)) *
-                _kpiTokenBalance *
-                finalKpiProgress) / (_totalSupplyPreBurn * _scalarRange);
+            (collateralAmount * _kpiTokenBalance * finalKpiProgress) /
+                (initialSupply * _scalarRange);
         collateralToken.safeTransfer(msg.sender, _redeemableAmount);
         emit Redeemed(_kpiTokenBalance, _redeemableAmount);
     }
