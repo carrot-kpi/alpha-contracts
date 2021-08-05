@@ -16,7 +16,7 @@
         "compile": "hardhat compile",
         "prepare": "husky install",
         "deploy:rinkeby": "hardhat deploy --network rinkeby --fee 30 --reality-address 0x3D00D77ee771405628a4bA4913175EcC095538da --arbitrator-address 0xcafa054b1b054581faf65adce667bf1c684b6ef0 --vote-timeout 120 --verify",
-        "create:rinkeby": "hardhat create-kpi-token --network rinkeby --factory-address 0xa60c831dc30A6564Aa23044Ade594C2f1e3c9929"
+        "create:rinkeby": "hardhat create-kpi-token --network rinkeby --factory-address 0x5e02B60e676CF965DEb29df522FE26f0c1d5d771"
     },
     "devDependencies": {
         "@commitlint/cli": "^12.1.1",
@@ -35,6 +35,7 @@
         "babel-eslint": "^10.1.0",
         "chai": "^4.2.0",
         "cross-env": "^7.0.3",
+        "decimal.js-light": "^2.5.1",
         "dotenv": "^8.2.0",
         "eslint": "^7.24.0",
         "ethereum-waffle": "^3.3.0",
