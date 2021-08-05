@@ -1,4 +1,4 @@
-import { parseUnits } from "ethers/lib/utils";
+import { parseEther } from "ethers/lib/utils";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DateTime } from "luxon";
@@ -14,6 +14,16 @@ interface TaskArguments {
     lowerBound: string;
     higherBound: string;
 }
+
+const getCollateralAmountPlusFees = (baseAmount: string) => {
+    const properBaseAmount = parseEther(baseAmount);
+    const feeAmount = properBaseAmount.mul(30).div(10000);
+    return {
+        baseAmount: properBaseAmount,
+        feeAmount,
+        totalAmount: properBaseAmount.add(feeAmount),
+    };
+};
 
 task("create-kpi-token", "Creates a KPI token")
     .addParam("factoryAddress", "The KPI tokens factory address")
@@ -47,14 +57,10 @@ task("create-kpi-token", "Creates a KPI token")
                 signer
             );
             console.log("approving collateral");
-            const properCollateralAmount = parseUnits(
-                collateralAmount,
-                await collateralErc20.decimals()
+            const { totalAmount, baseAmount } = getCollateralAmountPlusFees(
+                collateralAmount
             );
-            await collateralErc20.approve(
-                factoryAddress,
-                properCollateralAmount
-            );
+            await collateralErc20.approve(factoryAddress, totalAmount);
             console.log("collateral approved");
 
             const factory = await KPITokensFactory__factory.connect(
@@ -69,12 +75,11 @@ task("create-kpi-token", "Creates a KPI token")
             const transaction = await factory.createKpiToken(
                 encodedRealityQuestion,
                 Math.floor(
-                    DateTime.now().plus({ minutes: 30 }).toMillis() /
-                        1000
+                    DateTime.now().plus({ minutes: 30 }).toMillis() / 1000
                 ),
                 {
                     token: collateralAddress,
-                    amount: properCollateralAmount,
+                    amount: baseAmount,
                 },
                 {
                     name: tokenName,

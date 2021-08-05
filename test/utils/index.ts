@@ -1,4 +1,4 @@
-import { BigNumber, constants, ContractReceipt } from "ethers";
+import { constants, ContractReceipt } from "ethers";
 import { parseEther, solidityKeccak256, solidityPack } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -67,7 +67,7 @@ export const fastForward = async (seconds: number) => {
 
 export const getCollateralAmountPlusFees = (baseAmount: string) => {
     const properBaseAmount = parseEther(baseAmount);
-    const feeAmount = parseEther(baseAmount).mul(30).div(10000);
+    const feeAmount = properBaseAmount.mul(30).div(10000);
     return {
         baseAmount: properBaseAmount,
         feeAmount,
