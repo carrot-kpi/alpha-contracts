@@ -6,8 +6,8 @@ import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-dependency-compiler";
-/* import "./tasks/deploy";
-import "./tasks/create-kpi-token"; */
+import "./tasks/deploy";
+import "./tasks/create-kpi-token";
 
 config();
 
