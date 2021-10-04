@@ -14,6 +14,7 @@ interface TaskArguments {
     lowerBound: string;
     higherBound: string;
     arbitratorAddress: string;
+    voteTimeout: string;
 }
 
 const getCollateralAmountPlusFees = (baseAmount: string) => {
@@ -30,6 +31,7 @@ task("create-kpi-token", "Creates a KPI token")
     .addParam("factoryAddress", "The KPI tokens factory address")
     .addParam("question", "KPI question")
     .addParam("arbitratorAddress", "Arbitrator address")
+    .addParam("voteTimeout", "Vote timeout")
     .addParam("collateralAddress", "Collateral address")
     .addParam("collateralAmount", "Collateral amount")
     .addParam("tokenName", "Token name")
@@ -48,6 +50,7 @@ task("create-kpi-token", "Creates a KPI token")
                 lowerBound,
                 higherBound,
                 arbitratorAddress,
+                voteTimeout,
             }: TaskArguments,
             hre: HardhatRuntimeEnvironment
         ) => {
@@ -63,7 +66,11 @@ task("create-kpi-token", "Creates a KPI token")
             const { totalAmount, baseAmount } = getCollateralAmountPlusFees(
                 collateralAmount
             );
-            await collateralErc20.approve(factoryAddress, totalAmount);
+            const approveTx = await collateralErc20.approve(
+                factoryAddress,
+                totalAmount
+            );
+            await approveTx.wait();
             console.log("collateral approved");
 
             const factory = await KPITokensFactory__factory.connect(
@@ -82,7 +89,7 @@ task("create-kpi-token", "Creates a KPI token")
                     expiry: Math.floor(
                         DateTime.now().plus({ minutes: 30 }).toMillis() / 1000
                     ),
-                    timeout: 120, // 2 minutes
+                    timeout: voteTimeout,
                 },
                 {
                     token: collateralAddress,

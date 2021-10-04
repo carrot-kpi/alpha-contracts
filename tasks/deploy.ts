@@ -11,8 +11,6 @@ interface TaskArguments {
     verify: boolean;
     fee: string;
     realityAddress: string;
-    arbitratorAddress: string;
-    voteTimeout: string;
     feeReceiverAddress: string;
 }
 
