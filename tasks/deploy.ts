@@ -22,23 +22,14 @@ task(
 )
     .addParam("fee", "Fee to be applied when creating the KPI token (in bips)")
     .addParam("realityAddress", "Reality.eth contract address")
-    .addParam("arbitratorAddress", "Arbitrator contract address")
     .addParam("feeReceiverAddress", "Fee receiver contract address")
-    .addParam("voteTimeout", "Minimum vote timeout in seconds")
     .addFlag(
         "verify",
         "Additional (and optional) Etherscan contracts verification"
     )
     .setAction(
         async (
-            {
-                verify,
-                fee,
-                realityAddress,
-                arbitratorAddress,
-                voteTimeout,
-                feeReceiverAddress,
-            }: TaskArguments,
+            { verify, fee, realityAddress, feeReceiverAddress }: TaskArguments,
             hre: HardhatRuntimeEnvironment
         ) => {
             await hre.run("clean");
@@ -57,9 +48,7 @@ task(
             const kpiTokensFactory = (await kpiTokensFactoryFactory.deploy(
                 kpiTokenImplementation.address,
                 realityAddress,
-                arbitratorAddress,
                 fee,
-                voteTimeout,
                 feeReceiverAddress
             )) as KPITokensFactory;
 
@@ -83,9 +72,7 @@ task(
                     constructorArgsParams: [
                         kpiTokenImplementation.address,
                         realityAddress,
-                        arbitratorAddress,
                         fee,
-                        voteTimeout,
                         feeReceiverAddress,
                     ],
                 });

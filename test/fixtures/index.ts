@@ -81,9 +81,7 @@ export const fixture = async (_: any, provider: MockProvider) => {
     const kpiTokensFactory = (await kpiTokensFactoryFactory.deploy(
         kpiToken.address,
         realitio.address,
-        arbitrator.address,
         30,
-        voteTimeout,
         feeReceiver.address
     )) as KPITokensFactory;
 
@@ -142,8 +140,12 @@ export const testBooleanKpiTokenFixture = async (
     const transaction = await kpiTokensFactory
         .connect(testAccount)
         .createKpiToken(
-            question,
-            kpiExpiry,
+            {
+                question,
+                timeout: voteTimeout,
+                expiry: kpiExpiry,
+                arbitrator: arbitrator.address,
+            },
             collateralData,
             {
                 name: "Test KPI token",
@@ -216,8 +218,12 @@ export const getScalarKpiTokenFixture = (
     const transaction = await kpiTokensFactory
         .connect(testAccount)
         .createKpiToken(
-            question,
-            kpiExpiry,
+            {
+                question,
+                expiry: kpiExpiry,
+                timeout: voteTimeout,
+                arbitrator: arbitrator.address,
+            },
             collateralData,
             {
                 name: "Test KPI token",

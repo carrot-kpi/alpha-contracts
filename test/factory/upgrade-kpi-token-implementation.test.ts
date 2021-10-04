@@ -21,7 +21,7 @@ describe("KPITokensFactory - Upgrade KPI token implementation", () => {
             kpiTokensFactory.upgradeKpiTokenImplementation(
                 constants.AddressZero
             )
-        ).to.be.revertedWith("KF05");
+        ).to.be.revertedWith("ZeroAddressKpiTokenImplementation");
     });
 
     it("should succeed in the right conditions", async () => {

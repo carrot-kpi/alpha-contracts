@@ -12,7 +12,7 @@ describe("KPIToken - Redeem", () => {
         const { kpiToken } = await loadFixture(testBooleanKpiTokenFixture);
         // voting start timestamp is 2 minutes in the future since KPI token
         // initialization by default, so this should fail
-        await expect(kpiToken.redeem()).to.be.revertedWith("KT04");
+        await expect(kpiToken.redeem()).to.be.revertedWith("NotFinalized");
     });
 
     it("should fail when the kpi is finalized but a user with no token balance calls", async () => {
@@ -32,7 +32,7 @@ describe("KPIToken - Redeem", () => {
         );
         await fastForward(voteTimeout + 10);
         await kpiToken.finalize();
-        await expect(kpiToken.redeem()).to.be.revertedWith("KT05");
+        await expect(kpiToken.redeem()).to.be.revertedWith("NoKpiTokenBalance");
     });
 
     it("should succeed when the kpi is finalized to false (not reached) and a user with balance calls", async () => {

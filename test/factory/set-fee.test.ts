@@ -12,11 +12,6 @@ describe("KPITokensFactory - Set fee", () => {
         ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
-    it("should fail when setting the fee to 100%", async () => {
-        const { kpiTokensFactory } = await loadFixture(fixture);
-        await expect(kpiTokensFactory.setFee(10000)).to.be.revertedWith("KF06");
-    });
-
     it("should succeed in the right conditions", async () => {
         const { kpiTokensFactory } = await loadFixture(fixture);
         expect(await kpiTokensFactory.fee()).to.be.equal(

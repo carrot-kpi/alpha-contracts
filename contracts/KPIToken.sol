@@ -6,6 +6,12 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "./interfaces/IReality.sol";
 import "./interfaces/IKPIToken.sol";
 
+error NotEnoughCollateralBalance();
+error AlreadyFinalized();
+error NonFinalizedOracle();
+error NotFinalized();
+error NoKpiTokenBalance();
+
 /**
  * @title KPIToken
  * @dev KPIToken contract
@@ -15,7 +21,7 @@ import "./interfaces/IKPIToken.sol";
 contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
-    uint256 public constant INVALID_ANSWER = 2**256 - 1;
+    uint256 public immutable INVALID_ANSWER = 2**256 - 1;
 
     bytes32 public kpiId;
     IReality public oracle;
@@ -46,11 +52,10 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
         TokenData calldata _tokenData,
         ScalarData calldata _scalarData
     ) external override initializer {
-        require(
-            IERC20Upgradeable(_collateral.token).balanceOf(address(this)) >=
-                _collateral.amount,
-            "KT01"
-        );
+        if(
+            IERC20Upgradeable(_collateral.token).balanceOf(address(this)) <
+                _collateral.amount)
+            revert NotEnoughCollateralBalance();
 
         __ERC20_init(_tokenData.name, _tokenData.symbol);
         _mint(_creator, _tokenData.totalSupply);
@@ -73,8 +78,8 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
     }
 
     function finalize() external override {
-        require(!finalized, "KT02");
-        require(oracle.isFinalized(kpiId), "KT03");
+        if(finalized) revert AlreadyFinalized();
+        if(!oracle.isFinalized(kpiId)) revert NonFinalizedOracle();
         uint256 _oracleResult = uint256(oracle.resultFor(kpiId));
         if (
             _oracleResult <= scalarData.lowerBound ||
@@ -103,9 +108,9 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
     }
 
     function redeem() external override {
-        require(finalized, "KT04");
+        if(!finalized) revert NotFinalized();
         uint256 _kpiTokenBalance = balanceOf(msg.sender);
-        require(_kpiTokenBalance > 0, "KT05");
+        if(_kpiTokenBalance == 0) revert NoKpiTokenBalance();
         if (finalKpiProgress == 0) {
             _burn(msg.sender, _kpiTokenBalance);
             emit Redeemed(_kpiTokenBalance, 0);

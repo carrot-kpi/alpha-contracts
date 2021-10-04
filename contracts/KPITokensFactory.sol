@@ -7,6 +7,19 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./interfaces/IReality.sol";
 import "./interfaces/IKPIToken.sol";
 
+error ZeroAddressKpiTokenImplementation();
+error ZeroAddressOracle();
+error ZeroAddressFeeReceiver();
+error InvalidRealityQuestion();
+error InvalidRealityExpiry();
+error ZeroAddressRealityArbitrator();
+error ZeroAddressCollateralToken();
+error InvalidCollateralAmount();
+error InvalidTokenName();
+error InvalidTokenSymbol();
+error ZeroTotalSupply();
+error InvalidScalarRange();
+
 /**
  * @title KPITokensFactory
  * @dev KPITokensFactory contract
@@ -16,12 +29,15 @@ import "./interfaces/IKPIToken.sol";
 contract KPITokensFactory is Ownable {
     using SafeERC20 for IERC20;
 
-    uint16 private constant _10000 = 10000;
+    struct RealityConfig {
+        string question;
+        uint32 expiry;
+        uint32 timeout;
+        address arbitrator;
+    }
 
     uint16 public fee;
-    uint32 public voteTimeout;
     address public kpiTokenImplementation;
-    address public arbitrator;
     address public feeReceiver;
     IReality public oracle;
 
@@ -34,22 +50,15 @@ contract KPITokensFactory is Ownable {
     constructor(
         address _kpiTokenImplementation,
         address _oracle,
-        address _arbitrator,
         uint16 _fee,
-        uint32 _voteTimeout,
         address _feeReceiver
     ) {
-        require(_kpiTokenImplementation != address(0), "KF01");
-        require(_oracle != address(0), "KF02");
-        require(_arbitrator != address(0), "KF03");
-        require(_fee < _10000, "KF03");
-        require(_voteTimeout > 0, "KF04");
-        require(_feeReceiver != address(0), "KF17");
+        if(_kpiTokenImplementation == address(0)) revert ZeroAddressKpiTokenImplementation();
+        if(_oracle == address(0)) revert ZeroAddressOracle();
+        if(_feeReceiver == address(0)) revert ZeroAddressFeeReceiver();
         kpiTokenImplementation = _kpiTokenImplementation;
         oracle = IReality(_oracle);
-        arbitrator = _arbitrator;
         fee = _fee;
-        voteTimeout = _voteTimeout;
         feeReceiver = _feeReceiver;
     }
 
@@ -57,47 +66,37 @@ contract KPITokensFactory is Ownable {
         external
         onlyOwner
     {
-        require(_kpiTokenImplementation != address(0), "KF05");
+        if(_kpiTokenImplementation == address(0)) revert ZeroAddressKpiTokenImplementation();
         kpiTokenImplementation = _kpiTokenImplementation;
     }
 
     function setFee(uint16 _fee) external onlyOwner {
-        require(_fee < _10000, "KF06");
         fee = _fee;
     }
 
-    function setArbitrator(address _arbitrator) external onlyOwner {
-        require(_arbitrator != address(0), "KF07");
-        arbitrator = _arbitrator;
-    }
-
-    function setVoteTimeout(uint32 _voteTimeout) external onlyOwner {
-        require(_voteTimeout > 0, "KF08");
-        voteTimeout = _voteTimeout;
-    }
-
     function setFeeReceiver(address _feeReceiver) external onlyOwner {
-        require(_feeReceiver != address(0), "KF16");
+        if(_feeReceiver == address(0))revert ZeroAddressFeeReceiver();
         feeReceiver = _feeReceiver;
     }
 
     function createKpiToken(
-        string calldata _kpiQuestion,
-        uint32 _kpiExpiry,
+        RealityConfig calldata _realityConfig,
         IKPIToken.Collateral calldata _collateral,
         IKPIToken.TokenData calldata _tokenData,
         IKPIToken.ScalarData calldata _scalarData
     ) external {
-        require(_collateral.token != address(0), "KF09");
-        require(_collateral.amount > 0, "KF10");
-        require(bytes(_tokenData.name).length > 0, "KF11");
-        require(bytes(_tokenData.symbol).length > 0, "KF12");
-        require(_tokenData.totalSupply > 0, "KF13");
-        require(bytes(_kpiQuestion).length > 0, "KF14");
-        require(_kpiExpiry > block.timestamp, "KF15");
-        require(_scalarData.lowerBound < _scalarData.higherBound, "KF16");
+        if(bytes(_realityConfig.question).length == 0)revert InvalidRealityQuestion();
+        if(_realityConfig.expiry <= block.timestamp) revert InvalidRealityExpiry();
+        if(_realityConfig.arbitrator == address(0)) revert ZeroAddressRealityArbitrator();
+        if(_collateral.token == address(0)) revert ZeroAddressCollateralToken();
+        if(_collateral.amount == 0) revert InvalidCollateralAmount();
+        if(bytes(_tokenData.name).length == 0) revert InvalidTokenName();
+        if(bytes(_tokenData.symbol).length == 0) revert InvalidTokenSymbol();
+        if(_tokenData.totalSupply == 0) revert ZeroTotalSupply();
+        if(_scalarData.lowerBound >= _scalarData.higherBound) revert InvalidScalarRange();
+
         address _kpiTokenProxy = Clones.clone(kpiTokenImplementation);
-        uint256 _feeAmount = (_collateral.amount * fee) / _10000;
+        uint256 _feeAmount = (_collateral.amount * fee) / 10000;
         IERC20(_collateral.token).safeTransferFrom(
             msg.sender,
             feeReceiver,
@@ -113,23 +112,20 @@ contract KPITokensFactory is Ownable {
                 _scalarData.lowerBound == 0 && _scalarData.higherBound == 1
                     ? 0
                     : 1,
-                _kpiQuestion,
-                arbitrator,
-                voteTimeout,
-                _kpiExpiry,
+                _realityConfig.question,
+                _realityConfig.arbitrator,
+                _realityConfig.timeout,
+                _realityConfig.expiry,
                 0
             );
         IKPIToken(_kpiTokenProxy).initialize(
             _kpiId,
             address(oracle),
             msg.sender,
-            IKPIToken.Collateral({
-                token: _collateral.token,
-                amount: _collateral.amount
-            }),
+            _collateral,
             _tokenData,
             _scalarData
         );
-        emit KpiTokenCreated(_kpiTokenProxy, _feeAmount, _kpiExpiry);
+        emit KpiTokenCreated(_kpiTokenProxy, _feeAmount, _realityConfig.expiry);
     }
 }

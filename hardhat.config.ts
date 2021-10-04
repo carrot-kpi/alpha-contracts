@@ -6,8 +6,8 @@ import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-dependency-compiler";
-import "./tasks/deploy";
-import "./tasks/create-kpi-token";
+/* import "./tasks/deploy";
+import "./tasks/create-kpi-token"; */
 
 config();
 
@@ -22,11 +22,6 @@ const hardhatConfig: HardhatUserConfig = {
         rinkeby: {
             url: `https://rinkeby.infura.io/v3/${infuraId}`,
             accounts,
-        },
-        arbitrumTestnetV3: {
-            url: "https://kovan3.arbitrum.io/rpc",
-            accounts,
-            gasPrice: 0,
         },
         xdai: {
             url: "https://xdai.poanetwork.dev",

@@ -19,7 +19,7 @@ describe("KPITokensFactory - Set fee receiver", () => {
         const { kpiTokensFactory } = await loadFixture(fixture);
         await expect(
             kpiTokensFactory.setFeeReceiver(constants.AddressZero)
-        ).to.be.revertedWith("KF16");
+        ).to.be.revertedWith("ZeroAddressFeeReceiver");
     });
 
     it("should succeed in the right conditions", async () => {

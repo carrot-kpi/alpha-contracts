@@ -14,7 +14,9 @@ describe("KPIToken - Finalize", () => {
         const { kpiToken } = await loadFixture(testBooleanKpiTokenFixture);
         // voting start timestamp is 2 minutes in the future since KPI token
         // initialization by default, so this should fail
-        await expect(kpiToken.finalize()).to.be.revertedWith("KT03");
+        await expect(kpiToken.finalize()).to.be.revertedWith(
+            "NonFinalizedOracle"
+        );
     });
 
     it("should succeed when finalize is called and the question is answered with yes on Reality.eth", async () => {
@@ -53,8 +55,6 @@ describe("KPIToken - Finalize", () => {
             realitio,
             realiyQuestionId,
             voteTimeout,
-            collateralToken,
-            collateralData,
         } = await loadFixture(testBooleanKpiTokenFixture);
         await fastForwardTo(kpiExpiry);
         await realitio.submitAnswer(
@@ -66,7 +66,9 @@ describe("KPIToken - Finalize", () => {
         await fastForward(voteTimeout + 10);
         expect(await realitio.isFinalized(realiyQuestionId)).to.be.true;
         await kpiToken.finalize();
-        await expect(kpiToken.finalize()).to.be.revertedWith("KT02");
+        await expect(kpiToken.finalize()).to.be.revertedWith(
+            "AlreadyFinalized"
+        );
     });
 
     it("should succeed when finalize is called, the question is answered with false on Reality.eth", async () => {

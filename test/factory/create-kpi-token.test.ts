@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { fixture } from "../fixtures";
-import { constants } from "ethers";
+import { constants, Wallet } from "ethers";
 import { waffle } from "hardhat";
 import {
     encodeRealityQuestion,
@@ -14,76 +14,114 @@ const { loadFixture } = waffle;
 
 describe("KPITokensFactory - Create KPI token", () => {
     it("should fail when collateral token is the 0 address", async () => {
-        const { kpiTokensFactory } = await loadFixture(fixture);
+        const { kpiTokensFactory, arbitrator } = await loadFixture(fixture);
         await expect(
             kpiTokensFactory.createKpiToken(
-                encodeRealityQuestion("Test?"),
-                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
+                {
+                    question: encodeRealityQuestion("Test?"),
+                    expiry: Math.floor(
+                        DateTime.now().plus({ minutes: 2 }).toSeconds()
+                    ),
+                    timeout: 60,
+                    arbitrator: arbitrator.address,
+                },
                 { token: constants.AddressZero, amount: 1 },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
                 { lowerBound: 0, higherBound: 1 }
             )
-        ).to.be.revertedWith("KF09");
+        ).to.be.revertedWith("ZeroAddressCollateralToken");
     });
 
     it("should fail when collateral amount is 0", async () => {
-        const { kpiTokensFactory, collateralToken } = await loadFixture(
-            fixture
-        );
+        const {
+            kpiTokensFactory,
+            collateralToken,
+            arbitrator,
+        } = await loadFixture(fixture);
         await expect(
             kpiTokensFactory.createKpiToken(
-                encodeRealityQuestion("Test?"),
-                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
+                {
+                    question: encodeRealityQuestion("Test?"),
+                    expiry: Math.floor(
+                        DateTime.now().plus({ minutes: 2 }).toSeconds()
+                    ),
+                    timeout: 60,
+                    arbitrator: arbitrator.address,
+                },
                 { token: collateralToken.address, amount: 0 },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
                 { lowerBound: 0, higherBound: 1 }
             )
-        ).to.be.revertedWith("KF10");
+        ).to.be.revertedWith("InvalidCollateralAmount");
     });
 
     it("should fail when no name is given", async () => {
-        const { kpiTokensFactory, collateralToken } = await loadFixture(
-            fixture
-        );
+        const {
+            kpiTokensFactory,
+            collateralToken,
+            arbitrator,
+        } = await loadFixture(fixture);
         await expect(
             kpiTokensFactory.createKpiToken(
-                encodeRealityQuestion("Test?"),
-                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
+                {
+                    question: encodeRealityQuestion("Test?"),
+                    expiry: Math.floor(
+                        DateTime.now().plus({ minutes: 2 }).toSeconds()
+                    ),
+                    timeout: 60,
+                    arbitrator: arbitrator.address,
+                },
                 { token: collateralToken.address, amount: 1 },
                 { name: "", symbol: "TEST", totalSupply: 10 },
                 { lowerBound: 0, higherBound: 1 }
             )
-        ).to.be.revertedWith("KF11");
+        ).to.be.revertedWith("InvalidTokenName");
     });
 
     it("should fail when no symbol is given", async () => {
-        const { kpiTokensFactory, collateralToken } = await loadFixture(
-            fixture
-        );
+        const {
+            kpiTokensFactory,
+            collateralToken,
+            arbitrator,
+        } = await loadFixture(fixture);
         await expect(
             kpiTokensFactory.createKpiToken(
-                encodeRealityQuestion("Test?"),
-                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
+                {
+                    question: encodeRealityQuestion("Test?"),
+                    expiry: Math.floor(
+                        DateTime.now().plus({ minutes: 2 }).toSeconds()
+                    ),
+                    timeout: 60,
+                    arbitrator: arbitrator.address,
+                },
                 { token: collateralToken.address, amount: 1 },
                 { name: "Test", symbol: "", totalSupply: 10 },
                 { lowerBound: 0, higherBound: 1 }
             )
-        ).to.be.revertedWith("KF12");
+        ).to.be.revertedWith("InvalidTokenSymbol");
     });
 
     it("should fail when total supply is 0", async () => {
-        const { kpiTokensFactory, collateralToken } = await loadFixture(
-            fixture
-        );
+        const {
+            kpiTokensFactory,
+            collateralToken,
+            arbitrator,
+        } = await loadFixture(fixture);
         await expect(
             kpiTokensFactory.createKpiToken(
-                encodeRealityQuestion("Test?"),
-                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
+                {
+                    question: encodeRealityQuestion("Test?"),
+                    expiry: Math.floor(
+                        DateTime.now().plus({ minutes: 2 }).toSeconds()
+                    ),
+                    timeout: 60,
+                    arbitrator: arbitrator.address,
+                },
                 { token: collateralToken.address, amount: 1 },
                 { name: "Test", symbol: "TEST", totalSupply: 0 },
                 { lowerBound: 0, higherBound: 1 }
             )
-        ).to.be.revertedWith("KF13");
+        ).to.be.revertedWith("ZeroTotalSupply");
     });
 
     it("should fail when no question is given", async () => {
@@ -92,13 +130,19 @@ describe("KPITokensFactory - Create KPI token", () => {
         );
         await expect(
             kpiTokensFactory.createKpiToken(
-                "",
-                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
+                {
+                    question: "",
+                    expiry: Math.floor(
+                        DateTime.now().plus({ minutes: 2 }).toSeconds()
+                    ),
+                    timeout: 60,
+                    arbitrator: Wallet.createRandom().address,
+                },
                 { token: collateralToken.address, amount: 1 },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
                 { lowerBound: 0, higherBound: 1 }
             )
-        ).to.be.revertedWith("KF14");
+        ).to.be.revertedWith("InvalidRealityQuestion");
     });
 
     it("should fail when kpi expiry is in the past", async () => {
@@ -107,13 +151,40 @@ describe("KPITokensFactory - Create KPI token", () => {
         );
         await expect(
             kpiTokensFactory.createKpiToken(
-                encodeRealityQuestion("Test?"),
-                Math.floor(DateTime.now().minus({ minutes: 2 }).toSeconds()),
+                {
+                    question: encodeRealityQuestion("Test?"),
+                    expiry: Math.floor(
+                        DateTime.now().minus({ minutes: 2 }).toSeconds()
+                    ),
+                    timeout: 60,
+                    arbitrator: Wallet.createRandom().address,
+                },
                 { token: collateralToken.address, amount: 1 },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
                 { lowerBound: 0, higherBound: 1 }
             )
-        ).to.be.revertedWith("KF15");
+        ).to.be.revertedWith("InvalidRealityExpiry");
+    });
+
+    it("should fail when a 0-address arbitrator is given", async () => {
+        const { kpiTokensFactory, collateralToken } = await loadFixture(
+            fixture
+        );
+        await expect(
+            kpiTokensFactory.createKpiToken(
+                {
+                    question: encodeRealityQuestion("Test?"),
+                    expiry: Math.floor(
+                        DateTime.now().plus({ minutes: 2 }).toSeconds()
+                    ),
+                    timeout: 60,
+                    arbitrator: constants.AddressZero,
+                },
+                { token: collateralToken.address, amount: 1 },
+                { name: "Test", symbol: "TEST", totalSupply: 10 },
+                { lowerBound: 0, higherBound: 1 }
+            )
+        ).to.be.revertedWith("ZeroAddressRealityArbitrator");
     });
 
     it("should fail when the user has not enough collateral balance", async () => {
@@ -122,8 +193,14 @@ describe("KPITokensFactory - Create KPI token", () => {
         );
         await expect(
             kpiTokensFactory.createKpiToken(
-                encodeRealityQuestion("Test?"),
-                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
+                {
+                    question: encodeRealityQuestion("Test?"),
+                    expiry: Math.floor(
+                        DateTime.now().plus({ minutes: 2 }).toSeconds()
+                    ),
+                    timeout: 60,
+                    arbitrator: Wallet.createRandom().address,
+                },
                 { token: collateralToken.address, amount: 1 },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
                 { lowerBound: 0, higherBound: 1 }
@@ -141,8 +218,14 @@ describe("KPITokensFactory - Create KPI token", () => {
         await collateralToken.mint(testAccount.address, totalAmount);
         await expect(
             kpiTokensFactory.connect(testAccount).createKpiToken(
-                encodeRealityQuestion("Test?"),
-                Math.floor(DateTime.now().plus({ minutes: 2 }).toSeconds()),
+                {
+                    question: encodeRealityQuestion("Test?"),
+                    expiry: Math.floor(
+                        DateTime.now().plus({ minutes: 2 }).toSeconds()
+                    ),
+                    timeout: 60,
+                    arbitrator: Wallet.createRandom().address,
+                },
                 {
                     token: collateralToken.address,
                     amount: baseAmount,
@@ -175,11 +258,16 @@ describe("KPITokensFactory - Create KPI token", () => {
         const kpiExpiry = Math.floor(
             DateTime.now().plus({ minutes: 2 }).toSeconds()
         );
+        const timeout = 60;
         const transaction = await kpiTokensFactory
             .connect(testAccount)
             .createKpiToken(
-                question,
-                kpiExpiry,
+                {
+                    question: question,
+                    expiry: kpiExpiry,
+                    timeout,
+                    arbitrator: arbitrator.address,
+                },
                 { token: collateralToken.address, amount: baseAmount },
                 { name: "Test", symbol: "TEST", totalSupply: 10 },
                 { lowerBound: 0, higherBound: 1 }
@@ -203,7 +291,6 @@ describe("KPITokensFactory - Create KPI token", () => {
         expect(await createdKpiToken.collateralToken()).to.be.equal(
             collateralToken.address
         );
-        const timeout = await kpiTokensFactory.voteTimeout();
         expect(await createdKpiToken.kpiId()).to.be.equal(
             getRealityQuestionId(
                 0,

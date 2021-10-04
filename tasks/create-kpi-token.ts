@@ -13,6 +13,7 @@ interface TaskArguments {
     tokenSymbol: string;
     lowerBound: string;
     higherBound: string;
+    arbitratorAddress: string;
 }
 
 const getCollateralAmountPlusFees = (baseAmount: string) => {
@@ -28,6 +29,7 @@ const getCollateralAmountPlusFees = (baseAmount: string) => {
 task("create-kpi-token", "Creates a KPI token")
     .addParam("factoryAddress", "The KPI tokens factory address")
     .addParam("question", "KPI question")
+    .addParam("arbitratorAddress", "Arbitrator address")
     .addParam("collateralAddress", "Collateral address")
     .addParam("collateralAmount", "Collateral amount")
     .addParam("tokenName", "Token name")
@@ -45,6 +47,7 @@ task("create-kpi-token", "Creates a KPI token")
                 tokenSymbol,
                 lowerBound,
                 higherBound,
+                arbitratorAddress,
             }: TaskArguments,
             hre: HardhatRuntimeEnvironment
         ) => {
@@ -73,10 +76,14 @@ task("create-kpi-token", "Creates a KPI token")
             )}\u241fkpi\u241fen_US`;
             console.log("creating");
             const transaction = await factory.createKpiToken(
-                encodedRealityQuestion,
-                Math.floor(
-                    DateTime.now().plus({ minutes: 30 }).toMillis() / 1000
-                ),
+                {
+                    question: encodedRealityQuestion,
+                    arbitrator: arbitratorAddress,
+                    expiry: Math.floor(
+                        DateTime.now().plus({ minutes: 30 }).toMillis() / 1000
+                    ),
+                    timeout: 120, // 2 minutes
+                },
                 {
                     token: collateralAddress,
                     amount: baseAmount,
