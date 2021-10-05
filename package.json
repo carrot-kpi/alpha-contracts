@@ -16,6 +16,7 @@
         "compile": "hardhat compile",
         "prepare": "husky install",
         "deploy:rinkeby": "hardhat deploy --network rinkeby --fee 30 --reality-address 0x3D00D77ee771405628a4bA4913175EcC095538da --verify",
+        "deploy:xdai": "hardhat deploy --network xdai --fee 30 --reality-address 0x79e32aE03fb27B07C89c0c568F80287C01ca2E57 --fee-receiver-address 0xe716ec63c5673b3a4732d22909b38d779fa47c3f",
         "create:rinkeby": "hardhat create-kpi-token --network rinkeby --factory-address 0x6752241ee8420cb61A6ae6B666bD5759BFAC6eb0 --arbitrator-address 0xcafa054b1b054581faf65adce667bf1c684b6ef0 --vote-timeout 120"
     },
     "devDependencies": {
