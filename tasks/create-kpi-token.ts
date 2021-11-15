@@ -2,7 +2,6 @@ import { parseEther } from "ethers/lib/utils";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DateTime } from "luxon";
-import { ERC20__factory, KPITokensFactory__factory } from "../typechain";
 
 interface TaskArguments {
     factoryAddress: string;
@@ -58,25 +57,36 @@ task("create-kpi-token", "Creates a KPI token")
             await hre.run("compile");
             const [signer] = await hre.ethers.getSigners();
 
-            const collateralErc20 = await ERC20__factory.connect(
-                collateralAddress,
-                signer
-            );
-            console.log("approving collateral");
+            const collateralErc20 = (
+                await hre.ethers.getContractFactory("ERC20")
+            )
+                .attach(collateralAddress)
+                .connect(signer);
             const { totalAmount, baseAmount } = getCollateralAmountPlusFees(
                 collateralAmount
             );
-            const approveTx = await collateralErc20.approve(
-                factoryAddress,
-                totalAmount
-            );
-            await approveTx.wait();
-            console.log("collateral approved");
+            if (
+                await (
+                    await collateralErc20.allowance(
+                        signer.address,
+                        factoryAddress
+                    )
+                ).lt(totalAmount)
+            ) {
+                console.log("approving collateral");
+                const approveTx = await collateralErc20.approve(
+                    factoryAddress,
+                    totalAmount
+                );
+                await approveTx.wait();
+                console.log("collateral approved");
+            }
 
-            const factory = await KPITokensFactory__factory.connect(
-                factoryAddress,
-                signer
-            );
+            const factory = await (
+                await hre.ethers.getContractFactory("KPITokensFactory")
+            )
+                .attach(factoryAddress)
+                .connect(signer);
             const encodedRealityQuestion = `${JSON.stringify(question).replace(
                 /^"|"$/g,
                 ""
@@ -86,9 +96,7 @@ task("create-kpi-token", "Creates a KPI token")
                 {
                     question: encodedRealityQuestion,
                     arbitrator: arbitratorAddress,
-                    expiry: Math.floor(
-                        DateTime.now().plus({ minutes: 30 }).toMillis() / 1000
-                    ),
+                    expiry: DateTime.now().plus({ day: 1 }).toSeconds(),
                     timeout: voteTimeout,
                 },
                 {

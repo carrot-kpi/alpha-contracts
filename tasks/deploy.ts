@@ -1,11 +1,5 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import {
-    KPIToken__factory,
-    KPIToken,
-    KPITokensFactory__factory,
-    KPITokensFactory,
-} from "../typechain";
 
 interface TaskArguments {
     verify: boolean;
@@ -33,22 +27,24 @@ task(
             await hre.run("clean");
             await hre.run("compile");
 
-            const kpiTokenImplementationFactory = (await hre.ethers.getContractFactory(
+            const kpiTokenImplementationFactory = await hre.ethers.getContractFactory(
                 "KPIToken"
-            )) as KPIToken__factory;
+            );
             console.log("Deploying KPI token implementation template");
-            const kpiTokenImplementation = (await kpiTokenImplementationFactory.deploy()) as KPIToken;
+            const kpiTokenImplementation = await kpiTokenImplementationFactory.deploy();
+            await kpiTokenImplementation.deployed();
 
-            const kpiTokensFactoryFactory = (await hre.ethers.getContractFactory(
+            const kpiTokensFactoryFactory = await hre.ethers.getContractFactory(
                 "KPITokensFactory"
-            )) as KPITokensFactory__factory;
+            );
             console.log("Deploying KPI tokens factory");
-            const kpiTokensFactory = (await kpiTokensFactoryFactory.deploy(
+            const kpiTokensFactory = await kpiTokensFactoryFactory.deploy(
                 kpiTokenImplementation.address,
                 realityAddress,
                 fee,
                 feeReceiverAddress
-            )) as KPITokensFactory;
+            );
+            await kpiTokensFactory.deployed();
 
             if (verify) {
                 await new Promise((resolve) => {
