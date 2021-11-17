@@ -96,7 +96,9 @@ task("create-kpi-token", "Creates a KPI token")
                 {
                     question: encodedRealityQuestion,
                     arbitrator: arbitratorAddress,
-                    expiry: DateTime.now().plus({ day: 1 }).toSeconds(),
+                    expiry: Math.floor(
+                        DateTime.now().plus({ minutes: 2 }).toSeconds()
+                    ),
                     timeout: voteTimeout,
                 },
                 {
