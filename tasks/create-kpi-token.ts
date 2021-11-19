@@ -14,6 +14,7 @@ interface TaskArguments {
     higherBound: string;
     arbitratorAddress: string;
     voteTimeout: string;
+    expiry: string;
 }
 
 const getCollateralAmountPlusFees = (baseAmount: string) => {
@@ -37,6 +38,7 @@ task("create-kpi-token", "Creates a KPI token")
     .addParam("tokenSymbol", "Token symbol")
     .addParam("lowerBound", "Scalar lower bound")
     .addParam("higherBound", "Scalar higher bound")
+    .addOptionalParam("expiry", "The expiry timestamp (seconds since UNIX epoch)")
     .setAction(
         async (
             {
@@ -50,6 +52,7 @@ task("create-kpi-token", "Creates a KPI token")
                 higherBound,
                 arbitratorAddress,
                 voteTimeout,
+                expiry,
             }: TaskArguments,
             hre: HardhatRuntimeEnvironment
         ) => {
@@ -96,7 +99,7 @@ task("create-kpi-token", "Creates a KPI token")
                 {
                     question: encodedRealityQuestion,
                     arbitrator: arbitratorAddress,
-                    expiry: Math.floor(
+                    expiry: expiry || Math.floor(
                         DateTime.now().plus({ minutes: 2 }).toSeconds()
                     ),
                     timeout: voteTimeout,
