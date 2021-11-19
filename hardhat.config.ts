@@ -26,7 +26,6 @@ const hardhatConfig: HardhatUserConfig = {
         xdai: {
             url: "https://rpc.xdaichain.com/",
             accounts,
-            gasPrice: 1000000000,
         },
     },
     solidity: {
