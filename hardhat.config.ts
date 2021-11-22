@@ -8,6 +8,7 @@ import "@typechain/hardhat";
 import "hardhat-dependency-compiler";
 import "./tasks/deploy";
 import "./tasks/create-kpi-token";
+import "./tasks/get-create-kpi-token-calldata";
 
 config();
 
