@@ -46,6 +46,9 @@ contract KPITokensFactory is Ownable {
         uint256 feeAmount,
         uint32 kpiExpiry
     );
+    event KpiTokenImplementationUpgraded(address implementation);
+    event FeeUpdated(uint fee);
+    event FeeReceiverUpdated(address feeReceiver);
 
     constructor(
         address _kpiTokenImplementation,
@@ -68,15 +71,18 @@ contract KPITokensFactory is Ownable {
     {
         if(_kpiTokenImplementation == address(0)) revert ZeroAddressKpiTokenImplementation();
         kpiTokenImplementation = _kpiTokenImplementation;
+        emit KpiTokenImplementationUpgraded(_kpiTokenImplementation);
     }
 
     function setFee(uint16 _fee) external onlyOwner {
         fee = _fee;
+        emit FeeUpdated(_fee);
     }
 
     function setFeeReceiver(address _feeReceiver) external onlyOwner {
-        if(_feeReceiver == address(0))revert ZeroAddressFeeReceiver();
+        if(_feeReceiver == address(0)) revert ZeroAddressFeeReceiver();
         feeReceiver = _feeReceiver;
+        emit FeeReceiverUpdated(_feeReceiver);
     }
 
     function createKpiToken(
