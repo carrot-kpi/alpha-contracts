@@ -1,4 +1,3 @@
-import { parseEther } from "ethers/lib/utils";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -70,7 +69,7 @@ task("get-create-kpi-token-calldata", "Gets create KPI token calldata")
                     {
                         name: tokenName,
                         symbol: tokenSymbol,
-                        totalSupply: parseEther(totalSupply),
+                        totalSupply,
                     },
                     { lowerBound, higherBound },
                 ])
