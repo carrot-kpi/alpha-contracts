@@ -11,6 +11,7 @@ error AlreadyFinalized();
 error NonFinalizedOracle();
 error NotFinalized();
 error NoKpiTokenBalance();
+error CollateralNotRecoverable();
 
 /**
  * @title KPIToken
@@ -127,5 +128,11 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
         uint256 _redeemableScalableAmount = ((collateralAmount - minPayoutAmount) * _kpiTokenBalance * finalKpiProgress) / (initialSupply * _scalarRange);
         collateralToken.safeTransfer(msg.sender, _redeemableBaseAmount + _redeemableScalableAmount);
         emit Redeemed(_kpiTokenBalance, _redeemableBaseAmount + _redeemableScalableAmount);
+    }
+
+    function recoverFunds(IERC20Upgradeable token) public {
+        if(token == collateralToken) revert CollateralNotRecoverable();
+        uint256 erc20balance = token.balanceOf(address(this));
+        token.safeTransfer(creator, erc20balance);
     }
 }
