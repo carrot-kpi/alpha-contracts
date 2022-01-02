@@ -12,6 +12,7 @@ interface IKPIToken is IERC20Upgradeable {
     struct Collateral {
         address token;
         uint256 amount;
+        uint256 minPayoutAmount;
     }
 
     struct TokenData {

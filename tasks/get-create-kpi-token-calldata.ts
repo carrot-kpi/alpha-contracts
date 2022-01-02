@@ -6,6 +6,7 @@ interface TaskArguments {
     question: string;
     collateralAddress: string;
     collateralAmount: string;
+    minPayoutAmount: string;
     tokenName: string;
     tokenSymbol: string;
     lowerBound: string;
@@ -34,6 +35,7 @@ task("get-create-kpi-token-calldata", "Gets create KPI token calldata")
                 question,
                 collateralAddress,
                 collateralAmount,
+                minPayoutAmount,
                 tokenName,
                 tokenSymbol,
                 lowerBound,
@@ -65,6 +67,7 @@ task("get-create-kpi-token-calldata", "Gets create KPI token calldata")
                     {
                         token: collateralAddress,
                         amount: collateralAmount,
+                        minPayoutAmount: minPayoutAmount,
                     },
                     {
                         name: tokenName,

@@ -8,6 +8,7 @@ interface TaskArguments {
     question: string;
     collateralAddress: string;
     collateralAmount: string;
+    minPayoutAmount: string;
     tokenName: string;
     tokenSymbol: string;
     lowerBound: string;
@@ -38,7 +39,10 @@ task("create-kpi-token", "Creates a KPI token")
     .addParam("tokenSymbol", "Token symbol")
     .addParam("lowerBound", "Scalar lower bound")
     .addParam("higherBound", "Scalar higher bound")
-    .addOptionalParam("expiry", "The expiry timestamp (seconds since UNIX epoch)")
+    .addOptionalParam(
+        "expiry",
+        "The expiry timestamp (seconds since UNIX epoch)"
+    )
     .setAction(
         async (
             {
@@ -46,6 +50,7 @@ task("create-kpi-token", "Creates a KPI token")
                 question,
                 collateralAddress,
                 collateralAmount,
+                minPayoutAmount,
                 tokenName,
                 tokenSymbol,
                 lowerBound,
@@ -59,7 +64,7 @@ task("create-kpi-token", "Creates a KPI token")
             await hre.run("clean");
             await hre.run("compile");
             const [signer] = await hre.ethers.getSigners();
-
+            /*
             const collateralErc20 = (
                 await hre.ethers.getContractFactory("ERC20")
             )
@@ -84,7 +89,7 @@ task("create-kpi-token", "Creates a KPI token")
                 await approveTx.wait();
                 console.log("collateral approved");
             }
-
+            */
             const factory = await (
                 await hre.ethers.getContractFactory("KPITokensFactory")
             )
@@ -94,24 +99,28 @@ task("create-kpi-token", "Creates a KPI token")
                 /^"|"$/g,
                 ""
             )}\u241fkpi\u241fen_US`;
+            console.log(question, "\n", encodedRealityQuestion);
             console.log("creating");
             const transaction = await factory.createKpiToken(
                 {
                     question: encodedRealityQuestion,
                     arbitrator: arbitratorAddress,
-                    expiry: expiry || Math.floor(
-                        DateTime.now().plus({ minutes: 2 }).toSeconds()
-                    ),
+                    expiry:
+                        expiry ||
+                        Math.floor(
+                            DateTime.now().plus({ minutes: 2 }).toSeconds()
+                        ),
                     timeout: voteTimeout,
                 },
                 {
                     token: collateralAddress,
-                    amount: baseAmount,
+                    amount: collateralAmount,
+                    minPayoutAmount: minPayoutAmount,
                 },
                 {
                     name: tokenName,
                     symbol: tokenSymbol,
-                    totalSupply: "100000000000000000000000", //100k
+                    totalSupply: "10000000000000000000000", //100k
                 },
                 { lowerBound, higherBound }
             );

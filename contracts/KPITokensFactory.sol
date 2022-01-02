@@ -15,6 +15,7 @@ error InvalidRealityExpiry();
 error ZeroAddressRealityArbitrator();
 error ZeroAddressCollateralToken();
 error InvalidCollateralAmount();
+error MinimumCollateralAmountTooHigh();
 error InvalidTokenName();
 error InvalidTokenSymbol();
 error ZeroTotalSupply();
@@ -96,6 +97,7 @@ contract KPITokensFactory is Ownable {
         if(_realityConfig.arbitrator == address(0)) revert ZeroAddressRealityArbitrator();
         if(_collateral.token == address(0)) revert ZeroAddressCollateralToken();
         if(_collateral.amount == 0) revert InvalidCollateralAmount();
+        if(_collateral.minPayoutAmount > _collateral.amount) revert MinimumCollateralAmountTooHigh();
         if(bytes(_tokenData.name).length == 0) revert InvalidTokenName();
         if(bytes(_tokenData.symbol).length == 0) revert InvalidTokenSymbol();
         if(_tokenData.totalSupply == 0) revert ZeroTotalSupply();
