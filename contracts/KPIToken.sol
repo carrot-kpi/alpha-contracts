@@ -11,6 +11,7 @@ error AlreadyFinalized();
 error NonFinalizedOracle();
 error NotFinalized();
 error NoKpiTokenBalance();
+error CollateralNotRecoverable();
 
 /**
  * @title KPIToken
@@ -29,6 +30,7 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
     address public creator;
     bool public finalized;
     uint256 public collateralAmount;
+    uint256 public minPayoutAmount;
     uint256 public initialSupply;
     uint256 public finalKpiProgress;
     ScalarData public scalarData;
@@ -52,10 +54,11 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
         TokenData calldata _tokenData,
         ScalarData calldata _scalarData
     ) external override initializer {
-        if(
+        if (
             IERC20Upgradeable(_collateral.token).balanceOf(address(this)) <
-                _collateral.amount)
-            revert NotEnoughCollateralBalance();
+            _collateral.amount || _collateral.minPayoutAmount >
+            _collateral.amount
+        ) revert NotEnoughCollateralBalance();
 
         __ERC20_init(_tokenData.name, _tokenData.symbol);
         _mint(_creator, _tokenData.totalSupply);
@@ -66,6 +69,7 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
         creator = _creator;
         scalarData = _scalarData;
         collateralAmount = _collateral.amount;
+        minPayoutAmount = _collateral.minPayoutAmount;
 
         emit Initialized(
             _kpiId,
@@ -78,8 +82,8 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
     }
 
     function finalize() external override {
-        if(finalized) revert AlreadyFinalized();
-        if(!oracle.isFinalized(kpiId)) revert NonFinalizedOracle();
+        if (finalized) revert AlreadyFinalized();
+        if (!oracle.isFinalized(kpiId)) revert NonFinalizedOracle();
         uint256 _oracleResult = uint256(oracle.resultFor(kpiId));
         if (
             _oracleResult <= scalarData.lowerBound ||
@@ -87,10 +91,10 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
         ) {
             // kpi below the lower bound or invalid, transfer funds back to creator
             finalKpiProgress = 0;
-            collateralToken.safeTransfer(creator, collateralAmount);
+            collateralToken.safeTransfer(creator, collateralAmount - minPayoutAmount);
         } else {
-            uint256 _kpiFullRange =
-                scalarData.higherBound - scalarData.lowerBound;
+            uint256 _kpiFullRange = scalarData.higherBound -
+                scalarData.lowerBound;
             finalKpiProgress = _oracleResult >= scalarData.higherBound
                 ? _kpiFullRange
                 : _oracleResult - scalarData.lowerBound;
@@ -98,7 +102,7 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
             if (finalKpiProgress < _kpiFullRange) {
                 collateralToken.safeTransfer(
                     creator,
-                    (collateralAmount * (_kpiFullRange - finalKpiProgress)) /
+                    ((collateralAmount - minPayoutAmount) * (_kpiFullRange - finalKpiProgress)) /
                         _kpiFullRange
                 );
             }
@@ -108,20 +112,27 @@ contract KPIToken is Initializable, ERC20Upgradeable, IKPIToken {
     }
 
     function redeem() external override {
-        if(!finalized) revert NotFinalized();
+        if (!finalized) revert NotFinalized();
         uint256 _kpiTokenBalance = balanceOf(msg.sender);
-        if(_kpiTokenBalance == 0) revert NoKpiTokenBalance();
-        if (finalKpiProgress == 0) {
-            _burn(msg.sender, _kpiTokenBalance);
-            emit Redeemed(_kpiTokenBalance, 0);
+        if (_kpiTokenBalance == 0) revert NoKpiTokenBalance();
+        _burn(msg.sender, _kpiTokenBalance);
+        uint256 _redeemableBaseAmount = (minPayoutAmount * _kpiTokenBalance ) / (initialSupply);
+        if (finalKpiProgress == 0) {          
+            if (_redeemableBaseAmount > 0){
+                collateralToken.safeTransfer(msg.sender, _redeemableBaseAmount);
+            }
+            emit Redeemed(_kpiTokenBalance, _redeemableBaseAmount);
             return;
         }
-        _burn(msg.sender, _kpiTokenBalance);
         uint256 _scalarRange = scalarData.higherBound - scalarData.lowerBound;
-        uint256 _redeemableAmount =
-            (collateralAmount * _kpiTokenBalance * finalKpiProgress) /
-                (initialSupply * _scalarRange);
-        collateralToken.safeTransfer(msg.sender, _redeemableAmount);
-        emit Redeemed(_kpiTokenBalance, _redeemableAmount);
+        uint256 _redeemableScalableAmount = ((collateralAmount - minPayoutAmount) * _kpiTokenBalance * finalKpiProgress) / (initialSupply * _scalarRange);
+        collateralToken.safeTransfer(msg.sender, _redeemableBaseAmount + _redeemableScalableAmount);
+        emit Redeemed(_kpiTokenBalance, _redeemableBaseAmount + _redeemableScalableAmount);
+    }
+
+    function recoverFunds(IERC20Upgradeable token) public {
+        if(token == collateralToken) revert CollateralNotRecoverable();
+        uint256 erc20balance = token.balanceOf(address(this));
+        token.safeTransfer(creator, erc20balance);
     }
 }
