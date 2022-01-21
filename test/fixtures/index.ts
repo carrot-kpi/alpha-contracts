@@ -12,7 +12,7 @@ import {
     Realitio__factory,
     ERC20PresetMinterPauser,
     ERC20PresetMinterPauser__factory,
-} from "../../typechain";
+} from "../../typechain-types";
 import {
     encodeRealityQuestion,
     getCollateralAmountPlusFees,

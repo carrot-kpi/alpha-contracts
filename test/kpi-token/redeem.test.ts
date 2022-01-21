@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { testBooleanKpiTokenFixture } from "../fixtures";
 import { ethers, waffle } from "hardhat";
 import { fastForward, fastForwardTo } from "../utils";
-import { formatBytes32String, randomBytes } from "ethers/lib/utils";
-import { ERC20__factory } from "../../typechain";
+import { formatBytes32String } from "ethers/lib/utils";
+import { ERC20__factory } from "../../typechain-types";
 
 const { loadFixture } = waffle;
 
@@ -16,13 +16,8 @@ describe("KPIToken - Redeem", () => {
     });
 
     it("should fail when the kpi is finalized but a user with no token balance calls", async () => {
-        const {
-            kpiToken,
-            realitio,
-            realiyQuestionId,
-            voteTimeout,
-            kpiExpiry,
-        } = await loadFixture(testBooleanKpiTokenFixture);
+        const { kpiToken, realitio, realiyQuestionId, voteTimeout, kpiExpiry } =
+            await loadFixture(testBooleanKpiTokenFixture);
         await fastForwardTo(kpiExpiry);
         await realitio.submitAnswer(
             realiyQuestionId,

@@ -1,135 +1,83 @@
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "./interfaces/IReality.sol";
-import "./interfaces/IKPIToken.sol";
+import "./interfaces/IKPITokensFactory.sol";
+import "./interfaces/IKPITokensManager.sol";
+import "./interfaces/IOraclesManager.sol";
+import "./interfaces/kpi-tokens/IKPIToken.sol";
+import "./commons/Types.sol";
 
 /**
  * @title KPITokensFactory
  * @dev KPITokensFactory contract
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
- * SPDX-License-Identifier: GPL-3.0
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
-contract KPITokensFactory is Ownable {
+contract KPITokensFactory is Ownable, IKPITokensFactory {
     using SafeERC20 for IERC20;
 
-    uint16 private constant _10000 = 10000;
-
-    uint16 public fee;
-    uint32 public voteTimeout;
-    address public kpiTokenImplementation;
-    address public arbitrator;
+    address public kpiTokensManager;
+    address public oraclesManager;
     address public feeReceiver;
-    IReality public oracle;
+    mapping(address => bool) public created;
 
-    event KpiTokenCreated(
-        address kpiToken,
-        uint256 feeAmount,
-        uint32 kpiExpiry
-    );
+    error Forbidden();
+    error ZeroAddressKpiTokensManager();
+    error ZeroAddressOraclesManager();
+    error ZeroAddressFeeReceiver();
 
     constructor(
-        address _kpiTokenImplementation,
-        address _oracle,
-        address _arbitrator,
-        uint16 _fee,
-        uint32 _voteTimeout,
+        address _kpiTokensManager,
+        address _oraclesManager,
         address _feeReceiver
     ) {
-        require(_kpiTokenImplementation != address(0), "KF01");
-        require(_oracle != address(0), "KF02");
-        require(_arbitrator != address(0), "KF03");
-        require(_fee < _10000, "KF03");
-        require(_voteTimeout > 0, "KF04");
-        require(_feeReceiver != address(0), "KF17");
-        kpiTokenImplementation = _kpiTokenImplementation;
-        oracle = IReality(_oracle);
-        arbitrator = _arbitrator;
-        fee = _fee;
-        voteTimeout = _voteTimeout;
+        if (_kpiTokensManager == address(0))
+            revert ZeroAddressKpiTokensManager();
+        if (_oraclesManager == address(0)) revert ZeroAddressOraclesManager();
+        if (_feeReceiver == address(0)) revert ZeroAddressFeeReceiver();
+
+        kpiTokensManager = _kpiTokensManager;
+        oraclesManager = _oraclesManager;
         feeReceiver = _feeReceiver;
     }
 
-    function upgradeKpiTokenImplementation(address _kpiTokenImplementation)
-        external
-        onlyOwner
-    {
-        require(_kpiTokenImplementation != address(0), "KF05");
-        kpiTokenImplementation = _kpiTokenImplementation;
+    function createToken(
+        address _template,
+        bytes memory _initializationData,
+        bytes memory _oraclesInitializationData
+    ) external override {
+        address _instance = IKPITokensManager(kpiTokensManager).instantiate(
+            _template,
+            _initializationData
+        );
+        IKPIToken(_instance).initialize(msg.sender, _initializationData);
+        created[_instance] = true;
+        IKPIToken(_instance).initializeOracles(
+            oraclesManager,
+            _oraclesInitializationData
+        );
+        IKPIToken(_instance).collectProtocolFees(feeReceiver);
     }
 
-    function setFee(uint16 _fee) external onlyOwner {
-        require(_fee < _10000, "KF06");
-        fee = _fee;
+    function setKpiTokensManager(address _kpiTokensManager) external {
+        if (msg.sender != owner()) revert Forbidden();
+        if (_kpiTokensManager == address(0))
+            revert ZeroAddressKpiTokensManager();
+        kpiTokensManager = _kpiTokensManager;
     }
 
-    function setArbitrator(address _arbitrator) external onlyOwner {
-        require(_arbitrator != address(0), "KF07");
-        arbitrator = _arbitrator;
+    function setOraclesManager(address _oraclesManager) external {
+        if (msg.sender != owner()) revert Forbidden();
+        if (_oraclesManager == address(0)) revert ZeroAddressOraclesManager();
+        oraclesManager = _oraclesManager;
     }
 
-    function setVoteTimeout(uint32 _voteTimeout) external onlyOwner {
-        require(_voteTimeout > 0, "KF08");
-        voteTimeout = _voteTimeout;
-    }
-
-    function setFeeReceiver(address _feeReceiver) external onlyOwner {
-        require(_feeReceiver != address(0), "KF16");
+    function setFeeReceiver(address _feeReceiver) external {
+        if (msg.sender != owner()) revert Forbidden();
+        if (_feeReceiver == address(0)) revert ZeroAddressFeeReceiver();
         feeReceiver = _feeReceiver;
-    }
-
-    function createKpiToken(
-        string calldata _kpiQuestion,
-        uint32 _kpiExpiry,
-        IKPIToken.Collateral calldata _collateral,
-        IKPIToken.TokenData calldata _tokenData,
-        IKPIToken.ScalarData calldata _scalarData
-    ) external {
-        require(_collateral.token != address(0), "KF09");
-        require(_collateral.amount > 0, "KF10");
-        require(bytes(_tokenData.name).length > 0, "KF11");
-        require(bytes(_tokenData.symbol).length > 0, "KF12");
-        require(_tokenData.totalSupply > 0, "KF13");
-        require(bytes(_kpiQuestion).length > 0, "KF14");
-        require(_kpiExpiry > block.timestamp, "KF15");
-        require(_scalarData.lowerBound < _scalarData.higherBound, "KF16");
-        address _kpiTokenProxy = Clones.clone(kpiTokenImplementation);
-        uint256 _feeAmount = (_collateral.amount * fee) / _10000;
-        IERC20(_collateral.token).safeTransferFrom(
-            msg.sender,
-            feeReceiver,
-            _feeAmount
-        );
-        IERC20(_collateral.token).safeTransferFrom(
-            msg.sender,
-            _kpiTokenProxy,
-            _collateral.amount
-        );
-        bytes32 _kpiId =
-            oracle.askQuestion(
-                _scalarData.lowerBound == 0 && _scalarData.higherBound == 1
-                    ? 0
-                    : 1,
-                _kpiQuestion,
-                arbitrator,
-                voteTimeout,
-                _kpiExpiry,
-                0
-            );
-        IKPIToken(_kpiTokenProxy).initialize(
-            _kpiId,
-            address(oracle),
-            msg.sender,
-            IKPIToken.Collateral({
-                token: _collateral.token,
-                amount: _collateral.amount
-            }),
-            _tokenData,
-            _scalarData
-        );
-        emit KpiTokenCreated(_kpiTokenProxy, _feeAmount, _kpiExpiry);
     }
 }

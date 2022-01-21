@@ -1,12 +1,10 @@
-pragma solidity ^0.8.4;
-
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+pragma solidity ^0.8.11;
 
 /**
  * @title KPIToken
  * @dev KPIToken contract
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
- * SPDX-License-Identifier: GPL-3.0
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 interface IReality {
     function askQuestion(
@@ -18,5 +16,7 @@ interface IReality {
         uint256 _nonce
     ) external returns (bytes32 _questionId);
 
-    function resultFor(bytes32 _id) external returns (bytes32);
+    function isFinalized(bytes32 _id) external view returns (bool);
+
+    function resultFor(bytes32 _id) external view returns (bytes32);
 }

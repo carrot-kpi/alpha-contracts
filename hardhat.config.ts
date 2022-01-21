@@ -7,7 +7,12 @@ import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-dependency-compiler";
 import "./tasks/deploy";
-import "./tasks/create-kpi-token";
+import "./tasks/create-uniswap-v2-twap-kpi-token";
+import "./tasks/create-reality-eth-kpi-token";
+import "./tasks/create-manual-reality-eth-kpi-token";
+import "./tasks/upgrade-uniswap-v2-twap-template";
+import "./tasks/upgrade-erc20-kpi-token-template";
+import "./tasks/upgrade-manual-reality-eth-oracle-template";
 
 config();
 
@@ -18,9 +23,16 @@ const hardhatConfig: HardhatUserConfig = {
     networks: {
         mainnet: {
             url: `https://mainnet.infura.io/v3/${infuraId}`,
+            chainId: 1,
         },
         rinkeby: {
             url: `https://rinkeby.infura.io/v3/${infuraId}`,
+            chainId: 4,
+            accounts,
+        },
+        kovan: {
+            url: `https://kovan.infura.io/v3/${infuraId}`,
+            chainId: 42,
             accounts,
         },
         arbitrumTestnetV3: {
@@ -37,7 +49,7 @@ const hardhatConfig: HardhatUserConfig = {
     solidity: {
         compilers: [
             {
-                version: "0.8.4",
+                version: "0.8.11",
                 settings: {
                     optimizer: {
                         enabled: true,
