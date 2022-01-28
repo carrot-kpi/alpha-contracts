@@ -9,7 +9,7 @@ import "./interfaces/kpi-tokens/IKPIToken.sol";
 import "./interfaces/oracles/IOracle.sol";
 import "./interfaces/IOraclesManager.sol";
 import "./interfaces/IKPITokensFactory.sol";
-import "./libraries/TemplateSetLibrary.sol";
+import "./libraries/OracleTemplateSetLibrary.sol";
 
 /**
  * @title OraclesManager
@@ -19,11 +19,11 @@ import "./libraries/TemplateSetLibrary.sol";
  */
 contract OraclesManager is Ownable, IOraclesManager {
     using SafeERC20 for IERC20;
-    using TemplateSetLibrary for EnumerableTemplateSet;
+    using OracleTemplateSetLibrary for IOraclesManager.EnumerableTemplateSet;
 
     address public factory;
     address public workersJobsRegistry;
-    EnumerableTemplateSet private templates;
+    IOraclesManager.EnumerableTemplateSet private templates;
 
     error NonExistentTemplate();
     error ZeroAddressFactory();
@@ -32,7 +32,7 @@ contract OraclesManager is Ownable, IOraclesManager {
     error ZeroAddressTemplate();
     error NotAnUpgrade();
     error ZeroAddressWorkersJobsRegistry();
-    error InvalidDescription();
+    error InvalidSpecification();
     error InvalidAutomationParameters();
 
     constructor(address _factory, address _workersJobsRegistry) {
@@ -113,10 +113,10 @@ contract OraclesManager is Ownable, IOraclesManager {
     function addTemplate(
         address _template,
         bool _automatable,
-        string calldata _description
+        string calldata _specification
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
-        templates.add(_template, _automatable, _description);
+        templates.add(_template, _automatable, _specification);
     }
 
     function removeTemplate(address _template) external override {
@@ -124,22 +124,22 @@ contract OraclesManager is Ownable, IOraclesManager {
         templates.remove(_template);
     }
 
-    function updateTemplateDescription(
+    function updateTemplateSpecification(
         address _template,
-        string calldata _newDescription
+        string calldata _newSpecification
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
         Template storage _templateFromStorage = templates.get(_template);
-        _templateFromStorage.description = _newDescription;
+        _templateFromStorage.specification = _newSpecification;
     }
 
     function updgradeTemplate(
         address _template,
         address _newTemplate,
-        string calldata _newDescription
+        string calldata _newSpecification
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
-        templates.upgrade(_template, _newTemplate, _newDescription);
+        templates.upgrade(_template, _newTemplate, _newSpecification);
     }
 
     function _ensureJobsRegistryAllowance(
@@ -161,9 +161,15 @@ contract OraclesManager is Ownable, IOraclesManager {
         external
         view
         override
-        returns (Template memory)
+        returns (IOraclesManager.TemplateWithAddress memory)
     {
-        return templates.get(_template);
+        Template storage _templateFromStorage = templates.get(_template);
+        return
+            IOraclesManager.TemplateWithAddress({
+                addrezz: _template,
+                specification: _templateFromStorage.specification,
+                automatable: _templateFromStorage.automatable
+            });
     }
 
     function templatesAmount() external view override returns (uint256) {
@@ -174,7 +180,7 @@ contract OraclesManager is Ownable, IOraclesManager {
         external
         view
         override
-        returns (Template[] memory)
+        returns (IOraclesManager.TemplateWithAddress[] memory)
     {
         return templates.enumerate(_fromIndex, _toIndex);
     }

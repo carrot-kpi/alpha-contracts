@@ -8,7 +8,7 @@ import "@xcute/contracts/interfaces/IJobsRegistry.sol";
 import "./interfaces/kpi-tokens/IKPIToken.sol";
 import "./interfaces/oracles/IOracle.sol";
 import "./interfaces/IKPITokensManager.sol";
-import "./libraries/TemplateSetLibrary.sol";
+import "./libraries/KpiTokenTemplateSetLibrary.sol";
 import "./commons/Types.sol";
 
 /**
@@ -19,10 +19,10 @@ import "./commons/Types.sol";
  */
 contract KPITokensManager is Ownable, IKPITokensManager {
     using SafeERC20 for IERC20;
-    using TemplateSetLibrary for EnumerableTemplateSet;
+    using KpiTokenTemplateSetLibrary for IKPITokensManager.EnumerableTemplateSet;
 
     address public factory;
-    EnumerableTemplateSet private templates;
+    IKPITokensManager.EnumerableTemplateSet private templates;
 
     error ZeroAddressFactory();
     error Forbidden();
@@ -62,12 +62,11 @@ contract KPITokensManager is Ownable, IKPITokensManager {
         return Clones.cloneDeterministic(_template, salt(_initializationData));
     }
 
-    function addTemplate(
-        address _template,
-        bool _automatable,
-        string calldata _description
-    ) external {
-        templates.add(_template, _automatable, _description);
+    function addTemplate(address _template, string calldata _specification)
+        external
+    {
+        if (msg.sender != owner()) revert Forbidden();
+        templates.add(_template, _specification);
     }
 
     function removeTemplate(address _template) external {
@@ -78,28 +77,33 @@ contract KPITokensManager is Ownable, IKPITokensManager {
     function upgradeTemplate(
         address _template,
         address _newTemplate,
-        string memory _newDescription
+        string memory _newSpecification
     ) external {
         if (msg.sender != owner()) revert Forbidden();
-        templates.upgrade(_template, _newTemplate, _newDescription);
+        templates.upgrade(_template, _newTemplate, _newSpecification);
     }
 
-    function updateTemplateDescription(
+    function updateTemplateSpecification(
         address _template,
-        string calldata _newDescription
+        string calldata _newSpecification
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
         Template storage _templateFromStorage = templates.get(_template);
-        _templateFromStorage.description = _newDescription;
+        _templateFromStorage.specification = _newSpecification;
     }
 
     function template(address _template)
         external
         view
         override
-        returns (Template memory)
+        returns (IKPITokensManager.TemplateWithAddress memory)
     {
-        return templates.get(_template);
+        Template storage _templateFromStorage = templates.get(_template);
+        return
+            IKPITokensManager.TemplateWithAddress({
+                addrezz: _template,
+                specification: _templateFromStorage.specification
+            });
     }
 
     function templatesAmount() external view override returns (uint256) {
@@ -110,7 +114,7 @@ contract KPITokensManager is Ownable, IKPITokensManager {
         external
         view
         override
-        returns (Template[] memory)
+        returns (IKPITokensManager.TemplateWithAddress[] memory)
     {
         return templates.enumerate(_fromIndex, _toIndex);
     }

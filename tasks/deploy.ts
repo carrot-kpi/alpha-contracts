@@ -39,11 +39,21 @@ task(
             await erc20KpiToken.deployed();
             console.log("Deployed ERC20 KPI token template");
 
-            const templateSetLibraryFactory =
-                await hre.ethers.getContractFactory("TemplateSetLibrary");
-            const templateSetLibrary = await templateSetLibraryFactory.deploy();
-            await templateSetLibrary.deployed();
-            console.log("Deployed template set library");
+            const oracleTemplateSetLibraryFactory =
+                await hre.ethers.getContractFactory("OracleTemplateSetLibrary");
+            const oracleTemplateSetLibrary =
+                await oracleTemplateSetLibraryFactory.deploy();
+            await oracleTemplateSetLibrary.deployed();
+            console.log("Deployed oracle template set library");
+
+            const kpiTokenTemplateSetLibraryFactory =
+                await hre.ethers.getContractFactory(
+                    "KpiTokenTemplateSetLibrary"
+                );
+            const kpiTokenTemplateSetLibrary =
+                await kpiTokenTemplateSetLibraryFactory.deploy();
+            await kpiTokenTemplateSetLibrary.deployed();
+            console.log("Deployed KPI token template set library");
 
             const signer = hre.ethers.provider.getSigner(0);
             const predictedFactoryAddress =
@@ -56,7 +66,8 @@ task(
                 "KPITokensManager",
                 {
                     libraries: {
-                        TemplateSetLibrary: templateSetLibrary.address,
+                        KpiTokenTemplateSetLibrary:
+                            kpiTokenTemplateSetLibrary.address,
                     },
                 }
             );
@@ -68,8 +79,7 @@ task(
 
             const erc20KpiTokenAdditionTx = await kpiTokensManager.addTemplate(
                 erc20KpiToken.address,
-                false,
-                "ERC20 KPI token v1.0.0"
+                "QmXU4G418hZLL8yxXdjkTFSoH2FdSe6ELgUuSm5fHHJMMN"
             );
             await erc20KpiTokenAdditionTx.wait();
             console.log("Added KPI token template");
@@ -78,7 +88,8 @@ task(
                 "OraclesManager",
                 {
                     libraries: {
-                        TemplateSetLibrary: templateSetLibrary.address,
+                        OracleTemplateSetLibrary:
+                            oracleTemplateSetLibrary.address,
                     },
                 }
             );
@@ -156,7 +167,13 @@ task(
 
                 await verifyContractSourceCode(
                     hre,
-                    templateSetLibrary.address,
+                    kpiTokenTemplateSetLibrary.address,
+                    []
+                );
+
+                await verifyContractSourceCode(
+                    hre,
+                    oracleTemplateSetLibrary.address,
                     []
                 );
 

@@ -5,7 +5,7 @@ import { IKPITokensManager__factory } from "../typechain-types";
 interface TaskArguments {
     kpiTokensManagerAddress: string;
     oldTemplateAddress: string;
-    newTemplateDescription: string;
+    newTemplateSpecification: string;
     verify: boolean;
 }
 
@@ -14,7 +14,7 @@ task(
     "Upgrades the currently published version of the ERC20 KPI token template to the latest one available"
 )
     .addParam("oldTemplateAddress")
-    .addParam("newTemplateDescription")
+    .addParam("newTemplateSpecification")
     .addParam("kpiTokensManagerAddress")
     .addFlag("verify")
     .setAction(
@@ -22,7 +22,7 @@ task(
             {
                 kpiTokensManagerAddress,
                 oldTemplateAddress,
-                newTemplateDescription,
+                newTemplateSpecification,
                 verify,
             }: TaskArguments,
             hre: HardhatRuntimeEnvironment
@@ -45,7 +45,7 @@ task(
             const upgradeTx = await kpiTokensManager.upgradeTemplate(
                 oldTemplateAddress,
                 newTemplate.address,
-                newTemplateDescription
+                newTemplateSpecification
             );
             await upgradeTx.wait();
             console.log("Upgraded to", newTemplate.address);

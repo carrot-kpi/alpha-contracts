@@ -7,8 +7,6 @@ pragma solidity ^0.8.11;
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-
-
 struct RedeemedCollateral {
     address token;
     uint256 amount;
@@ -42,15 +40,4 @@ struct FinalizableOracle {
     uint256 finalProgress;
     uint256 weight;
     bool finalized;
-}
-
-struct Template {
-    string description;
-    bool exists;
-    bool automatable;
-}
-
-struct EnumerableTemplateSet {
-    mapping(address => Template) map;
-    address[] keys;
 }

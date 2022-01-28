@@ -25,8 +25,6 @@ contract ManualRealityOracle is IOracle, Initializable {
     error InvalidQuestionTimeout();
     error InvalidExpiry();
 
-    event Log(bytes _log);
-
     function initialize(address _kpiToken, bytes memory _data)
         external
         override
@@ -48,8 +46,6 @@ contract ManualRealityOracle is IOracle, Initializable {
         if (bytes(_question).length == 0) revert InvalidQuestion();
         if (_questionTimeout == 0) revert InvalidQuestionTimeout();
         if (_expiry <= block.timestamp) revert InvalidExpiry();
-
-        emit Log(_data);
 
         kpiToken = _kpiToken;
         reality = _reality;

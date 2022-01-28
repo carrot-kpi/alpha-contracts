@@ -4,7 +4,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 interface TaskArguments {
     oraclesManagerAddress: string;
     oldTemplateAddress: string;
-    newTemplateDescription: string;
+    newTemplateSpecification: string;
     verify: boolean;
 }
 
@@ -13,7 +13,7 @@ task(
     "Upgrade the currently published version of the token price oracle to the latest one available"
 )
     .addParam("oldTemplateAddress")
-    .addParam("newTemplateDescription")
+    .addParam("newTemplateSpecification")
     .addParam("oraclesManagerAddress")
     .addFlag("verify")
     .setAction(
@@ -21,7 +21,7 @@ task(
             {
                 oraclesManagerAddress,
                 oldTemplateAddress,
-                newTemplateDescription,
+                newTemplateSpecification,
                 verify,
             }: TaskArguments,
             hre: HardhatRuntimeEnvironment
@@ -45,7 +45,7 @@ task(
             const upgradeTx = await oraclesManager.updgradeTemplate(
                 oldTemplateAddress,
                 twapOracle.address,
-                newTemplateDescription
+                newTemplateSpecification
             );
             await upgradeTx.wait();
 

@@ -9,6 +9,22 @@ import "../commons/Types.sol";
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 interface IOraclesManager {
+    struct Template {
+        string specification;
+        bool automatable;
+    }
+
+    struct TemplateWithAddress {
+        address addrezz;
+        string specification;
+        bool automatable;
+    }
+
+    struct EnumerableTemplateSet {
+        mapping(address => Template) map;
+        address[] keys;
+    }
+
     function predictInstanceAddress(
         address _template,
         address _automationFundingToken,
@@ -26,7 +42,7 @@ interface IOraclesManager {
     function addTemplate(
         address _template,
         bool _automatable,
-        string calldata _description
+        string calldata _specification
     ) external;
 
     function removeTemplate(address _template) external;
@@ -34,23 +50,23 @@ interface IOraclesManager {
     function updgradeTemplate(
         address _template,
         address _newTemplate,
-        string calldata _newDescription
+        string calldata _newSpecification
     ) external;
 
-    function updateTemplateDescription(
+    function updateTemplateSpecification(
         address _template,
-        string calldata _newDescription
+        string calldata _newSpecification
     ) external;
 
     function template(address _template)
         external
         view
-        returns (Template memory);
+        returns (TemplateWithAddress memory);
 
     function templatesAmount() external view returns (uint256);
 
     function templatesSlice(uint256 _fromIndex, uint256 _toIndex)
         external
         view
-        returns (Template[] memory);
+        returns (TemplateWithAddress[] memory);
 }
