@@ -14,8 +14,10 @@ import "../interfaces/external/IReality.sol";
 contract ManualRealityOracle is IOracle, Initializable {
     bool public finalized;
     address public kpiToken;
-    address public reality;
-    bytes32 public kpiId;
+    address internal reality;
+    bytes32 internal questionId;
+    string internal question;
+    IOraclesManager.Template private __template;
 
     error Forbidden();
     error ZeroAddressKpiToken();
@@ -25,11 +27,11 @@ contract ManualRealityOracle is IOracle, Initializable {
     error InvalidQuestionTimeout();
     error InvalidExpiry();
 
-    function initialize(address _kpiToken, bytes memory _data)
-        external
-        override
-        initializer
-    {
+    function initialize(
+        address _kpiToken,
+        IOraclesManager.Template memory _template,
+        bytes memory _data
+    ) external override initializer {
         if (_kpiToken == address(0)) revert ZeroAddressKpiToken();
 
         (
@@ -37,9 +39,8 @@ contract ManualRealityOracle is IOracle, Initializable {
             address _arbitrator,
             string memory _question,
             uint32 _questionTimeout,
-            uint32 _expiry,
-            bool _binary
-        ) = abi.decode(_data, (address, address, string, uint32, uint32, bool));
+            uint32 _expiry
+        ) = abi.decode(_data, (address, address, string, uint32, uint32));
 
         if (_reality == address(0)) revert ZeroAddressReality();
         if (_arbitrator == address(0)) revert ZeroAddressArbitrator();
@@ -47,10 +48,12 @@ contract ManualRealityOracle is IOracle, Initializable {
         if (_questionTimeout == 0) revert InvalidQuestionTimeout();
         if (_expiry <= block.timestamp) revert InvalidExpiry();
 
+        __template = _template;
         kpiToken = _kpiToken;
         reality = _reality;
-        kpiId = IReality(_reality).askQuestion(
-            _binary ? 0 : 1,
+        question = _question;
+        questionId = IReality(_reality).askQuestion(
+            0, // shouldn't matter on-chain
             _question,
             _arbitrator,
             _questionTimeout,
@@ -60,11 +63,34 @@ contract ManualRealityOracle is IOracle, Initializable {
     }
 
     function finalize() external {
-        if (finalized || !IReality(reality).isFinalized(kpiId))
+        bytes32 _questionId = questionId; // gas optimization
+        if (finalized || !IReality(reality).isFinalized(_questionId))
             revert Forbidden();
         IKPIToken(kpiToken).finalize(
-            uint256(IReality(reality).resultFor(kpiId))
+            uint256(IReality(reality).resultFor(_questionId))
         );
         finalized = true;
+    }
+
+    function data() external view override returns (bytes memory) {
+        address _reality = reality; // gas optimization
+        bytes32 _questionId = questionId; // gas optimization
+        return
+            abi.encode(
+                _reality,
+                IReality(_reality).getArbitrator(_questionId),
+                question,
+                IReality(_reality).getTimeout(_questionId),
+                IReality(_reality).getOpeningTS(_questionId)
+            );
+    }
+
+    function template()
+        external
+        view
+        override
+        returns (IOraclesManager.Template memory)
+    {
+        return __template;
     }
 }

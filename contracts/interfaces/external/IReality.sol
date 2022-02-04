@@ -18,5 +18,11 @@ interface IReality {
 
     function isFinalized(bytes32 _id) external view returns (bool);
 
+    function getArbitrator(bytes32 _id) external view returns (address);
+
+    function getOpeningTS(bytes32 _id) external view returns (uint32);
+
+    function getTimeout(bytes32 _id) external view returns (uint32);
+
     function resultFor(bytes32 _id) external view returns (bytes32);
 }

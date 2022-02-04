@@ -5,8 +5,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "../interfaces/oracles/IOracle.sol";
 import "../interfaces/IOraclesManager.sol";
+import "../interfaces/IKPITokensManager.sol";
 import "../interfaces/kpi-tokens/IERC20KPIToken.sol";
-import "../commons/Types.sol";
 
 /**
  * @title ERC20KPIToken
@@ -24,14 +24,16 @@ contract ERC20KPIToken is
     uint256 internal immutable INVALID_ANSWER =
         0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
-    bool private oraclesInitialized;
-    bool private protocolFeeCollected;
+    bool internal oraclesInitialized;
+    bool internal protocolFeeCollected;
     bool public finalized;
-    bool public andRelationship;
+    bool internal andRelationship;
     uint16 internal toBeFinalized;
     address public creator;
-    Collateral[] public collaterals;
-    mapping(address => FinalizableOracle) public oracles;
+    Collateral[] internal collaterals;
+    FinalizableOracle[] internal finalizableOracles;
+    string public description;
+    IKPITokensManager.Template private __template;
     uint256 internal initialSupply;
     uint256 internal totalWeight;
 
@@ -46,9 +48,11 @@ contract ERC20KPIToken is
     error AlreadyInitialized();
     error NotInitialized();
     error OraclesNotInitialized();
+    error InvalidDescription();
 
     event Initialize(
         address creator,
+        string _description,
         Collateral[] collaterals,
         bytes32 name,
         bytes32 symbol,
@@ -57,11 +61,14 @@ contract ERC20KPIToken is
     event Finalize(address oracle, uint256 result);
     event Redeem(uint256 burned, RedeemedCollateral[] redeemed);
 
-    function initialize(address _creator, bytes memory _data)
-        external
-        override
-        initializer
-    {
+    function initialize(
+        address _creator,
+        IKPITokensManager.Template memory _template,
+        string memory _description,
+        bytes memory _data
+    ) external override initializer {
+        if (bytes(_description).length == 0) revert InvalidDescription();
+
         (
             address[] memory _collateralTokens,
             uint256[] memory _collateralAmounts,
@@ -111,9 +118,12 @@ contract ERC20KPIToken is
 
         initialSupply = _erc20Supply;
         creator = _creator;
+        description = _description;
+        __template = _template;
 
         emit Initialize(
             _creator,
+            _description,
             collaterals,
             _erc20Name,
             _erc20Symbol,
@@ -129,7 +139,7 @@ contract ERC20KPIToken is
         if (oraclesInitialized) revert AlreadyInitialized();
 
         (
-            address[] memory _templates,
+            uint256[] memory _ids,
             uint256[] memory _lowerBounds,
             uint256[] memory _higherBounds,
             address[] memory _automationFundingTokens,
@@ -140,7 +150,7 @@ contract ERC20KPIToken is
         ) = abi.decode(
                 _data,
                 (
-                    address[],
+                    uint256[],
                     uint256[],
                     uint256[],
                     address[],
@@ -152,8 +162,8 @@ contract ERC20KPIToken is
             );
 
         if (
-            _templates.length == 0 ||
-            _templates.length != _lowerBounds.length ||
+            _ids.length == 0 ||
+            _ids.length != _lowerBounds.length ||
             _lowerBounds.length != _higherBounds.length ||
             _higherBounds.length != _automationFundingTokens.length ||
             _automationFundingTokens.length !=
@@ -162,7 +172,7 @@ contract ERC20KPIToken is
             _weights.length != _initializationData.length
         ) revert InconsistentArrayLengths();
 
-        for (uint256 _i = 0; _i < _templates.length; _i++) {
+        for (uint256 _i = 0; _i < _ids.length; _i++) {
             uint256 _higherBound = _higherBounds[_i];
             uint256 _lowerBound = _lowerBounds[_i];
             uint256 _weight = _weights[_i];
@@ -171,18 +181,21 @@ contract ERC20KPIToken is
             totalWeight += _weight;
             toBeFinalized++;
             address _instance = IOraclesManager(_oraclesManager).instantiate(
-                _templates[_i],
+                _ids[_i],
                 _automationFundingTokens[_i],
                 _automationFundingAmounts[_i],
                 _initializationData[_i]
             );
-            oracles[_instance] = FinalizableOracle({
-                lowerBound: _lowerBound,
-                higherBound: _higherBound,
-                finalProgress: 0,
-                weight: _weight,
-                finalized: false
-            });
+            finalizableOracles.push(
+                FinalizableOracle({
+                    addrezz: _instance,
+                    lowerBound: _lowerBound,
+                    higherBound: _higherBound,
+                    finalProgress: 0,
+                    weight: _weight,
+                    finalized: false
+                })
+            );
         }
 
         andRelationship = _andRelationship;
@@ -206,12 +219,27 @@ contract ERC20KPIToken is
         protocolFeeCollected = true;
     }
 
+    function finalizableOracle(address _address)
+        internal
+        view
+        returns (FinalizableOracle storage)
+    {
+        for (uint256 _i = 0; _i < finalizableOracles.length; _i++) {
+            FinalizableOracle storage _finalizableOracle = finalizableOracles[
+                _i
+            ];
+            if (
+                !_finalizableOracle.finalized &&
+                _finalizableOracle.addrezz == _address
+            ) return _finalizableOracle;
+        }
+        revert Forbidden();
+    }
+
     function finalize(uint256 _result) external override nonReentrant {
         if (finalized) revert Forbidden();
 
-        FinalizableOracle storage _oracle = oracles[msg.sender];
-        if (_oracle.higherBound == 0 || _oracle.finalized) revert Forbidden();
-
+        FinalizableOracle storage _oracle = finalizableOracle(msg.sender);
         if (_result < _oracle.lowerBound || _result == INVALID_ANSWER) {
             // if oracles are in an 'and' relationship and at least one gives a
             // negative result, give back all the collateral minus the minimum payout
@@ -331,5 +359,66 @@ contract ERC20KPIToken is
             _fees[_i] = calculateProtocolFee(_collateralAmounts[_i]);
 
         return abi.encode(_collateralTokens, _fees);
+    }
+
+    function oracles() external view override returns (address[] memory) {
+        address[] memory _oracleAddresses = new address[](
+            finalizableOracles.length
+        );
+        for (uint256 _i = 0; _i < _oracleAddresses.length; _i++)
+            _oracleAddresses[_i] = finalizableOracles[_i].addrezz;
+        return _oracleAddresses;
+    }
+
+    function data() external view returns (bytes memory) {
+        uint256 _collateralsLength = collaterals.length;
+        address[] memory _collateralTokens = new address[](_collateralsLength);
+        uint256[] memory _collateralAmounts = new uint256[](_collateralsLength);
+        uint256[] memory _collateralMinimumPayouts = new uint256[](
+            _collateralsLength
+        );
+        for (uint256 _i = 0; _i < _collateralsLength; _i++) {
+            Collateral storage _collateral = collaterals[_i];
+            _collateralTokens[_i] = _collateral.token;
+            _collateralAmounts[_i] = _collateral.amount;
+            _collateralMinimumPayouts[_i] = _collateral.minimumPayout;
+        }
+
+        uint256 _oraclesLength = finalizableOracles.length;
+        uint256[] memory _lowerBounds = new uint256[](_oraclesLength);
+        uint256[] memory _higherBounds = new uint256[](_oraclesLength);
+        uint256[] memory _finalProgresses = new uint256[](_oraclesLength);
+        uint256[] memory _weights = new uint256[](_oraclesLength);
+        for (uint256 _i = 0; _i < _oraclesLength; _i++) {
+            FinalizableOracle storage _oracle = finalizableOracles[_i];
+            _lowerBounds[_i] = _oracle.lowerBound;
+            _higherBounds[_i] = _oracle.higherBound;
+            _finalProgresses[_i] = _oracle.finalProgress;
+            _weights[_i] = _oracle.weight;
+        }
+
+        return
+            abi.encode(
+                _collateralTokens,
+                _collateralAmounts,
+                _collateralMinimumPayouts,
+                _lowerBounds,
+                _higherBounds,
+                _finalProgresses,
+                _weights,
+                andRelationship,
+                initialSupply,
+                name(),
+                symbol()
+            );
+    }
+
+    function template()
+        external
+        view
+        override
+        returns (IKPITokensManager.Template memory)
+    {
+        return __template;
     }
 }

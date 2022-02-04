@@ -124,7 +124,7 @@ task(
             const automatedRealityAdditionTx = await oraclesManager.addTemplate(
                 automatedRealityOracle.address,
                 true,
-                "Automated Reality.eth oracle v1.0.0"
+                "QmXssrpqPoquowjsEpXTLSbkV7rqwLpXSS8ZPtnBu2BPdA"
             );
             await automatedRealityAdditionTx.wait();
             console.log("Added automated Reality.eth oracle template");
@@ -139,7 +139,7 @@ task(
             const manualRealityAdditionTx = await oraclesManager.addTemplate(
                 manualRealityOracle.address,
                 false,
-                "Manual Reality.eth oracle v1.0.0"
+                "QmRvoExBSESXedwqfC1cs4DGaRymnRR1wA9YGoZbqsE8Mf"
             );
             await manualRealityAdditionTx.wait();
             console.log("Added manual Reality.eth oracle template");
@@ -154,12 +154,11 @@ task(
             const twapAdditionTx = await oraclesManager.addTemplate(
                 uniswapV2TwapOracle.address,
                 true,
-                "Uniswap v2 TWAP oracle v1.0.0"
+                "QmXssrpqPoquowjsEpXTLSbkV7rqwLpXSS8ZPtnBu2BPdA"
             );
             await twapAdditionTx.wait();
             console.log("Added Uniswap v2 TWAP oracle template");
 
-            console.log(predictedFactoryAddress);
             if (verify) {
                 await wait(70_000);
 

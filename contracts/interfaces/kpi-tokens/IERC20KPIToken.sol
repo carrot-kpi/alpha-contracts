@@ -15,4 +15,18 @@ interface IERC20KPIToken is IKPIToken, IERC20Upgradeable {
         uint256 amount;
         uint256 minimumPayout;
     }
+
+    struct FinalizableOracle {
+        address addrezz;
+        uint256 lowerBound;
+        uint256 higherBound;
+        uint256 finalProgress;
+        uint256 weight;
+        bool finalized;
+    }
+
+    struct RedeemedCollateral {
+        address token;
+        uint256 amount;
+    }
 }

@@ -19,19 +19,17 @@ library KpiTokenTemplateSetLibrary {
 
     function contains(
         IKPITokensManager.EnumerableTemplateSet storage _self,
-        address _template
+        uint256 _id
     ) public view returns (bool) {
-        return
-            _template != address(0) &&
-            bytes(_self.map[_template].specification).length != 0;
+        return _self.map[_id].exists;
     }
 
     function get(
         IKPITokensManager.EnumerableTemplateSet storage _self,
-        address _template
+        uint256 _id
     ) public view returns (IKPITokensManager.Template storage) {
-        if (!contains(_self, _template)) revert NonExistentTemplate();
-        return _self.map[_template];
+        if (!contains(_self, _id)) revert NonExistentTemplate();
+        return _self.map[_id];
     }
 
     function add(
@@ -39,27 +37,30 @@ library KpiTokenTemplateSetLibrary {
         address _template,
         string calldata _specification
     ) public {
+        if (_template == address(0)) revert ZeroAddressTemplate();
         if (bytes(_specification).length == 0) revert InvalidSpecification();
-        IKPITokensManager.Template storage _templateFromStorage = get(
-            _self,
-            _template
-        );
-        _templateFromStorage.specification = _specification;
-        _self.keys.push(_template);
+        uint256 _id = _self.ids++;
+        _self.map[_id] = IKPITokensManager.Template({
+            id: _id,
+            addrezz: _template,
+            specification: _specification,
+            exists: true
+        });
+        _self.keys.push(_id);
     }
 
     function remove(
         IKPITokensManager.EnumerableTemplateSet storage _self,
-        address _template
+        uint256 _id
     ) public {
         IKPITokensManager.Template storage _templateFromStorage = get(
             _self,
-            _template
+            _id
         );
-        delete _templateFromStorage.specification;
+        delete _templateFromStorage.exists;
         uint256 _keysLength = _self.keys.length;
         for (uint256 _i = 0; _i < _keysLength; _i++)
-            if (_self.keys[_i] == _template) {
+            if (_self.keys[_i] == _id) {
                 if (_i != _keysLength - 1)
                     _self.keys[_i] = _self.keys[_keysLength - 1];
                 _self.keys.pop();
@@ -70,22 +71,22 @@ library KpiTokenTemplateSetLibrary {
 
     function upgrade(
         IKPITokensManager.EnumerableTemplateSet storage _self,
-        address _template,
+        uint256 _id,
         address _newTemplate,
         string calldata _newSpecification
     ) external {
+        if (_newTemplate == address(0)) revert ZeroAddressTemplate();
         if (bytes(_newSpecification).length == 0) revert InvalidSpecification();
-        if (_template == _newTemplate) revert NotAnUpgrade();
         IKPITokensManager.Template storage _templateFromStorage = get(
             _self,
-            _template
+            _id
         );
         if (
             keccak256(bytes(_templateFromStorage.specification)) ==
             keccak256(bytes(_newSpecification))
         ) revert InvalidSpecification();
-        remove(_self, _template);
-        add(_self, _newTemplate, _newSpecification);
+        _templateFromStorage.addrezz = _newTemplate;
+        _templateFromStorage.specification = _newSpecification;
     }
 
     function size(IKPITokensManager.EnumerableTemplateSet storage _self)
@@ -100,23 +101,14 @@ library KpiTokenTemplateSetLibrary {
         IKPITokensManager.EnumerableTemplateSet storage _self,
         uint256 _fromIndex,
         uint256 _toIndex
-    ) external view returns (IKPITokensManager.TemplateWithAddress[] memory) {
+    ) external view returns (IKPITokensManager.Template[] memory) {
         if (_toIndex > _self.keys.length || _fromIndex > _toIndex)
             revert InvalidIndices();
         uint256 _range = _toIndex - _fromIndex;
-        IKPITokensManager.TemplateWithAddress[]
-            memory _templates = new IKPITokensManager.TemplateWithAddress[](
-                _range
-            );
-        for (uint256 _i = 0; _i < _range; _i++) {
-            address _templateAddress = _self.keys[_fromIndex + _i];
-            IKPITokensManager.Template storage _template = _self.map[
-                _templateAddress
-            ];
-            _templates[_i] = IKPITokensManager.TemplateWithAddress({
-                addrezz: _templateAddress,
-                specification: _template.specification
-            });
+        IKPITokensManager.Template[]
+            memory _templates = new IKPITokensManager.Template[](_range);
+        for (uint256 _i = _fromIndex; _i < _fromIndex + _range; _i++) {
+            _templates[_i] = _self.map[_self.keys[_i]];
         }
         return _templates;
     }

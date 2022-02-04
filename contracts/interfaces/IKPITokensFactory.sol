@@ -1,7 +1,5 @@
 pragma solidity ^0.8.11;
 
-import "../commons/Types.sol";
-
 /**
  * @title IKPITokensFactory
  * @dev IKPITokensFactory contract
@@ -10,7 +8,8 @@ import "../commons/Types.sol";
  */
 interface IKPITokensFactory {
     function createToken(
-        address _template,
+        uint256 _id,
+        string memory _description,
         bytes memory _initializationData,
         bytes memory _oraclesInitializationData
     ) external;
@@ -20,4 +19,11 @@ interface IKPITokensFactory {
     function setKpiTokensManager(address _kpiTokensManager) external;
 
     function setFeeReceiver(address _feeReceiver) external;
+
+    function size() external view returns (uint256);
+
+    function enumerate(uint256 _fromIndex, uint256 _toIndex)
+        external
+        view
+        returns (address[] memory);
 }

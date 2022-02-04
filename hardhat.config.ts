@@ -13,6 +13,7 @@ import "./tasks/create-manual-reality-eth-kpi-token";
 import "./tasks/upgrade-uniswap-v2-twap-template";
 import "./tasks/upgrade-erc20-kpi-token-template";
 import "./tasks/upgrade-manual-reality-eth-oracle-template";
+import "./tasks/get-manual-reality-orace-calldata";
 
 config();
 

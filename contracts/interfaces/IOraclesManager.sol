@@ -1,7 +1,5 @@
 pragma solidity ^0.8.11;
 
-import "../commons/Types.sol";
-
 /**
  * @title IOraclesManager
  * @dev IOraclesManager contract
@@ -10,30 +8,28 @@ import "../commons/Types.sol";
  */
 interface IOraclesManager {
     struct Template {
-        string specification;
-        bool automatable;
-    }
-
-    struct TemplateWithAddress {
+        uint256 id;
         address addrezz;
         string specification;
         bool automatable;
+        bool exists;
     }
 
     struct EnumerableTemplateSet {
-        mapping(address => Template) map;
-        address[] keys;
+        uint256 ids;
+        mapping(uint256 => Template) map;
+        uint256[] keys;
     }
 
     function predictInstanceAddress(
-        address _template,
+        uint256 _id,
         address _automationFundingToken,
         uint256 _automationFundingAmount,
         bytes memory _initializationData
     ) external view returns (address);
 
     function instantiate(
-        address _template,
+        uint256 _id,
         address _automationFundingToken,
         uint256 _automationFundingAmount,
         bytes memory _initializationData
@@ -45,28 +41,25 @@ interface IOraclesManager {
         string calldata _specification
     ) external;
 
-    function removeTemplate(address _template) external;
+    function removeTemplate(uint256 _id) external;
 
     function updgradeTemplate(
-        address _template,
+        uint256 _id,
         address _newTemplate,
         string calldata _newSpecification
     ) external;
 
     function updateTemplateSpecification(
-        address _template,
+        uint256 _id,
         string calldata _newSpecification
     ) external;
 
-    function template(address _template)
-        external
-        view
-        returns (TemplateWithAddress memory);
+    function template(uint256 _id) external view returns (Template memory);
 
     function templatesAmount() external view returns (uint256);
 
     function templatesSlice(uint256 _fromIndex, uint256 _toIndex)
         external
         view
-        returns (TemplateWithAddress[] memory);
+        returns (Template[] memory);
 }

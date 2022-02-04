@@ -33,6 +33,7 @@ contract UniswapV2TWAPOracle is JobUpgradeable, IOracle {
     address public pair;
     address public kpiToken;
     Observation public observation;
+    IOraclesManager.Template private __template;
 
     error ZeroAddressKpiToken();
     error ZeroAddressPair();
@@ -43,10 +44,11 @@ contract UniswapV2TWAPOracle is JobUpgradeable, IOracle {
     error InvalidEndsAt();
     error ZeroAddressToken();
 
-    function initialize(address _kpiToken, bytes memory _data)
-        external
-        initializer
-    {
+    function initialize(
+        address _kpiToken,
+        IOraclesManager.Template memory _template,
+        bytes memory _data
+    ) external initializer {
         if (_kpiToken == address(0)) revert ZeroAddressKpiToken();
 
         (
@@ -78,6 +80,7 @@ contract UniswapV2TWAPOracle is JobUpgradeable, IOracle {
         ) = UniswapV2OracleLibrary.currentCumulativePrices(_pair);
 
         __Job_init(_workersMaster);
+        __template = _template;
         kpiToken = _kpiToken;
         refreshRate = _refreshRate;
         startsAt = _startsAt;
@@ -147,5 +150,27 @@ contract UniswapV2TWAPOracle is JobUpgradeable, IOracle {
         observation.price = _averagePriceCumulative;
         observation.lastCumulative = _priceCumulative;
         observation.timestamp = _timestamp;
+    }
+
+    function data() external view override returns (bytes memory) {
+        return
+            abi.encode(
+                refreshRate,
+                startsAt,
+                endsAt,
+                pair,
+                token0,
+                observation.price.mul(10**tokenDecimals).decode144(),
+                observation.timestamp
+            );
+    }
+
+    function template()
+        external
+        view
+        override
+        returns (IOraclesManager.Template memory)
+    {
+        return __template;
     }
 }

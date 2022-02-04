@@ -1,11 +1,11 @@
 {
     "rinkeby": {
-        "kpiTokensManager": "0x9eE4c4ad91DeBD4bA104fA926aB6B7485A297F78",
-        "erc20KpiTokensTemplate": "0x72a0AE064E62c25b09029b764032d1b72be7Fe9C",
-        "oraclesManager": "0x20f62652E788a62b9BA0776a805377d1373241A0",
-        "factory": "0x7D1B664C50e2e558Acc881B39a261759E6683a42",
-        "manualRealityEthOracleTemplate": "0x252C54D06723676E21ea9777FA5d876781396cac",
-        "automatedRealityEthOracleTemplate": "0xD8f8110974533c7e0EEF11F7Bb8f08756cc020ff",
-        "uniswapV2TwapOracleTemplate": "0x4C016F979670cCD5C895550e51BEd6b18Ec74A80"
+        "kpiTokensManager": "0xBdc296CF95e665f3685868B41Ff66B6791463e0C",
+        "erc20KpiTokensTemplate": "0xD4bAee4761cC5b312ED33fAe3E532da7Dd3E12aE",
+        "oraclesManager": "0xf495eDD3fF5b5e7486B77bdFFC6BBAbD5B8A4358",
+        "factory": "0x50aa0256d2aD23488e663536f3B7B679F7A2F4A1",
+        "automatedRealityEthOracleTemplate": "0xdCd6871De196e8F0003D69eE27455F2a85959D5c",
+        "manualRealityEthOracleTemplate": "0xB2da602954C21147C13340f172F8f38a1d64b6aa",
+        "uniswapV2TwapOracleTemplate": "0x777Fb82d62DF50bdB3C529Efdd65E276B9ef29E2"
     }
 }

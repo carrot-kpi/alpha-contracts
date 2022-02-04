@@ -25,19 +25,17 @@ library OracleTemplateSetLibrary {
 
     function contains(
         IOraclesManager.EnumerableTemplateSet storage _self,
-        address _template
+        uint256 _id
     ) public view returns (bool) {
-        return
-            _template != address(0) &&
-            bytes(_self.map[_template].specification).length != 0;
+        return _self.map[_id].exists;
     }
 
     function get(
         IOraclesManager.EnumerableTemplateSet storage _self,
-        address _template
+        uint256 _id
     ) public view returns (IOraclesManager.Template storage) {
-        if (!contains(_self, _template)) revert NonExistentTemplate();
-        return _self.map[_template];
+        if (!contains(_self, _id)) revert NonExistentTemplate();
+        return _self.map[_id];
     }
 
     function add(
@@ -46,29 +44,28 @@ library OracleTemplateSetLibrary {
         bool _automatable,
         string calldata _specification
     ) public {
+        if (_template == address(0)) revert ZeroAddressTemplate();
         if (bytes(_specification).length == 0) revert InvalidSpecification();
-        IOraclesManager.Template storage _templateFromStorage = get(
-            _self,
-            _template
-        );
-        _templateFromStorage.specification = _specification;
-        _templateFromStorage.automatable = _automatable;
-        _self.keys.push(_template);
+        uint256 _id = _self.ids++;
+        _self.map[_id] = IOraclesManager.Template({
+            id: _id,
+            addrezz: _template,
+            specification: _specification,
+            automatable: _automatable,
+            exists: true
+        });
+        _self.keys.push(_id);
     }
 
     function remove(
         IOraclesManager.EnumerableTemplateSet storage _self,
-        address _template
+        uint256 _id
     ) public {
-        IOraclesManager.Template storage _templateFromStorage = get(
-            _self,
-            _template
-        );
-        delete _templateFromStorage.specification;
-        delete _templateFromStorage.automatable;
+        IOraclesManager.Template storage _templateFromStorage = get(_self, _id);
+        delete _templateFromStorage.exists;
         uint256 _keysLength = _self.keys.length;
         for (uint256 _i = 0; _i < _keysLength; _i++)
-            if (_self.keys[_i] == _template) {
+            if (_self.keys[_i] == _id) {
                 if (_i != _keysLength - 1)
                     _self.keys[_i] = _self.keys[_keysLength - 1];
                 _self.keys.pop();
@@ -79,27 +76,18 @@ library OracleTemplateSetLibrary {
 
     function upgrade(
         IOraclesManager.EnumerableTemplateSet storage _self,
-        address _template,
+        uint256 _id,
         address _newTemplate,
         string calldata _newSpecification
     ) external {
         if (bytes(_newSpecification).length == 0) revert InvalidSpecification();
-        if (_template == _newTemplate) revert NotAnUpgrade();
-        IOraclesManager.Template storage _templateFromStorage = get(
-            _self,
-            _template
-        );
+        IOraclesManager.Template storage _templateFromStorage = get(_self, _id);
         if (
             keccak256(bytes(_templateFromStorage.specification)) ==
             keccak256(bytes(_newSpecification))
         ) revert InvalidSpecification();
-        remove(_self, _template);
-        add(
-            _self,
-            _newTemplate,
-            _templateFromStorage.automatable,
-            _newSpecification
-        );
+        _templateFromStorage.addrezz = _newTemplate;
+        _templateFromStorage.specification = _newSpecification;
     }
 
     function size(IOraclesManager.EnumerableTemplateSet storage _self)
@@ -114,24 +102,14 @@ library OracleTemplateSetLibrary {
         IOraclesManager.EnumerableTemplateSet storage _self,
         uint256 _fromIndex,
         uint256 _toIndex
-    ) external view returns (IOraclesManager.TemplateWithAddress[] memory) {
+    ) external view returns (IOraclesManager.Template[] memory) {
         if (_toIndex > _self.keys.length || _fromIndex > _toIndex)
             revert InvalidIndices();
         uint256 _range = _toIndex - _fromIndex;
-        IOraclesManager.TemplateWithAddress[]
-            memory _templates = new IOraclesManager.TemplateWithAddress[](
-                _range
-            );
-        for (uint256 _i = 0; _i < _range; _i++) {
-            address _templateAddress = _self.keys[_fromIndex + _i];
-            IOraclesManager.Template storage _template = _self.map[
-                _templateAddress
-            ];
-            _templates[_i] = IOraclesManager.TemplateWithAddress({
-                addrezz: _templateAddress,
-                specification: _template.specification,
-                automatable: _template.automatable
-            });
+        IOraclesManager.Template[]
+            memory _templates = new IOraclesManager.Template[](_range);
+        for (uint256 _i = _fromIndex; _i < _fromIndex + _range; _i++) {
+            _templates[_i] = _self.map[_self.keys[_i]];
         }
         return _templates;
     }

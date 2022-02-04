@@ -9,7 +9,6 @@ import "./interfaces/kpi-tokens/IKPIToken.sol";
 import "./interfaces/oracles/IOracle.sol";
 import "./interfaces/IKPITokensManager.sol";
 import "./libraries/KpiTokenTemplateSetLibrary.sol";
-import "./commons/Types.sol";
 
 /**
  * @title KPITokensManager
@@ -33,77 +32,93 @@ contract KPITokensManager is Ownable, IKPITokensManager {
         factory = _factory;
     }
 
-    function salt(bytes memory _initializationData)
-        internal
-        pure
-        returns (bytes32)
-    {
-        return keccak256(_initializationData);
-    }
-
-    function predictInstanceAddress(
-        address _template,
-        bytes calldata _initializationData
-    ) external view returns (address) {
+    function salt(
+        string memory _description,
+        bytes memory _initializationData,
+        bytes memory _oraclesInitializationData
+    ) internal pure returns (bytes32) {
         return
-            Clones.predictDeterministicAddress(
-                _template,
-                salt(_initializationData),
-                address(this)
+            keccak256(
+                abi.encodePacked(
+                    _description,
+                    _initializationData,
+                    _oraclesInitializationData
+                )
             );
     }
 
-    function instantiate(address _template, bytes calldata _initializationData)
-        external
-        returns (address)
-    {
+    function predictInstanceAddress(
+        uint256 _id,
+        string memory _description,
+        bytes memory _initializationData,
+        bytes memory _oraclesInitializationData
+    ) external view override returns (address) {
+        return
+            Clones.predictDeterministicAddress(
+                templates.get(_id).addrezz,
+                salt(
+                    _description,
+                    _initializationData,
+                    _oraclesInitializationData
+                )
+            );
+    }
+
+    function instantiate(
+        uint256 _id,
+        string memory _description,
+        bytes memory _initializationData,
+        bytes memory _oraclesInitializationData
+    ) external override returns (address) {
         if (msg.sender != factory) revert Forbidden();
-        if (!templates.contains(_template)) revert InvalidTemplate();
-        return Clones.cloneDeterministic(_template, salt(_initializationData));
+        return
+            Clones.cloneDeterministic(
+                templates.get(_id).addrezz,
+                salt(
+                    _description,
+                    _initializationData,
+                    _oraclesInitializationData
+                )
+            );
     }
 
     function addTemplate(address _template, string calldata _specification)
         external
+        override
     {
         if (msg.sender != owner()) revert Forbidden();
         templates.add(_template, _specification);
     }
 
-    function removeTemplate(address _template) external {
+    function removeTemplate(uint256 _id) external override {
         if (msg.sender != owner()) revert Forbidden();
-        templates.remove(_template);
+        templates.remove(_id);
     }
 
     function upgradeTemplate(
-        address _template,
+        uint256 _id,
         address _newTemplate,
         string memory _newSpecification
-    ) external {
+    ) external override {
         if (msg.sender != owner()) revert Forbidden();
-        templates.upgrade(_template, _newTemplate, _newSpecification);
+        templates.upgrade(_id, _newTemplate, _newSpecification);
     }
 
     function updateTemplateSpecification(
-        address _template,
+        uint256 _id,
         string calldata _newSpecification
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
-        Template storage _templateFromStorage = templates.get(_template);
-        _templateFromStorage.specification = _newSpecification;
+        templates.get(_id).specification = _newSpecification;
     }
 
-    function template(address _template)
+    function template(uint256 _id)
         external
         view
         override
-        returns (IKPITokensManager.TemplateWithAddress memory)
+        returns (IKPITokensManager.Template memory)
     {
-        Template storage _templateFromStorage = templates.get(_template);
-        return
-            IKPITokensManager.TemplateWithAddress({
-                addrezz: _template,
-                specification: _templateFromStorage.specification
-            });
+        return templates.get(_id);
     }
 
     function templatesAmount() external view override returns (uint256) {
@@ -114,7 +129,7 @@ contract KPITokensManager is Ownable, IKPITokensManager {
         external
         view
         override
-        returns (IKPITokensManager.TemplateWithAddress[] memory)
+        returns (IKPITokensManager.Template[] memory)
     {
         return templates.enumerate(_fromIndex, _toIndex);
     }

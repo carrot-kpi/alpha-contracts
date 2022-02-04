@@ -3,6 +3,7 @@ pragma solidity ^0.8.11;
 import "@xcute/contracts/JobUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../interfaces/oracles/IOracle.sol";
+import "../interfaces/IOraclesManager.sol";
 import "../interfaces/kpi-tokens/IKPIToken.sol";
 import "../interfaces/external/IReality.sol";
 
@@ -25,12 +26,15 @@ contract AutomatedRealityOracle is JobUpgradeable, IOracle {
     bool public finalized;
     address public kpiToken;
     address public reality;
-    bytes32 public kpiId;
+    bytes32 internal questionId;
+    string internal question;
+    IOraclesManager.Template public __template;
 
-    function initialize(address _kpiToken, bytes memory _data)
-        external
-        initializer
-    {
+    function initialize(
+        address _kpiToken,
+        IOraclesManager.Template memory _template,
+        bytes memory _data
+    ) external initializer {
         if (_kpiToken == address(0)) revert ZeroAddressKpiToken();
 
         (
@@ -53,9 +57,11 @@ contract AutomatedRealityOracle is JobUpgradeable, IOracle {
         if (_expiry <= block.timestamp) revert InvalidExpiry();
         __Job_init(_workersMaster);
 
+        __template = _template;
         kpiToken = _kpiToken;
         reality = _reality;
-        kpiId = IReality(_reality).askQuestion(
+        question = _question;
+        questionId = IReality(_reality).askQuestion(
             _binary ? 0 : 1,
             _question,
             _arbitrator,
@@ -66,7 +72,7 @@ contract AutomatedRealityOracle is JobUpgradeable, IOracle {
     }
 
     function _workable() internal view returns (bool) {
-        return !finalized && IReality(reality).isFinalized(kpiId);
+        return !finalized && IReality(reality).isFinalized(questionId);
     }
 
     function workable(bytes memory)
@@ -81,8 +87,30 @@ contract AutomatedRealityOracle is JobUpgradeable, IOracle {
     function work(bytes memory) external override needsExecution {
         if (!_workable()) revert NoWorkRequired();
         IKPIToken(kpiToken).finalize(
-            uint256(IReality(reality).resultFor(kpiId))
+            uint256(IReality(reality).resultFor(questionId))
         );
         finalized = true;
+    }
+
+    function data() external view override returns (bytes memory) {
+        address _reality = reality; // gas optimization
+        bytes32 _questionId = questionId; // gas optimization
+        return
+            abi.encode(
+                _reality,
+                IReality(_reality).getArbitrator(_questionId),
+                question,
+                IReality(_reality).getTimeout(_questionId),
+                IReality(_reality).getOpeningTS(_questionId)
+            );
+    }
+
+    function template()
+        external
+        view
+        override
+        returns (IOraclesManager.Template memory)
+    {
+        return __template;
     }
 }

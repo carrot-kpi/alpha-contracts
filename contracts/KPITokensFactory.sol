@@ -8,7 +8,6 @@ import "./interfaces/IKPITokensFactory.sol";
 import "./interfaces/IKPITokensManager.sol";
 import "./interfaces/IOraclesManager.sol";
 import "./interfaces/kpi-tokens/IKPIToken.sol";
-import "./commons/Types.sol";
 
 /**
  * @title KPITokensFactory
@@ -23,11 +22,13 @@ contract KPITokensFactory is Ownable, IKPITokensFactory {
     address public oraclesManager;
     address public feeReceiver;
     mapping(address => bool) public created;
+    address[] kpiTokens;
 
     error Forbidden();
     error ZeroAddressKpiTokensManager();
     error ZeroAddressOraclesManager();
     error ZeroAddressFeeReceiver();
+    error InvalidIndices();
 
     constructor(
         address _kpiTokensManager,
@@ -45,21 +46,30 @@ contract KPITokensFactory is Ownable, IKPITokensFactory {
     }
 
     function createToken(
-        address _template,
+        uint256 _id,
+        string memory _description,
         bytes memory _initializationData,
         bytes memory _oraclesInitializationData
     ) external override {
         address _instance = IKPITokensManager(kpiTokensManager).instantiate(
-            _template,
+            _id,
+            _description,
+            _initializationData,
+            _oraclesInitializationData
+        );
+        IKPIToken(_instance).initialize(
+            msg.sender,
+            IKPITokensManager(kpiTokensManager).template(_id),
+            _description,
             _initializationData
         );
-        IKPIToken(_instance).initialize(msg.sender, _initializationData);
         created[_instance] = true;
         IKPIToken(_instance).initializeOracles(
             oraclesManager,
             _oraclesInitializationData
         );
         IKPIToken(_instance).collectProtocolFees(feeReceiver);
+        kpiTokens.push(_instance);
     }
 
     function setKpiTokensManager(address _kpiTokensManager) external {
@@ -79,5 +89,24 @@ contract KPITokensFactory is Ownable, IKPITokensFactory {
         if (msg.sender != owner()) revert Forbidden();
         if (_feeReceiver == address(0)) revert ZeroAddressFeeReceiver();
         feeReceiver = _feeReceiver;
+    }
+
+    function size() external view override returns (uint256) {
+        return kpiTokens.length;
+    }
+
+    function enumerate(uint256 _fromIndex, uint256 _toIndex)
+        external
+        view
+        override
+        returns (address[] memory)
+    {
+        if (_toIndex > kpiTokens.length || _fromIndex > _toIndex)
+            revert InvalidIndices();
+        uint256 _range = _toIndex - _fromIndex;
+        address[] memory _kpiTokens = new address[](_range);
+        for (uint256 _i = _fromIndex; _i < _fromIndex + _range; _i++)
+            _kpiTokens[_i] = kpiTokens[_i];
+        return _kpiTokens;
     }
 }

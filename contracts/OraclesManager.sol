@@ -57,14 +57,14 @@ contract OraclesManager is Ownable, IOraclesManager {
     }
 
     function predictInstanceAddress(
-        address _template,
+        uint256 _id,
         address _automationFundingToken,
         uint256 _automationFundingAmount,
         bytes memory _initializationData
     ) external view returns (address) {
         return
             Clones.predictDeterministicAddress(
-                _template,
+                templates.get(_id).addrezz,
                 salt(
                     _automationFundingToken,
                     _automationFundingAmount,
@@ -75,15 +75,14 @@ contract OraclesManager is Ownable, IOraclesManager {
     }
 
     function instantiate(
-        address _template,
+        uint256 _id,
         address _automationFundingToken,
         uint256 _automationFundingAmount,
         bytes memory _initializationData
     ) external override returns (address) {
         if (!IKPITokensFactory(factory).created(msg.sender)) revert Forbidden();
-        if (!templates.contains(_template)) revert NonExistentTemplate();
         address _instance = Clones.cloneDeterministic(
-            _template,
+            templates.get(_id).addrezz,
             salt(
                 _automationFundingToken,
                 _automationFundingAmount,
@@ -106,7 +105,11 @@ contract OraclesManager is Ownable, IOraclesManager {
                 _automationFundingAmount
             );
         }
-        IOracle(_instance).initialize(msg.sender, _initializationData);
+        IOracle(_instance).initialize(
+            msg.sender,
+            templates.get(_id),
+            _initializationData
+        );
         return _instance;
     }
 
@@ -119,27 +122,26 @@ contract OraclesManager is Ownable, IOraclesManager {
         templates.add(_template, _automatable, _specification);
     }
 
-    function removeTemplate(address _template) external override {
+    function removeTemplate(uint256 _id) external override {
         if (msg.sender != owner()) revert Forbidden();
-        templates.remove(_template);
+        templates.remove(_id);
     }
 
     function updateTemplateSpecification(
-        address _template,
+        uint256 _id,
         string calldata _newSpecification
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
-        Template storage _templateFromStorage = templates.get(_template);
-        _templateFromStorage.specification = _newSpecification;
+        templates.get(_id).specification = _newSpecification;
     }
 
     function updgradeTemplate(
-        address _template,
+        uint256 _id,
         address _newTemplate,
         string calldata _newSpecification
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
-        templates.upgrade(_template, _newTemplate, _newSpecification);
+        templates.upgrade(_id, _newTemplate, _newSpecification);
     }
 
     function _ensureJobsRegistryAllowance(
@@ -157,19 +159,13 @@ contract OraclesManager is Ownable, IOraclesManager {
             );
     }
 
-    function template(address _template)
+    function template(uint256 _id)
         external
         view
         override
-        returns (IOraclesManager.TemplateWithAddress memory)
+        returns (IOraclesManager.Template memory)
     {
-        Template storage _templateFromStorage = templates.get(_template);
-        return
-            IOraclesManager.TemplateWithAddress({
-                addrezz: _template,
-                specification: _templateFromStorage.specification,
-                automatable: _templateFromStorage.automatable
-            });
+        return templates.get(_id);
     }
 
     function templatesAmount() external view override returns (uint256) {
@@ -180,7 +176,7 @@ contract OraclesManager is Ownable, IOraclesManager {
         external
         view
         override
-        returns (IOraclesManager.TemplateWithAddress[] memory)
+        returns (IOraclesManager.Template[] memory)
     {
         return templates.enumerate(_fromIndex, _toIndex);
     }
