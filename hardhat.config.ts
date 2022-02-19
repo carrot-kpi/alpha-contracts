@@ -1,5 +1,5 @@
 import { HardhatUserConfig } from "hardhat/types/config";
-import { config } from "dotenv";
+import "dotenv/config";
 import "solidity-coverage";
 import "hardhat-gas-reporter";
 import "@nomiclabs/hardhat-etherscan";
@@ -16,8 +16,6 @@ import "./tasks/upgrade-erc20-kpi-token-template";
 import "./tasks/upgrade-manual-reality-eth-oracle-template";
 import "./tasks/get-manual-reality-orace-calldata";
 import "./tasks/upgrade-aave-erc20-kpi-token-template";
-
-config();
 
 const infuraId = process.env.INFURA_ID;
 const accounts = process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [];
