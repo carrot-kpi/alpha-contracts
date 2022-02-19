@@ -1,12 +1,12 @@
 {
     "rinkeby": {
-        "kpiTokensManager": "0x786AD0d88306370c3710917c0788C872e96Bab3c",
-        "erc20KpiTokensTemplate": "0xE5b5fdbf247fd26F6aDDe34284342c3dD408E313",
-        "aaveErc20KpiTokensTemplate": "0x6E668E2bd952Fa0B845f45388B33fA448B0FB0fC",
-        "oraclesManager": "0xCC29bF3825BC49E3C14C8466a0AfFeB0a83567bD",
-        "factory": "0x2DbbdFB250a35e54908b2BB4ef85ffbaCBCa796E",
-        "automatedRealityEthOracleTemplate": "0x0347634d29bB8704DCcd766f26e6b541D58F411E",
-        "manualRealityEthOracleTemplate": "0x0cE87d1051b477129a975aeA6c0aa7e42ad2AE80",
-        "uniswapV2TwapOracleTemplate": "0xb8bef476133806aDcf6EE006fE9302E70914ba3a"
+        "kpiTokensManager": "0x17D841d288859b2c6ba6dB2DbBd584e375dB0193",
+        "erc20KpiTokensTemplate": "0x2128B9eA4F0C7A2ce1B028d56a210698b620CADD",
+        "aaveErc20KpiTokensTemplate": "0xf0E76860F0842dE25A94Eefc808Fe3ebE2A3c43A",
+        "oraclesManager": "0x462583e5079fdF724634F8Fa0E70dc1566937517",
+        "factory": "0xdd8e2c9411Fa69e45f86E04dC583CEC69e4C6a30",
+        "automatedRealityEthOracleTemplate": "0x88265f0400C98CFeba4B91262984A26Bcd4457fd",
+        "manualRealityEthOracleTemplate": "0xB167c4e8b8634A6CE846792F9f8Adf6D0022C63E",
+        "uniswapV2TwapOracleTemplate": "0x3bE1ECd1763334F83490BAD2Bb8B06Ca2965636D"
     }
 }
