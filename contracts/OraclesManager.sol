@@ -22,7 +22,7 @@ contract OraclesManager is Ownable, IOraclesManager {
     using OracleTemplateSetLibrary for IOraclesManager.EnumerableTemplateSet;
 
     address public factory;
-    address public workersJobsRegistry;
+    address public jobsRegistry;
     IOraclesManager.EnumerableTemplateSet private templates;
 
     error NonExistentTemplate();
@@ -31,14 +31,18 @@ contract OraclesManager is Ownable, IOraclesManager {
     error AlreadyAdded();
     error ZeroAddressTemplate();
     error NotAnUpgrade();
-    error ZeroAddressWorkersJobsRegistry();
+    error ZeroAddressJobsRegistry();
     error InvalidSpecification();
     error InvalidAutomationParameters();
 
-    constructor(address _factory, address _workersJobsRegistry) {
+    constructor(address _factory, address _jobsRegistry) {
         if (_factory == address(0)) revert ZeroAddressFactory();
         factory = _factory;
-        workersJobsRegistry = _workersJobsRegistry;
+        jobsRegistry = _jobsRegistry;
+    }
+
+    function setJobsRegistry(address _jobsRegistry) external onlyOwner {
+        jobsRegistry = _jobsRegistry;
     }
 
     function salt(
@@ -92,14 +96,14 @@ contract OraclesManager is Ownable, IOraclesManager {
         if (
             _automationFundingAmount > 0 &&
             _automationFundingToken != address(0) &&
-            workersJobsRegistry != address(0)
+            jobsRegistry != address(0)
         ) {
-            IJobsRegistry(workersJobsRegistry).addJob(_instance);
+            IJobsRegistry(jobsRegistry).addJob(_instance);
             _ensureJobsRegistryAllowance(
                 _automationFundingToken,
                 _automationFundingAmount
             );
-            IJobsRegistry(workersJobsRegistry).addCredit(
+            IJobsRegistry(jobsRegistry).addCredit(
                 _instance,
                 _automationFundingToken,
                 _automationFundingAmount
@@ -150,11 +154,11 @@ contract OraclesManager is Ownable, IOraclesManager {
     ) internal {
         if (
             _token != address(0) &&
-            workersJobsRegistry != address(0) &&
+            jobsRegistry != address(0) &&
             _minimumAmount > 0
         )
             IERC20(_token).approve(
-                workersJobsRegistry,
+                jobsRegistry,
                 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
             );
     }
