@@ -39,6 +39,12 @@ task(
             await erc20KpiToken.deployed();
             console.log("Deployed ERC20 KPI token template");
 
+            const aaveErc20KpiTokenFactory =
+                await hre.ethers.getContractFactory("AaveERC20KPIToken");
+            const aaveErc20KpiToken = await aaveErc20KpiTokenFactory.deploy();
+            await aaveErc20KpiToken.deployed();
+            console.log("Deployed Aave ERC20 KPI token template");
+
             const oracleTemplateSetLibraryFactory =
                 await hre.ethers.getContractFactory("OracleTemplateSetLibrary");
             const oracleTemplateSetLibrary =
@@ -59,7 +65,7 @@ task(
             const predictedFactoryAddress =
                 await hre.ethers.utils.getContractAddress({
                     from: await signer.getAddress(),
-                    nonce: (await signer.getTransactionCount()) + 3,
+                    nonce: (await signer.getTransactionCount()) + 4,
                 });
 
             const kpiTokensManagerFactory = await hre.ethers.getContractFactory(
@@ -82,7 +88,15 @@ task(
                 "QmXU4G418hZLL8yxXdjkTFSoH2FdSe6ELgUuSm5fHHJMMN"
             );
             await erc20KpiTokenAdditionTx.wait();
-            console.log("Added KPI token template");
+            console.log("Added ERC20 KPI token template");
+
+            const aaveErc20KpiTokenAdditionTx =
+                await kpiTokensManager.addTemplate(
+                    aaveErc20KpiToken.address,
+                    "QmPRwBVEPteH9qLKHdPGPPkNYuLzTv6fNACcLSHDUW3j8p"
+                );
+            await aaveErc20KpiTokenAdditionTx.wait();
+            console.log("Added Aave ERC20 KPI token template");
 
             const oraclesManagerFactory = await hre.ethers.getContractFactory(
                 "OraclesManager",
@@ -216,6 +230,9 @@ task(
             console.log("== Addresses ==");
             console.log(`KPI tokens manager: ${kpiTokensManager.address}`);
             console.log(`ERC20 KPI token template: ${erc20KpiToken.address}`);
+            console.log(
+                `Aave ERC20 KPI token template: ${aaveErc20KpiToken.address}`
+            );
             console.log(`Oracles manager: ${oraclesManager.address}`);
             console.log(`Factory: ${kpiTokensFactory.address}`);
             console.log(
