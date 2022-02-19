@@ -9,11 +9,13 @@ import "hardhat-dependency-compiler";
 import "./tasks/deploy";
 import "./tasks/create-uniswap-v2-twap-kpi-token";
 import "./tasks/create-reality-eth-kpi-token";
-import "./tasks/create-manual-reality-eth-kpi-token";
+import "./tasks/create-manual-reality-eth-erc20-kpi-token";
+import "./tasks/create-manual-reality-eth-aave-erc20-kpi-token";
 import "./tasks/upgrade-uniswap-v2-twap-template";
 import "./tasks/upgrade-erc20-kpi-token-template";
 import "./tasks/upgrade-manual-reality-eth-oracle-template";
 import "./tasks/get-manual-reality-orace-calldata";
+import "./tasks/upgrade-aave-erc20-kpi-token-template";
 
 config();
 
