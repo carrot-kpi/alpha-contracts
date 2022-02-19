@@ -19,7 +19,7 @@ interface TaskArguments {
 }
 
 task(
-    "create-manual-reality-eth-kpi-token",
+    "create-manual-reality-eth-erc20-kpi-token",
     "Creates a manual KPI token based on the outcome of a Reality.eth question"
 )
     .addParam("kpiTemplateId")
@@ -140,7 +140,9 @@ task(
                     signer
                 ).predictInstanceAddress(
                     kpiTemplateId,
-                    kpiTokenInitializationData
+                    description,
+                    kpiTokenInitializationData,
+                    oraclesInitializationData
                 );
             console.log(
                 "Predicted KPI token address",
