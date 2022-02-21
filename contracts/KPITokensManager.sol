@@ -98,10 +98,11 @@ contract KPITokensManager is Ownable, IKPITokensManager {
     function upgradeTemplate(
         uint256 _id,
         address _newTemplate,
+        uint8 _versionBump,
         string memory _newSpecification
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
-        templates.upgrade(_id, _newTemplate, _newSpecification);
+        templates.upgrade(_id, _newTemplate, _versionBump, _newSpecification);
     }
 
     function updateTemplateSpecification(

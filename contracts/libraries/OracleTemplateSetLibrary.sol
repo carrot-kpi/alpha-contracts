@@ -9,12 +9,6 @@ import "../interfaces/IOraclesManager.sol";
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 library OracleTemplateSetLibrary {
-    struct KpiTokenTemplateWithAddress {
-        address addrezz;
-        string specification;
-        bool automatable;
-    }
-
     error ZeroAddressTemplate();
     error InvalidSpecification();
     error TemplateAlreadyAdded();
@@ -22,6 +16,7 @@ library OracleTemplateSetLibrary {
     error NoKeyForTemplate();
     error NotAnUpgrade();
     error InvalidIndices();
+    error InvalidVersionBump();
 
     function contains(
         IOraclesManager.EnumerableTemplateSet storage _self,
@@ -50,6 +45,7 @@ library OracleTemplateSetLibrary {
         _self.map[_id] = IOraclesManager.Template({
             id: _id,
             addrezz: _template,
+            version: IOraclesManager.Version({major: 1, minor: 0, patch: 0}),
             specification: _specification,
             automatable: _automatable,
             exists: true
@@ -78,6 +74,7 @@ library OracleTemplateSetLibrary {
         IOraclesManager.EnumerableTemplateSet storage _self,
         uint256 _id,
         address _newTemplate,
+        uint8 _versionBump,
         string calldata _newSpecification
     ) external {
         if (bytes(_newSpecification).length == 0) revert InvalidSpecification();
@@ -88,6 +85,15 @@ library OracleTemplateSetLibrary {
         ) revert InvalidSpecification();
         _templateFromStorage.addrezz = _newTemplate;
         _templateFromStorage.specification = _newSpecification;
+        if (_versionBump & 1 == 1) _templateFromStorage.version.patch++;
+        else if (_versionBump & 2 == 2) {
+            _templateFromStorage.version.minor++;
+            _templateFromStorage.version.patch = 0;
+        } else if (_versionBump & 4 == 4) {
+            _templateFromStorage.version.major++;
+            _templateFromStorage.version.minor = 0;
+            _templateFromStorage.version.patch = 0;
+        } else revert InvalidVersionBump();
     }
 
     function size(IOraclesManager.EnumerableTemplateSet storage _self)

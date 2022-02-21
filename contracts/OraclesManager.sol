@@ -142,10 +142,11 @@ contract OraclesManager is Ownable, IOraclesManager {
     function updgradeTemplate(
         uint256 _id,
         address _newTemplate,
+        uint8 _versionBump,
         string calldata _newSpecification
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
-        templates.upgrade(_id, _newTemplate, _newSpecification);
+        templates.upgrade(_id, _newTemplate, _versionBump, _newSpecification);
     }
 
     function _ensureJobsRegistryAllowance(

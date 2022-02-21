@@ -7,9 +7,16 @@ pragma solidity ^0.8.11;
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 interface IKPITokensManager {
+    struct Version {
+        uint32 major;
+        uint32 minor;
+        uint32 patch;
+    }
+
     struct Template {
         uint256 id;
         address addrezz;
+        Version version;
         string specification;
         bool exists;
     }
@@ -42,6 +49,7 @@ interface IKPITokensManager {
     function upgradeTemplate(
         uint256 _id,
         address _newTemplate,
+        uint8 _versionBump,
         string calldata _newSpecification
     ) external;
 

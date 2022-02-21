@@ -16,6 +16,7 @@ library KpiTokenTemplateSetLibrary {
     error NoKeyForTemplate();
     error NotAnUpgrade();
     error InvalidIndices();
+    error InvalidVersionBump();
 
     function contains(
         IKPITokensManager.EnumerableTemplateSet storage _self,
@@ -43,6 +44,7 @@ library KpiTokenTemplateSetLibrary {
         _self.map[_id] = IKPITokensManager.Template({
             id: _id,
             addrezz: _template,
+            version: IKPITokensManager.Version({major: 1, minor: 0, patch: 0}),
             specification: _specification,
             exists: true
         });
@@ -73,6 +75,7 @@ library KpiTokenTemplateSetLibrary {
         IKPITokensManager.EnumerableTemplateSet storage _self,
         uint256 _id,
         address _newTemplate,
+        uint8 _versionBump,
         string calldata _newSpecification
     ) external {
         if (_newTemplate == address(0)) revert ZeroAddressTemplate();
@@ -87,6 +90,15 @@ library KpiTokenTemplateSetLibrary {
         ) revert InvalidSpecification();
         _templateFromStorage.addrezz = _newTemplate;
         _templateFromStorage.specification = _newSpecification;
+        if (_versionBump & 1 == 1) _templateFromStorage.version.patch++;
+        else if (_versionBump & 2 == 2) {
+            _templateFromStorage.version.minor++;
+            _templateFromStorage.version.patch = 0;
+        } else if (_versionBump & 4 == 4) {
+            _templateFromStorage.version.major++;
+            _templateFromStorage.version.minor = 0;
+            _templateFromStorage.version.patch = 0;
+        } else revert InvalidVersionBump();
     }
 
     function size(IKPITokensManager.EnumerableTemplateSet storage _self)
