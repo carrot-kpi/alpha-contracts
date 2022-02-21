@@ -4,6 +4,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 interface TaskArguments {
     oraclesManagerAddress: string;
     oldTemplateAddress: string;
+    versionBump: string;
     newTemplateSpecification: string;
     verify: boolean;
 }
@@ -15,6 +16,7 @@ task(
     .addParam("oldTemplateAddress")
     .addParam("newTemplateSpecification")
     .addParam("oraclesManagerAddress")
+    .addParam("versionBump")
     .addFlag("verify")
     .setAction(
         async (
@@ -22,6 +24,7 @@ task(
                 oraclesManagerAddress,
                 oldTemplateAddress,
                 newTemplateSpecification,
+                versionBump,
                 verify,
             }: TaskArguments,
             hre: HardhatRuntimeEnvironment
@@ -45,6 +48,7 @@ task(
             const upgradeTx = await oraclesManager.updgradeTemplate(
                 oldTemplateAddress,
                 twapOracle.address,
+                versionBump,
                 newTemplateSpecification
             );
             await upgradeTx.wait();

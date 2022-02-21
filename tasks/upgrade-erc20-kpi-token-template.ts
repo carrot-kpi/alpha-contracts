@@ -5,6 +5,7 @@ import { IKPITokensManager__factory } from "../typechain-types";
 interface TaskArguments {
     kpiTokensManagerAddress: string;
     oldTemplateAddress: string;
+    versionBump: string;
     newTemplateSpecification: string;
     verify: boolean;
 }
@@ -15,6 +16,7 @@ task(
 )
     .addParam("oldTemplateAddress")
     .addParam("newTemplateSpecification")
+    .addParam("versionBump")
     .addParam("kpiTokensManagerAddress")
     .addFlag("verify")
     .setAction(
@@ -23,6 +25,7 @@ task(
                 kpiTokensManagerAddress,
                 oldTemplateAddress,
                 newTemplateSpecification,
+                versionBump,
                 verify,
             }: TaskArguments,
             hre: HardhatRuntimeEnvironment
@@ -45,6 +48,7 @@ task(
             const upgradeTx = await kpiTokensManager.upgradeTemplate(
                 oldTemplateAddress,
                 newTemplate.address,
+                versionBump,
                 newTemplateSpecification
             );
             await upgradeTx.wait();

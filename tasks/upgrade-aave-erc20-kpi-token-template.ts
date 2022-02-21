@@ -6,6 +6,7 @@ interface TaskArguments {
     kpiTokensManagerAddress: string;
     templateId: string;
     newTemplateSpecification: string;
+    versionBump: string;
     verify: boolean;
 }
 
@@ -16,6 +17,7 @@ task(
     .addParam("templateId")
     .addParam("newTemplateSpecification")
     .addParam("kpiTokensManagerAddress")
+    .addParam("versionBump")
     .addFlag("verify")
     .setAction(
         async (
@@ -23,6 +25,7 @@ task(
                 kpiTokensManagerAddress,
                 templateId,
                 newTemplateSpecification,
+                versionBump,
                 verify,
             }: TaskArguments,
             hre: HardhatRuntimeEnvironment
@@ -45,6 +48,7 @@ task(
             const upgradeTx = await kpiTokensManager.upgradeTemplate(
                 templateId,
                 newTemplate.address,
+                versionBump,
                 newTemplateSpecification
             );
             await upgradeTx.wait();
