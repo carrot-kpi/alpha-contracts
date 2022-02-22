@@ -174,7 +174,7 @@ task(
             console.log("Added Uniswap v2 TWAP oracle template");
 
             if (verify) {
-                await wait(70_000);
+                await wait(120_000);
 
                 await verifyContractSourceCode(hre, erc20KpiToken.address, []);
 
@@ -227,22 +227,21 @@ task(
                 console.log("Source code verified");
             }
 
-            console.log("== Addresses ==");
-            console.log(`KPI tokens manager: ${kpiTokensManager.address}`);
-            console.log(`ERC20 KPI token template: ${erc20KpiToken.address}`);
             console.log(
-                `Aave ERC20 KPI token template: ${aaveErc20KpiToken.address}`
-            );
-            console.log(`Oracles manager: ${oraclesManager.address}`);
-            console.log(`Factory: ${kpiTokensFactory.address}`);
-            console.log(
-                `Automated Reality.eth oracle template: ${automatedRealityOracle.address}`
-            );
-            console.log(
-                `Manual Reality.eth oracle template: ${manualRealityOracle.address}`
-            );
-            console.log(
-                `Automated Uniswap v2 TWAP oracle template: ${uniswapV2TwapOracle.address}`
+                JSON.stringify({
+                    kpiTokenTemplateSetLibrary:
+                        kpiTokenTemplateSetLibrary.address,
+                    kpiTokensManager: kpiTokensManager.address,
+                    erc20KpiTokensTemplate: erc20KpiToken.address,
+                    aaveErc20KpiTokensTemplate: aaveErc20KpiToken.address,
+                    oracleTemplateSetLibrary: oracleTemplateSetLibrary.address,
+                    oraclesManager: oraclesManager.address,
+                    factory: kpiTokensFactory.address,
+                    automatedRealityEthOracleTemplate:
+                        automatedRealityOracle.address,
+                    manualRealityEthOracleTemplate: manualRealityOracle.address,
+                    uniswapV2TwapOracleTemplate: uniswapV2TwapOracle.address,
+                })
             );
         }
     );
