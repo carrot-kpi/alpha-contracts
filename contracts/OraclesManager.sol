@@ -79,6 +79,7 @@ contract OraclesManager is Ownable, IOraclesManager {
     }
 
     function instantiate(
+        address _creator,
         uint256 _id,
         address _automationFundingToken,
         uint256 _automationFundingAmount,
@@ -99,6 +100,11 @@ contract OraclesManager is Ownable, IOraclesManager {
             jobsRegistry != address(0)
         ) {
             IJobsRegistry(jobsRegistry).addJob(_instance, address(this), "");
+            IERC20(_automationFundingToken).safeTransferFrom(
+                _creator,
+                address(this),
+                _automationFundingAmount
+            );
             _ensureJobsRegistryAllowance(
                 _automationFundingToken,
                 _automationFundingAmount

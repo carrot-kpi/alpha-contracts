@@ -208,6 +208,7 @@ contract AaveERC20KPIToken is
             totalWeight += _weight;
             toBeFinalized++;
             address _instance = IOraclesManager(_oraclesManager).instantiate(
+                creator,
                 _ids[_i],
                 _automationFundingTokens[_i],
                 _automationFundingAmounts[_i],
