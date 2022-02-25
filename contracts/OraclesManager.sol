@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@xcute/contracts/interfaces/IJobsRegistry.sol";
+import "@jolt-network/contracts/interfaces/IJobsRegistry.sol";
 import "./interfaces/kpi-tokens/IKPIToken.sol";
 import "./interfaces/oracles/IOracle.sol";
 import "./interfaces/IOraclesManager.sol";
@@ -98,7 +98,7 @@ contract OraclesManager is Ownable, IOraclesManager {
             _automationFundingToken != address(0) &&
             jobsRegistry != address(0)
         ) {
-            IJobsRegistry(jobsRegistry).addJob(_instance);
+            IJobsRegistry(jobsRegistry).addJob(_instance, address(this), "");
             _ensureJobsRegistryAllowance(
                 _automationFundingToken,
                 _automationFundingAmount

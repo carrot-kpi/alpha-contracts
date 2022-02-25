@@ -833,6 +833,11 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
+"@jolt-network/contracts@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@jolt-network/contracts/-/contracts-0.6.0.tgz#a40988bd20ff5ec2abbba6ef13a4e7021c8b2ea2"
+  integrity sha512-RJRDPFDATyPuQfc4fYE701aaaLb8UEXg9/EAGdvVWbv6UuZSs5YIirR1rdL5XNr23yC2tBMyc3n6xa1XapvTQQ==
+
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@metamask/eth-sig-util/-/eth-sig-util-4.0.0.tgz#11553ba06de0d1352332c1bde28c8edd00e0dcf6"
@@ -1302,11 +1307,6 @@
   dependencies:
     "@types/bn.js" "*"
     "@types/underscore" "*"
-
-"@xcute/contracts@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@xcute/contracts/-/contracts-0.4.0.tgz#85be4dac5cafbf6b664db51d3d148aa3529210c5"
-  integrity sha512-yKZWKL/jVEy1nPrDxRBpI+Sk6DI4u/wf+GIiRr/dGNmRPyrCkjGG6igUh9aFsd4XVU9H1XUkkNfRYf7iJrxx4Q==
 
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"

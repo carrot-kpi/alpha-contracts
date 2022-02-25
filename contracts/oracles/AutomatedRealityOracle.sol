@@ -1,6 +1,6 @@
 pragma solidity ^0.8.11;
 
-import "@xcute/contracts/JobUpgradeable.sol";
+import "@jolt-network/contracts/JobUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../interfaces/oracles/IOracle.sol";
 import "../interfaces/IOraclesManager.sol";
@@ -38,7 +38,7 @@ contract AutomatedRealityOracle is JobUpgradeable, IOracle {
         if (_kpiToken == address(0)) revert ZeroAddressKpiToken();
 
         (
-            address _workersMaster,
+            address _joltJobsRegistry,
             address _reality,
             address _arbitrator,
             string memory _question,
@@ -55,7 +55,7 @@ contract AutomatedRealityOracle is JobUpgradeable, IOracle {
         if (bytes(_question).length == 0) revert InvalidQuestion();
         if (_questionTimeout == 0) revert InvalidQuestionTimeout();
         if (_expiry <= block.timestamp) revert InvalidExpiry();
-        __Job_init(_workersMaster);
+        __Job_init(_joltJobsRegistry);
 
         __template = _template;
         kpiToken = _kpiToken;

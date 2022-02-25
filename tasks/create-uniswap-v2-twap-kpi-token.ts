@@ -1,49 +1,68 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import {
+    IKPITokensManager__factory,
+    IOraclesManager__factory,
+} from "../typechain-types";
 
 interface TaskArguments {
-    workersTokenAddress: string;
-    workersTokenFunding: string;
     factoryAddress: string;
+    kpiTokensManagerAddress: string;
+    oraclesManagerAddress: string;
     collateralAddress: string;
     collateralAmount: string;
     pairAddress: string;
     tokenAddress: string;
-    workersMasterAddress: string;
+    joltJobsRegistryAddress: string;
     startsAt: string;
     endsAt: string;
     refreshRate: string;
+    description: string;
+    automationFundingTokenAddress: string;
+    automationFundingTokenAmount: string;
+    lowerBound: string;
+    higherBound: string;
 }
 
 task(
     "create-uniswap-v2-twap-kpi-token",
-    "Creates a KPI token tracking the liquidity value of a Uniswap v2 fork pair"
+    "Creates a manual KPI token based on the outcome of a Reality.eth question"
 )
-    .addParam("workersTokenAddress")
-    .addParam("workersTokenFunding")
+    .addParam("automationFundingTokenAddress")
+    .addParam("automationFundingTokenAmount")
     .addParam("factoryAddress")
+    .addParam("kpiTokensManagerAddress")
+    .addParam("oraclesManagerAddress")
     .addParam("collateralAddress")
     .addParam("collateralAmount")
     .addParam("pairAddress")
     .addParam("tokenAddress")
-    .addParam("workersMasterAddress")
+    .addParam("joltJobsRegistryAddress")
     .addParam("startsAt")
     .addParam("endsAt")
     .addParam("refreshRate")
+    .addParam("description")
+    .addParam("lowerBound")
+    .addParam("higherBound")
     .setAction(
         async (
             {
-                workersTokenAddress,
-                workersTokenFunding,
+                automationFundingTokenAddress,
+                automationFundingTokenAmount,
+                factoryAddress,
+                kpiTokensManagerAddress,
+                oraclesManagerAddress,
                 collateralAddress,
                 collateralAmount,
-                factoryAddress,
                 pairAddress,
                 tokenAddress,
-                workersMasterAddress,
+                joltJobsRegistryAddress,
                 startsAt,
                 endsAt,
                 refreshRate,
+                description,
+                lowerBound,
+                higherBound,
             }: TaskArguments,
             hre: HardhatRuntimeEnvironment
         ) => {
@@ -51,81 +70,161 @@ task(
             await hre.run("compile");
             const [signer] = await hre.ethers.getSigners();
 
-            const jobFundingAmount =
-                hre.ethers.utils.parseEther(workersTokenFunding);
-            const workersToken = await (
-                await hre.ethers.getContractFactory("ERC20")
-            ).attach(workersTokenAddress);
-            if (
-                (
-                    await workersToken.allowance(signer.address, factoryAddress)
-                ).lt(jobFundingAmount)
-            ) {
-                const approveTx = await workersToken.approve(
-                    factoryAddress,
-                    jobFundingAmount
-                );
-                await approveTx.wait();
-                console.log("Worker tokens approved");
-            }
-
-            const parsedCollateralAmount =
-                hre.ethers.utils.parseEther(collateralAmount);
-            const collateralToken = await (
-                await hre.ethers.getContractFactory("ERC20")
-            ).attach(collateralAddress);
-            if (
-                (
-                    await collateralToken.allowance(
-                        signer.address,
-                        factoryAddress
-                    )
-                ).lt(parsedCollateralAmount)
-            ) {
-                const approveTx = await collateralToken.approve(
-                    factoryAddress,
-                    parsedCollateralAmount
-                );
-                await approveTx.wait();
-                console.log("Collateral token approved");
-            }
-
             const factory = await (
                 await hre.ethers.getContractFactory("KPITokensFactory")
             )
                 .attach(factoryAddress)
                 .connect(signer);
-            const creationTx = await factory.createToken(
-                0,
-                jobFundingAmount,
+
+            const collateralToken = await (
+                await hre.ethers.getContractFactory("ERC20")
+            ).attach(collateralAddress);
+            const collateralTokenDecimals = await collateralToken.decimals();
+            const parsedRawCollateralAmount = hre.ethers.utils.parseUnits(
+                collateralAmount,
+                collateralTokenDecimals
+            );
+
+            const kpiTokenInitializationData =
                 hre.ethers.utils.defaultAbiCoder.encode(
                     [
-                        "address",
-                        "address",
-                        "address",
-                        "uint64",
-                        "uint64",
-                        "uint32",
+                        "address[]",
+                        "uint256[]",
+                        "uint256[]",
+                        "bytes32",
+                        "bytes32",
+                        "uint256",
                     ],
                     [
-                        workersMasterAddress,
-                        pairAddress,
-                        tokenAddress,
-                        startsAt,
-                        endsAt,
-                        refreshRate,
+                        [collateralAddress],
+                        [parsedRawCollateralAmount],
+                        [0],
+                        hre.ethers.utils.formatBytes32String(
+                            "Automated Uniswap v2 TWAP KPI"
+                        ),
+                        hre.ethers.utils.formatBytes32String("KPI"),
+                        hre.ethers.utils.parseEther("100000"),
                     ]
-                ),
-                {
-                    token: collateralAddress,
-                    amount: parsedCollateralAmount,
-                },
-                {
-                    name: "KPI",
-                    symbol: "KPI",
-                    totalSupply: hre.ethers.utils.parseEther("100000"),
-                },
-                { lowerBound: 0, higherBound: 1 }
+                );
+
+            const oraclesInitializationData =
+                hre.ethers.utils.defaultAbiCoder.encode(
+                    [
+                        "uint256[]",
+                        "uint256[]",
+                        "uint256[]",
+                        "address[]",
+                        "uint256[]",
+                        "uint256[]",
+                        "bytes[]",
+                        "bool",
+                    ],
+                    [
+                        [2],
+                        [lowerBound],
+                        [higherBound],
+                        [automationFundingTokenAddress],
+                        [automationFundingTokenAmount],
+                        [1],
+                        [
+                            hre.ethers.utils.defaultAbiCoder.encode(
+                                [
+                                    "address",
+                                    "address",
+                                    "address",
+                                    "uint64",
+                                    "uint64",
+                                    "uint32",
+                                ],
+                                [
+                                    joltJobsRegistryAddress,
+                                    pairAddress,
+                                    tokenAddress,
+                                    startsAt,
+                                    endsAt,
+                                    refreshRate,
+                                ]
+                            ),
+                        ],
+                        false,
+                    ]
+                );
+
+            const predictedKpiTokenAddress =
+                await IKPITokensManager__factory.connect(
+                    kpiTokensManagerAddress,
+                    signer
+                ).predictInstanceAddress(
+                    0,
+                    description,
+                    kpiTokenInitializationData,
+                    oraclesInitializationData
+                );
+            console.log(
+                "Predicted KPI token address",
+                predictedKpiTokenAddress
+            );
+            if (
+                (
+                    await collateralToken.allowance(
+                        signer.address,
+                        predictedKpiTokenAddress
+                    )
+                ).lt(parsedRawCollateralAmount)
+            ) {
+                const approveTx = await collateralToken.approve(
+                    predictedKpiTokenAddress,
+                    parsedRawCollateralAmount
+                );
+                console.log("Collateral token approving");
+                await approveTx.wait();
+                console.log("Collateral token approved");
+            }
+
+            const automationFundingToken = await (
+                await hre.ethers.getContractFactory("ERC20")
+            ).attach(automationFundingTokenAddress);
+            const automationFundingTokenDecimals =
+                await automationFundingToken.decimals();
+            const parsedRawAutomationFundingAmount =
+                hre.ethers.utils.parseUnits(
+                    automationFundingTokenAmount,
+                    automationFundingTokenDecimals
+                );
+
+            const predictedOracleAddress =
+                await IOraclesManager__factory.connect(
+                    oraclesManagerAddress,
+                    signer
+                ).predictInstanceAddress(
+                    2,
+                    automationFundingTokenAddress,
+                    parsedRawAutomationFundingAmount,
+                    oraclesInitializationData
+                );
+            console.log("Predicted oracle address", predictedOracleAddress);
+            if (
+                (
+                    await automationFundingToken.allowance(
+                        signer.address,
+                        predictedOracleAddress
+                    )
+                ).lt(parsedRawAutomationFundingAmount)
+            ) {
+                const approveTx = await automationFundingToken.approve(
+                    predictedOracleAddress,
+                    parsedRawAutomationFundingAmount
+                );
+                console.log("Approving automation funding token");
+                await approveTx.wait();
+                console.log("Automation funding token approved");
+            }
+
+            const creationTx = await factory.createToken(
+                0,
+                description,
+                kpiTokenInitializationData,
+                oraclesInitializationData
             );
             await creationTx.wait();
 

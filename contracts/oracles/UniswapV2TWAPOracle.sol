@@ -1,6 +1,6 @@
 pragma solidity ^0.8.11;
 
-import "@xcute/contracts/JobUpgradeable.sol";
+import "@jolt-network/contracts/JobUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../libraries/FixedPointLibrary.sol";
 import "../libraries/UniswapV2OracleLibrary.sol";
@@ -52,7 +52,7 @@ contract UniswapV2TWAPOracle is JobUpgradeable, IOracle {
         if (_kpiToken == address(0)) revert ZeroAddressKpiToken();
 
         (
-            address _workersMaster,
+            address _joltJobsRegistry,
             address _pair,
             address _token,
             uint64 _startsAt,
@@ -79,7 +79,7 @@ contract UniswapV2TWAPOracle is JobUpgradeable, IOracle {
             uint32 _timestamp
         ) = UniswapV2OracleLibrary.currentCumulativePrices(_pair);
 
-        __Job_init(_workersMaster);
+        __Job_init(_joltJobsRegistry);
         __template = _template;
         kpiToken = _kpiToken;
         refreshRate = _refreshRate;

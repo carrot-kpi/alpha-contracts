@@ -228,20 +228,27 @@ task(
             }
 
             console.log(
-                JSON.stringify({
-                    kpiTokenTemplateSetLibrary:
-                        kpiTokenTemplateSetLibrary.address,
-                    kpiTokensManager: kpiTokensManager.address,
-                    erc20KpiTokensTemplate: erc20KpiToken.address,
-                    aaveErc20KpiTokensTemplate: aaveErc20KpiToken.address,
-                    oracleTemplateSetLibrary: oracleTemplateSetLibrary.address,
-                    oraclesManager: oraclesManager.address,
-                    factory: kpiTokensFactory.address,
-                    automatedRealityEthOracleTemplate:
-                        automatedRealityOracle.address,
-                    manualRealityEthOracleTemplate: manualRealityOracle.address,
-                    uniswapV2TwapOracleTemplate: uniswapV2TwapOracle.address,
-                })
+                JSON.stringify(
+                    {
+                        kpiTokenTemplateSetLibrary:
+                            kpiTokenTemplateSetLibrary.address,
+                        kpiTokensManager: kpiTokensManager.address,
+                        erc20KpiTokensTemplate: erc20KpiToken.address,
+                        aaveErc20KpiTokensTemplate: aaveErc20KpiToken.address,
+                        oracleTemplateSetLibrary:
+                            oracleTemplateSetLibrary.address,
+                        oraclesManager: oraclesManager.address,
+                        factory: kpiTokensFactory.address,
+                        automatedRealityEthOracleTemplate:
+                            automatedRealityOracle.address,
+                        manualRealityEthOracleTemplate:
+                            manualRealityOracle.address,
+                        uniswapV2TwapOracleTemplate:
+                            uniswapV2TwapOracle.address,
+                    },
+                    undefined,
+                    4
+                )
             );
         }
     );
