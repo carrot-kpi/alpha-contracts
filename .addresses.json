@@ -1,14 +1,14 @@
 {
     "rinkeby": {
-        "kpiTokenTemplateSetLibrary": "0x59060Ca00F89732394416440ab856BB282A81d15",
-        "kpiTokensManager": "0x80b794Ab4a86E828465a02e1d16Eb00977850871",
-        "erc20KpiTokensTemplate": "0x588a5857845B6428D477B7F038aaA359F832d0b7",
-        "aaveErc20KpiTokensTemplate": "0x7a8bB443f019820c314240E7E5ADb6dcC630fa91",
-        "oracleTemplateSetLibrary": "0xC7d52e74a248977bCE891036d7dAa3056A695d84",
-        "oraclesManager": "0x1311DC7092541582C60576470cB2a35a16Fd8Dc8",
-        "factory": "0x92783580fBf3aeFA1671c7776405e4a78b479906",
-        "automatedRealityEthOracleTemplate": "0x2D11077b553A94Bd5c6CAEE11b4d499A3A39d98f",
-        "manualRealityEthOracleTemplate": "0x04B45Fb695e95Cb374040091247559029a07561b",
-        "uniswapV2TwapOracleTemplate": "0x383E3649d0AaBFaDa166C9920A04126a4756EeB0"
+        "kpiTokenTemplateSetLibrary": "0xdBfC6BBC13D6bbAcCd593c1866Ec846a9d4983f8",
+        "kpiTokensManager": "0xcdA3dbdD68c85cAC136ECe0d4F0cee0a9a00f88C",
+        "erc20KpiTokensTemplate": "0x5A80BE3b2c212d9d91b8be1DCF1C172B9f9355f8",
+        "aaveErc20KpiTokensTemplate": "0x259acAF527CD783a8016Bbe76897Ba085553A0A6",
+        "oracleTemplateSetLibrary": "0xBe3C430CD3D516b66b2c3A96B77f9A8cC3904AB0",
+        "oraclesManager": "0xa54DDD929d6daa34c960746AE1c234B6de01500D",
+        "factory": "0xf786b224c7d9adA752723aD788a91E8e2ab42560",
+        "automatedRealityEthOracleTemplate": "0x6255A54165cFa03939cda5F1eBA668548F070727",
+        "manualRealityEthOracleTemplate": "0x06544DE2E23CA34e8ea2C3020F35936EF3c7b916",
+        "uniswapV2TwapOracleTemplate": "0x85975ed6E55fEdCe003aFfEF0DB592F17Ae43044"
     }
 }
