@@ -207,12 +207,12 @@ task(
                 (
                     await automationFundingToken.allowance(
                         signer.address,
-                        predictedOracleAddress
+                        oraclesManagerAddress
                     )
                 ).lt(parsedRawAutomationFundingAmount)
             ) {
                 const approveTx = await automationFundingToken.approve(
-                    predictedOracleAddress,
+                    oraclesManagerAddress,
                     parsedRawAutomationFundingAmount
                 );
                 console.log("Approving automation funding token");
