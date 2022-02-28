@@ -25,15 +25,15 @@ contract UniswapV2TWAPOracle is JobUpgradeable, IOracle {
     }
 
     bool public finalized;
-    bool private token0;
-    uint8 private tokenDecimals;
-    uint32 private refreshRate;
-    uint64 private startsAt;
-    uint64 private endsAt;
-    address private pair;
+    bool internal token0;
+    uint8 internal tokenDecimals;
+    uint32 internal refreshRate;
+    uint64 internal startsAt;
+    uint64 internal endsAt;
+    address internal pair;
     address public kpiToken;
-    Observation private observation;
-    IOraclesManager.Template private __template;
+    Observation internal observation;
+    IOraclesManager.Template internal __template;
 
     error ZeroAddressKpiToken();
     error ZeroAddressPair();
@@ -46,8 +46,8 @@ contract UniswapV2TWAPOracle is JobUpgradeable, IOracle {
 
     function initialize(
         address _kpiToken,
-        IOraclesManager.Template memory _template,
-        bytes memory _data
+        IOraclesManager.Template calldata _template,
+        bytes calldata _data
     ) external initializer {
         if (_kpiToken == address(0)) revert ZeroAddressKpiToken();
 
@@ -106,7 +106,7 @@ contract UniswapV2TWAPOracle is JobUpgradeable, IOracle {
         return _timeElapsed >= refreshRate;
     }
 
-    function workable(bytes memory)
+    function workable(bytes calldata)
         external
         view
         override
@@ -115,7 +115,7 @@ contract UniswapV2TWAPOracle is JobUpgradeable, IOracle {
         return (_workable(), bytes(""));
     }
 
-    function work(bytes memory) external override needsExecution {
+    function work(bytes calldata) external override needsExecution {
         if (!_workable()) revert NoWorkRequired();
 
         if (block.timestamp >= endsAt && !finalized) {

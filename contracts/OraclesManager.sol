@@ -48,7 +48,7 @@ contract OraclesManager is Ownable, IOraclesManager {
     function salt(
         address _automationFundingToken,
         uint256 _automationFundingAmount,
-        bytes memory _initializationData
+        bytes calldata _initializationData
     ) internal pure returns (bytes32) {
         return
             keccak256(
@@ -64,7 +64,7 @@ contract OraclesManager is Ownable, IOraclesManager {
         uint256 _id,
         address _automationFundingToken,
         uint256 _automationFundingAmount,
-        bytes memory _initializationData
+        bytes calldata _initializationData
     ) external view returns (address) {
         return
             Clones.predictDeterministicAddress(
@@ -83,7 +83,7 @@ contract OraclesManager is Ownable, IOraclesManager {
         uint256 _id,
         address _automationFundingToken,
         uint256 _automationFundingAmount,
-        bytes memory _initializationData
+        bytes calldata _initializationData
     ) external override returns (address) {
         if (!IKPITokensFactory(factory).created(msg.sender)) revert Forbidden();
         address _instance = Clones.cloneDeterministic(

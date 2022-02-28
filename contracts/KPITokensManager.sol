@@ -33,9 +33,9 @@ contract KPITokensManager is Ownable, IKPITokensManager {
     }
 
     function salt(
-        string memory _description,
-        bytes memory _initializationData,
-        bytes memory _oraclesInitializationData
+        string calldata _description,
+        bytes calldata _initializationData,
+        bytes calldata _oraclesInitializationData
     ) internal pure returns (bytes32) {
         return
             keccak256(
@@ -49,9 +49,9 @@ contract KPITokensManager is Ownable, IKPITokensManager {
 
     function predictInstanceAddress(
         uint256 _id,
-        string memory _description,
-        bytes memory _initializationData,
-        bytes memory _oraclesInitializationData
+        string calldata _description,
+        bytes calldata _initializationData,
+        bytes calldata _oraclesInitializationData
     ) external view override returns (address) {
         return
             Clones.predictDeterministicAddress(
@@ -66,9 +66,9 @@ contract KPITokensManager is Ownable, IKPITokensManager {
 
     function instantiate(
         uint256 _id,
-        string memory _description,
-        bytes memory _initializationData,
-        bytes memory _oraclesInitializationData
+        string calldata _description,
+        bytes calldata _initializationData,
+        bytes calldata _oraclesInitializationData
     ) external override returns (address) {
         if (msg.sender != factory) revert Forbidden();
         return
@@ -99,7 +99,7 @@ contract KPITokensManager is Ownable, IKPITokensManager {
         uint256 _id,
         address _newTemplate,
         uint8 _versionBump,
-        string memory _newSpecification
+        string calldata _newSpecification
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
         templates.upgrade(_id, _newTemplate, _versionBump, _newSpecification);

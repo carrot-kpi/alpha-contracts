@@ -32,8 +32,8 @@ contract AutomatedRealityOracle is JobUpgradeable, IOracle {
 
     function initialize(
         address _kpiToken,
-        IOraclesManager.Template memory _template,
-        bytes memory _data
+        IOraclesManager.Template calldata _template,
+        bytes calldata _data
     ) external initializer {
         if (_kpiToken == address(0)) revert ZeroAddressKpiToken();
 
@@ -75,7 +75,7 @@ contract AutomatedRealityOracle is JobUpgradeable, IOracle {
         return !finalized && IReality(reality).isFinalized(questionId);
     }
 
-    function workable(bytes memory)
+    function workable(bytes calldata)
         external
         view
         override
@@ -84,7 +84,7 @@ contract AutomatedRealityOracle is JobUpgradeable, IOracle {
         return (_workable(), bytes(""));
     }
 
-    function work(bytes memory) external override needsExecution {
+    function work(bytes calldata) external override needsExecution {
         if (!_workable()) revert NoWorkRequired();
         IKPIToken(kpiToken).finalize(
             uint256(IReality(reality).resultFor(questionId))

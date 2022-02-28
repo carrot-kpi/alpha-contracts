@@ -17,7 +17,7 @@ contract ManualRealityOracle is IOracle, Initializable {
     address internal reality;
     bytes32 internal questionId;
     string internal question;
-    IOraclesManager.Template private __template;
+    IOraclesManager.Template internal __template;
 
     error Forbidden();
     error ZeroAddressKpiToken();
@@ -29,8 +29,8 @@ contract ManualRealityOracle is IOracle, Initializable {
 
     function initialize(
         address _kpiToken,
-        IOraclesManager.Template memory _template,
-        bytes memory _data
+        IOraclesManager.Template calldata _template,
+        bytes calldata _data
     ) external override initializer {
         if (_kpiToken == address(0)) revert ZeroAddressKpiToken();
 

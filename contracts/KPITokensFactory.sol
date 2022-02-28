@@ -47,9 +47,9 @@ contract KPITokensFactory is Ownable, IKPITokensFactory {
 
     function createToken(
         uint256 _id,
-        string memory _description,
-        bytes memory _initializationData,
-        bytes memory _oraclesInitializationData
+        string calldata _description,
+        bytes calldata _initializationData,
+        bytes calldata _oraclesInitializationData
     ) external override {
         address _instance = IKPITokensManager(kpiTokensManager).instantiate(
             _id,

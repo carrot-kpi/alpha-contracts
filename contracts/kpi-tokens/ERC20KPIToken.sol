@@ -63,9 +63,9 @@ contract ERC20KPIToken is
 
     function initialize(
         address _creator,
-        IKPITokensManager.Template memory _template,
-        string memory _description,
-        bytes memory _data
+        IKPITokensManager.Template calldata _template,
+        string calldata _description,
+        bytes calldata _data
     ) external override initializer {
         if (bytes(_description).length == 0) revert InvalidDescription();
 
@@ -88,26 +88,22 @@ contract ERC20KPIToken is
         ) revert InconsistentCollaterals();
 
         for (uint256 _i = 0; _i < _collateralTokens.length; _i++) {
-            address _token = _collateralTokens[_i];
-            uint256 _amount = _collateralAmounts[_i];
-            uint256 _minimumPayout = _minimumPayouts[_i];
+            Collateral memory _collateral = Collateral({
+                token: _collateralTokens[_i],
+                amount: _collateralAmounts[_i],
+                minimumPayout: _minimumPayouts[_i]
+            });
             if (
-                _token == address(0) ||
-                _amount == 0 ||
-                _minimumPayout >= _amount
+                _collateral.token == address(0) ||
+                _collateral.amount == 0 ||
+                _collateral.minimumPayout >= _collateral.amount
             ) revert InvalidCollateral();
-            IERC20Upgradeable(_token).safeTransferFrom(
+            IERC20Upgradeable(_collateral.token).safeTransferFrom(
                 _creator,
                 address(this),
-                _amount
+                _collateral.amount
             );
-            collaterals.push(
-                Collateral({
-                    token: _token,
-                    amount: _amount,
-                    minimumPayout: _minimumPayout
-                })
-            );
+            collaterals.push(_collateral);
         }
 
         __ERC20_init(
@@ -131,7 +127,7 @@ contract ERC20KPIToken is
         );
     }
 
-    function initializeOracles(address _oraclesManager, bytes memory _data)
+    function initializeOracles(address _oraclesManager, bytes calldata _data)
         external
         nonReentrant
     {
@@ -342,7 +338,7 @@ contract ERC20KPIToken is
         emit Redeem(_kpiTokenBalance, _redeemedCollaterals);
     }
 
-    function protocolFee(bytes memory _data)
+    function protocolFee(bytes calldata _data)
         external
         pure
         returns (bytes memory)

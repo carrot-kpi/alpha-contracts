@@ -66,7 +66,7 @@ contract AaveERC20KPIToken is
 
     function initialize(
         address _creator,
-        IKPITokensManager.Template memory _template,
+        IKPITokensManager.Template calldata _template,
         string memory _description,
         bytes memory _data
     ) external override initializer {
@@ -158,7 +158,7 @@ contract AaveERC20KPIToken is
         );
     }
 
-    function initializeOracles(address _oraclesManager, bytes memory _data)
+    function initializeOracles(address _oraclesManager, bytes calldata _data)
         external
         nonReentrant
     {
@@ -376,7 +376,7 @@ contract AaveERC20KPIToken is
         emit Redeem(_kpiTokenBalance, _redeemedCollaterals);
     }
 
-    function protocolFee(bytes memory _data)
+    function protocolFee(bytes calldata _data)
         external
         pure
         returns (bytes memory)
