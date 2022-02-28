@@ -26,13 +26,13 @@ contract UniswapV2TWAPOracle is JobUpgradeable, IOracle {
 
     bool public finalized;
     bool private token0;
-    uint8 public tokenDecimals;
-    uint32 public refreshRate;
-    uint64 public startsAt;
-    uint64 public endsAt;
-    address public pair;
+    uint8 private tokenDecimals;
+    uint32 private refreshRate;
+    uint64 private startsAt;
+    uint64 private endsAt;
+    address private pair;
     address public kpiToken;
-    Observation public observation;
+    Observation private observation;
     IOraclesManager.Template private __template;
 
     error ZeroAddressKpiToken();
