@@ -192,17 +192,6 @@ task(
                     automationFundingTokenDecimals
                 );
 
-            const predictedOracleAddress =
-                await IOraclesManager__factory.connect(
-                    oraclesManagerAddress,
-                    signer
-                ).predictInstanceAddress(
-                    2,
-                    automationFundingTokenAddress,
-                    parsedRawAutomationFundingAmount,
-                    oraclesInitializationData
-                );
-            console.log("Predicted oracle address", predictedOracleAddress);
             if (
                 (
                     await automationFundingToken.allowance(
