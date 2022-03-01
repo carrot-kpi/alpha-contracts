@@ -59,7 +59,8 @@ contract KPITokensFactory is Ownable, IKPITokensFactory {
         );
         IKPIToken(_instance).initialize(
             msg.sender,
-            IKPITokensManager(kpiTokensManager).template(_id),
+            kpiTokensManager,
+            _id,
             _description,
             _initializationData
         );

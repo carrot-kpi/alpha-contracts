@@ -35,7 +35,8 @@ contract AaveERC20KPIToken is
     Collateral[] internal collaterals;
     FinalizableOracle[] internal finalizableOracles;
     string public description;
-    IKPITokensManager.Template private __template;
+    address internal kpiTokensManager;
+    uint256 internal kpiTokenTemplateId;
     uint256 internal initialSupply;
     uint256 internal totalWeight;
 
@@ -55,7 +56,7 @@ contract AaveERC20KPIToken is
 
     event Initialize(
         address creator,
-        string _description,
+        string description,
         Collateral[] collaterals,
         bytes32 name,
         bytes32 symbol,
@@ -66,11 +67,21 @@ contract AaveERC20KPIToken is
 
     function initialize(
         address _creator,
-        IKPITokensManager.Template calldata _template,
+        address _kpiTokensManager,
+        uint256 _kpiTokenTemplateId,
         string memory _description,
         bytes memory _data
     ) external override initializer {
-        if (bytes(_description).length == 0) revert InvalidDescription();
+        InitializeArguments memory _arguments = InitializeArguments({
+            creator: _creator,
+            kpiTokensManager: _kpiTokensManager,
+            kpiTokenTemplateId: _kpiTokenTemplateId,
+            description: _description,
+            data: _data
+        });
+
+        if (bytes(_arguments.description).length == 0)
+            revert InvalidDescription();
 
         (
             address _aavePool,
@@ -81,7 +92,7 @@ contract AaveERC20KPIToken is
             bytes32 _erc20Symbol,
             uint256 _erc20Supply
         ) = abi.decode(
-                _data,
+                _arguments.data,
                 (
                     address,
                     address[],
@@ -107,19 +118,20 @@ contract AaveERC20KPIToken is
                 aToken: address(0),
                 minimumPayout: _minimumPayouts[_i]
             });
-            IAavePool.ReserveData memory _reserveData = IAavePool(_aavePool)
-                .getReserveData(_collateral.token);
-            if (_reserveData.aTokenAddress == address(0))
-                revert InvalidCollateral();
-            _collateral.aToken = _reserveData.aTokenAddress;
-
             if (
                 _collateral.token == address(0) ||
                 _collateral.amount == 0 ||
                 _collateral.minimumPayout >= _collateral.amount
             ) revert InvalidCollateral();
+
+            address _aTokenAddress = IAavePool(_aavePool)
+                .getReserveData(_collateral.token)
+                .aTokenAddress;
+            if (_aTokenAddress == address(0)) revert InvalidCollateral();
+            _collateral.aToken = _aTokenAddress;
+
             IERC20Upgradeable(_collateral.token).safeTransferFrom(
-                _creator,
+                _arguments.creator,
                 address(this),
                 _collateral.amount
             );
@@ -140,17 +152,18 @@ contract AaveERC20KPIToken is
             string(abi.encodePacked(_erc20Name)),
             string(abi.encodePacked(_erc20Symbol))
         );
-        _mint(_creator, _erc20Supply);
+        _mint(_arguments.creator, _erc20Supply);
 
         aavePool = _aavePool;
         initialSupply = _erc20Supply;
-        creator = _creator;
-        description = _description;
-        __template = _template;
+        creator = _arguments.creator;
+        description = _arguments.description;
+        kpiTokensManager = _arguments.kpiTokensManager;
+        kpiTokenTemplateId = _arguments.kpiTokenTemplateId;
 
         emit Initialize(
-            _creator,
-            _description,
+            _arguments.creator,
+            _arguments.description,
             collaterals,
             _erc20Name,
             _erc20Symbol,
@@ -457,6 +470,6 @@ contract AaveERC20KPIToken is
         override
         returns (IKPITokensManager.Template memory)
     {
-        return __template;
+        return IKPITokensManager(kpiTokensManager).template(kpiTokenTemplateId);
     }
 }

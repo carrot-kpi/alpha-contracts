@@ -9,9 +9,18 @@ import "../IKPITokensManager.sol";
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 interface IKPIToken {
+    struct InitializeArguments {
+        address creator;
+        address kpiTokensManager;
+        uint256 kpiTokenTemplateId;
+        string description;
+        bytes data;
+    }
+
     function initialize(
         address _creator,
-        IKPITokensManager.Template memory _template,
+        address _kpiTokensManager,
+        uint256 _kpiTokenTemplateId,
         string memory _description,
         bytes memory _data
     ) external;
