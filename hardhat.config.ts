@@ -43,6 +43,22 @@ const hardhatConfig: HardhatUserConfig = {
             gasPrice: 0,
         },
     },
+    solidity: {
+        compilers: [
+            {
+                version: "0.8.13",
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 2000,
+                        details: {
+                            yul: true,
+                        },
+                    },
+                },
+            },
+        ],
+    },
     etherscan: {
         apiKey: process.env.ETHERSCAN_API_KEY,
     },

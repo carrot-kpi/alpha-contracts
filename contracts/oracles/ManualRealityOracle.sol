@@ -1,6 +1,6 @@
-pragma solidity ^0.8.11;
+pragma solidity 0.8.13;
 
-import "openzeppelin/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../interfaces/oracles/IOracle.sol";
 import "../interfaces/kpi-tokens/IKPIToken.sol";
 import "../interfaces/external/IReality.sol";

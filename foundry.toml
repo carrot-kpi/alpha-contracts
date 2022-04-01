@@ -3,8 +3,5 @@ src = 'contracts'
 out = 'artifacts'
 libs = ['node_modules']
 remappings = [
-    'openzeppelin/=node_modules/@openzeppelin/contracts',
-    'openzeppelin-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable',
-    'realitio/=node_modules/@realitio/realitio-contracts',
     'ds-test/=lib/ds-test/src/',
 ]

@@ -1,6 +1,6 @@
-pragma solidity ^0.8.11;
+pragma solidity >0.8.0;
 
-import "openzeppelin-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "./IKPIToken.sol";
 
 /**
