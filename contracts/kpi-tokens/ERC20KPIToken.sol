@@ -1,8 +1,8 @@
 pragma solidity ^0.8.11;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "openzeppelin/token/ERC20/ERC20.sol";
+import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
+import "openzeppelin/security/ReentrancyGuard.sol";
 import "../interfaces/oracles/IOracle.sol";
 import "../interfaces/IOraclesManager.sol";
 import "../interfaces/IKPITokensManager.sol";

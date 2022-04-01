@@ -1,6 +1,6 @@
 pragma solidity ^0.8.11;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "openzeppelin/token/ERC20/IERC20.sol";
 import "./IKPIToken.sol";
 
 /**
@@ -9,7 +9,7 @@ import "./IKPIToken.sol";
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-interface IAaveERC20KPIToken is IKPIToken, IERC20Upgradeable {
+interface IAaveERC20KPIToken is IKPIToken, IERC20 {
     struct Collateral {
         address token;
         address aToken;

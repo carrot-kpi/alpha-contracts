@@ -1,4 +1,3 @@
-import { defaultAbiCoder } from "ethers/lib/utils";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -31,7 +30,7 @@ task(
             hre: HardhatRuntimeEnvironment
         ) => {
             console.log(
-                defaultAbiCoder.encode(
+                hre.ethers.utils.defaultAbiCoder.encode(
                     ["address", "address", "string", "uint32", "uint32"],
                     [
                         realityAddress,

@@ -1,7 +1,7 @@
 pragma solidity ^0.8.11;
 
-import "@jolt-network/contracts/JobUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "jolt-network/JobUpgradeable.sol";
+import "openzeppelin/token/ERC20/IERC20.sol";
 import "../libraries/FixedPointLibrary.sol";
 import "../libraries/UniswapV2OracleLibrary.sol";
 import "../interfaces/external/IUniswapV2Pair.sol";

@@ -1,6 +1,5 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { IKPITokensManager__factory } from "../typechain-types";
 
 interface TaskArguments {
     oraclesManagerAddress: string;
@@ -41,10 +40,12 @@ task(
             await newTemplate.deployed();
             console.log("Deployed new template");
 
-            const oraclesManager = IKPITokensManager__factory.connect(
-                oraclesManagerAddress,
-                signer
+            const kpiTokensManagerFactory = await hre.ethers.getContractFactory(
+                "OraclesManager"
             );
+            const oraclesManager = kpiTokensManagerFactory
+                .attach(oraclesManagerAddress)
+                .connect(signer);
             const upgradeTx = await oraclesManager.upgradeTemplate(
                 oldTemplateAddress,
                 newTemplate.address,

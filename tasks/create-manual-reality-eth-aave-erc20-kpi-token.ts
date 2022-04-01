@@ -1,6 +1,5 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { IKPITokensManager__factory } from "../typechain-types";
 
 interface TaskArguments {
     kpiTemplateId: string;
@@ -138,11 +137,13 @@ task(
                     ]
                 );
 
-            const predictedKpiTokenAddress =
-                await IKPITokensManager__factory.connect(
-                    kpiTokensManagerAddress,
-                    signer
-                ).predictInstanceAddress(
+            const kpiTokensManagerFactory = await hre.ethers.getContractFactory(
+                "KPITokensManager"
+            );
+            const predictedKpiTokenAddress = await kpiTokensManagerFactory
+                .attach(kpiTokensManagerAddress)
+                .connect(signer)
+                .predictInstanceAddress(
                     kpiTemplateId,
                     description,
                     kpiTokenInitializationData,

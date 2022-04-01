@@ -1,11 +1,7 @@
 import { HardhatUserConfig } from "hardhat/types/config";
 import "dotenv/config";
-import "solidity-coverage";
-import "hardhat-gas-reporter";
+import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
-import "@nomiclabs/hardhat-waffle";
-import "@typechain/hardhat";
-import "hardhat-dependency-compiler";
 import "./tasks/deploy";
 import "./tasks/create-uniswap-v2-twap-kpi-token";
 import "./tasks/create-reality-eth-kpi-token";
@@ -47,40 +43,8 @@ const hardhatConfig: HardhatUserConfig = {
             gasPrice: 0,
         },
     },
-    solidity: {
-        compilers: [
-            {
-                version: "0.8.11",
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 200,
-                    },
-                },
-            },
-            {
-                version: "0.4.25",
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 200,
-                    },
-                },
-            },
-        ],
-    },
-    gasReporter: {
-        currency: "USD",
-        enabled: process.env.GAS_REPORT_ENABLED === "true",
-    },
     etherscan: {
         apiKey: process.env.ETHERSCAN_API_KEY,
-    },
-    dependencyCompiler: {
-        paths: [
-            "@realitio/realitio-contracts/truffle/contracts/Realitio.sol",
-            "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol",
-        ],
     },
 };
 

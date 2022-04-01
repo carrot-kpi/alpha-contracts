@@ -1,10 +1,10 @@
 pragma solidity ^0.8.11;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@jolt-network/contracts/interfaces/IJobsRegistry.sol";
+import "openzeppelin/access/Ownable.sol";
+import "openzeppelin/token/ERC20/IERC20.sol";
+import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
+import "openzeppelin/proxy/Clones.sol";
+import "jolt-network/interfaces/IJobsRegistry.sol";
 import "./interfaces/kpi-tokens/IKPIToken.sol";
 import "./interfaces/oracles/IOracle.sol";
 import "./interfaces/IOraclesManager.sol";
@@ -99,7 +99,7 @@ contract OraclesManager is Ownable, IOraclesManager {
             _automationFundingToken != address(0) &&
             jobsRegistry != address(0)
         ) {
-            IJobsRegistry(jobsRegistry).addJob(_instance, address(this), "");
+            IMaster(jobsRegistry).addJob(_instance, address(this), "");
             IERC20(_automationFundingToken).safeTransferFrom(
                 _creator,
                 address(this),
@@ -109,7 +109,7 @@ contract OraclesManager is Ownable, IOraclesManager {
                 _automationFundingToken,
                 _automationFundingAmount
             );
-            IJobsRegistry(jobsRegistry).addCredit(
+            IMaster(jobsRegistry).addCredit(
                 _instance,
                 _automationFundingToken,
                 _automationFundingAmount
