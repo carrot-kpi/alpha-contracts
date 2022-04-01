@@ -8,7 +8,6 @@ interface TaskArguments {
     factoryAddress: string;
     workersTokenFunding: string;
     workersTokenAddress: string;
-    joltJobsRegistryAddress: string;
     collateralAddress: string;
     collateralAmount: string;
     realityAddress: string;
@@ -26,7 +25,6 @@ task(
     .addParam("kpiTemplateAddress")
     .addParam("oracleTemplateAddress")
     .addParam("factoryAddress")
-    .addParam("joltJobsRegistryAddress")
     .addParam("workersTokenFunding")
     .addParam("workersTokenAddress")
     .addParam("collateralAddress")
@@ -44,7 +42,6 @@ task(
                 factoryAddress,
                 workersTokenFunding,
                 workersTokenAddress,
-                joltJobsRegistryAddress,
                 collateralAddress,
                 collateralAmount,
                 realityAddress,
@@ -136,7 +133,6 @@ task(
                                     "bool",
                                 ],
                                 [
-                                    joltJobsRegistryAddress,
                                     realityAddress,
                                     arbitratorAddress,
                                     questionText,

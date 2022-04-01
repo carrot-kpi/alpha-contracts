@@ -3,8 +3,8 @@ src = 'contracts'
 out = 'artifacts'
 libs = ['node_modules']
 remappings = [
-    'jolt-network/=node_modules/@jolt-network/contracts',
     'openzeppelin/=node_modules/@openzeppelin/contracts',
+    'openzeppelin-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable',
     'realitio/=node_modules/@realitio/realitio-contracts',
     'ds-test/=lib/ds-test/src/',
 ]

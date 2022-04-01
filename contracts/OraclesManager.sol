@@ -4,7 +4,6 @@ import "openzeppelin/access/Ownable.sol";
 import "openzeppelin/token/ERC20/IERC20.sol";
 import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin/proxy/Clones.sol";
-import "jolt-network/interfaces/IJobsRegistry.sol";
 import "./interfaces/kpi-tokens/IKPIToken.sol";
 import "./interfaces/oracles/IOracle.sol";
 import "./interfaces/IOraclesManager.sol";
@@ -41,39 +40,30 @@ contract OraclesManager is Ownable, IOraclesManager {
         jobsRegistry = _jobsRegistry;
     }
 
-    function setJobsRegistry(address _jobsRegistry) external onlyOwner {
+    function setJobsRegistry(address _jobsRegistry)
+        external
+        override
+        onlyOwner
+    {
         jobsRegistry = _jobsRegistry;
     }
 
-    function salt(
-        address _automationFundingToken,
-        uint256 _automationFundingAmount,
-        bytes calldata _initializationData
-    ) internal pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(
-                    _automationFundingToken,
-                    _automationFundingAmount,
-                    _initializationData
-                )
-            );
+    function salt(bytes calldata _initializationData)
+        internal
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encodePacked(_initializationData));
     }
 
     function predictInstanceAddress(
         uint256 _id,
-        address _automationFundingToken,
-        uint256 _automationFundingAmount,
         bytes calldata _initializationData
-    ) external view returns (address) {
+    ) external view override returns (address) {
         return
             Clones.predictDeterministicAddress(
                 templates.get(_id).addrezz,
-                salt(
-                    _automationFundingToken,
-                    _automationFundingAmount,
-                    _initializationData
-                ),
+                salt(_initializationData),
                 address(this)
             );
     }
@@ -81,40 +71,13 @@ contract OraclesManager is Ownable, IOraclesManager {
     function instantiate(
         address _creator,
         uint256 _id,
-        address _automationFundingToken,
-        uint256 _automationFundingAmount,
         bytes calldata _initializationData
     ) external override returns (address) {
         if (!IKPITokensFactory(factory).created(msg.sender)) revert Forbidden();
         address _instance = Clones.cloneDeterministic(
             templates.get(_id).addrezz,
-            salt(
-                _automationFundingToken,
-                _automationFundingAmount,
-                _initializationData
-            )
+            salt(_initializationData)
         );
-        if (
-            _automationFundingAmount > 0 &&
-            _automationFundingToken != address(0) &&
-            jobsRegistry != address(0)
-        ) {
-            IMaster(jobsRegistry).addJob(_instance, address(this), "");
-            IERC20(_automationFundingToken).safeTransferFrom(
-                _creator,
-                address(this),
-                _automationFundingAmount
-            );
-            _ensureJobsRegistryAllowance(
-                _automationFundingToken,
-                _automationFundingAmount
-            );
-            IMaster(jobsRegistry).addCredit(
-                _instance,
-                _automationFundingToken,
-                _automationFundingAmount
-            );
-        }
         IOracle(_instance).initialize(
             msg.sender,
             templates.get(_id),
@@ -153,21 +116,6 @@ contract OraclesManager is Ownable, IOraclesManager {
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
         templates.upgrade(_id, _newTemplate, _versionBump, _newSpecification);
-    }
-
-    function _ensureJobsRegistryAllowance(
-        address _token,
-        uint256 _minimumAmount
-    ) internal {
-        if (
-            _token != address(0) &&
-            jobsRegistry != address(0) &&
-            _minimumAmount > 0
-        )
-            IERC20(_token).approve(
-                jobsRegistry,
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-            );
     }
 
     function template(uint256 _id)

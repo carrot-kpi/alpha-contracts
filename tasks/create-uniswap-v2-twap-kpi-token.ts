@@ -9,7 +9,6 @@ interface TaskArguments {
     collateralAmount: string;
     pairAddress: string;
     tokenAddress: string;
-    joltJobsRegistryAddress: string;
     startsAt: string;
     endsAt: string;
     refreshRate: string;
@@ -33,7 +32,6 @@ task(
     .addParam("collateralAmount")
     .addParam("pairAddress")
     .addParam("tokenAddress")
-    .addParam("joltJobsRegistryAddress")
     .addParam("startsAt")
     .addParam("endsAt")
     .addParam("refreshRate")
@@ -52,7 +50,6 @@ task(
                 collateralAmount,
                 pairAddress,
                 tokenAddress,
-                joltJobsRegistryAddress,
                 startsAt,
                 endsAt,
                 refreshRate,
@@ -133,7 +130,6 @@ task(
                                     "uint32",
                                 ],
                                 [
-                                    joltJobsRegistryAddress,
                                     pairAddress,
                                     tokenAddress,
                                     startsAt,

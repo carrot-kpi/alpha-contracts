@@ -28,18 +28,16 @@ interface IOraclesManager {
         uint256[] keys;
     }
 
+    function setJobsRegistry(address _jobsRegistry) external;
+
     function predictInstanceAddress(
         uint256 _id,
-        address _automationFundingToken,
-        uint256 _automationFundingAmount,
         bytes memory _initializationData
     ) external view returns (address);
 
     function instantiate(
         address _creator,
         uint256 _id,
-        address _automationFundingToken,
-        uint256 _automationFundingAmount,
         bytes memory _initializationData
     ) external returns (address);
 

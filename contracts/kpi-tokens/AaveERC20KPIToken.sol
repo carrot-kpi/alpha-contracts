@@ -1,8 +1,8 @@
 pragma solidity ^0.8.11;
 
-import "openzeppelin/token/ERC20/ERC20.sol";
-import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
-import "openzeppelin/security/ReentrancyGuard.sol";
+import "openzeppelin-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "openzeppelin-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "openzeppelin-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "../interfaces/oracles/IOracle.sol";
 import "../interfaces/IOraclesManager.sol";
 import "../interfaces/IKPITokensManager.sol";
@@ -182,33 +182,19 @@ contract AaveERC20KPIToken is
             uint256[] memory _ids,
             uint256[] memory _lowerBounds,
             uint256[] memory _higherBounds,
-            address[] memory _automationFundingTokens,
-            uint256[] memory _automationFundingAmounts,
             uint256[] memory _weights,
             bytes[] memory _initializationData,
             bool _andRelationship
         ) = abi.decode(
                 _data,
-                (
-                    uint256[],
-                    uint256[],
-                    uint256[],
-                    address[],
-                    uint256[],
-                    uint256[],
-                    bytes[],
-                    bool
-                )
+                (uint256[], uint256[], uint256[], uint256[], bytes[], bool)
             );
 
         if (
             _ids.length == 0 ||
             _ids.length != _lowerBounds.length ||
             _lowerBounds.length != _higherBounds.length ||
-            _higherBounds.length != _automationFundingTokens.length ||
-            _automationFundingTokens.length !=
-            _automationFundingAmounts.length ||
-            _automationFundingAmounts.length != _weights.length ||
+            _higherBounds.length != _weights.length ||
             _weights.length != _initializationData.length
         ) revert InconsistentArrayLengths();
 
@@ -223,8 +209,6 @@ contract AaveERC20KPIToken is
             address _instance = IOraclesManager(_oraclesManager).instantiate(
                 creator,
                 _ids[_i],
-                _automationFundingTokens[_i],
-                _automationFundingAmounts[_i],
                 _initializationData[_i]
             );
             finalizableOracles.push(
