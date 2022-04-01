@@ -128,21 +128,6 @@ task(
             if (predictedFactoryAddress !== kpiTokensFactory.address)
                 throw new Error();
 
-            const automatedRealityOracleFactory =
-                await hre.ethers.getContractFactory("AutomatedRealityOracle");
-            const automatedRealityOracle =
-                await automatedRealityOracleFactory.deploy();
-            await automatedRealityOracle.deployed();
-            console.log("Deployed automated Reality.eth oracle");
-
-            const automatedRealityAdditionTx = await oraclesManager.addTemplate(
-                automatedRealityOracle.address,
-                true,
-                "QmXssrpqPoquowjsEpXTLSbkV7rqwLpXSS8ZPtnBu2BPdA"
-            );
-            await automatedRealityAdditionTx.wait();
-            console.log("Added automated Reality.eth oracle template");
-
             const manualRealityOracleFactory =
                 await hre.ethers.getContractFactory("ManualRealityOracle");
             const manualRealityOracle =
@@ -157,21 +142,6 @@ task(
             );
             await manualRealityAdditionTx.wait();
             console.log("Added manual Reality.eth oracle template");
-
-            const uniswapV2TwapOracleFactory =
-                await hre.ethers.getContractFactory("UniswapV2TWAPOracle");
-            const uniswapV2TwapOracle =
-                await uniswapV2TwapOracleFactory.deploy();
-            await uniswapV2TwapOracle.deployed();
-            console.log("Deployed Uniswap v2 TWAP oracle");
-
-            const twapAdditionTx = await oraclesManager.addTemplate(
-                uniswapV2TwapOracle.address,
-                true,
-                "QmXssrpqPoquowjsEpXTLSbkV7rqwLpXSS8ZPtnBu2BPdA"
-            );
-            await twapAdditionTx.wait();
-            console.log("Added Uniswap v2 TWAP oracle template");
 
             if (verify) {
                 await wait(120_000);
@@ -208,19 +178,7 @@ task(
 
                 await verifyContractSourceCode(
                     hre,
-                    automatedRealityOracle.address,
-                    []
-                );
-
-                await verifyContractSourceCode(
-                    hre,
                     manualRealityOracle.address,
-                    []
-                );
-
-                await verifyContractSourceCode(
-                    hre,
-                    uniswapV2TwapOracle.address,
                     []
                 );
 
@@ -239,12 +197,8 @@ task(
                             oracleTemplateSetLibrary.address,
                         oraclesManager: oraclesManager.address,
                         factory: kpiTokensFactory.address,
-                        automatedRealityEthOracleTemplate:
-                            automatedRealityOracle.address,
                         manualRealityEthOracleTemplate:
                             manualRealityOracle.address,
-                        uniswapV2TwapOracleTemplate:
-                            uniswapV2TwapOracle.address,
                     },
                     undefined,
                     4
