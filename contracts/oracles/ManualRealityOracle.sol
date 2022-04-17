@@ -15,6 +15,7 @@ contract ManualRealityOracle is IOracle, Initializable {
     bool public finalized;
     address public kpiToken;
     address internal reality;
+    uint256 internal realityTemplateId;
     bytes32 internal questionId;
     string internal question;
     IOraclesManager.Template internal __template;
@@ -37,10 +38,14 @@ contract ManualRealityOracle is IOracle, Initializable {
         (
             address _reality,
             address _arbitrator,
+            uint256 _templateId,
             string memory _question,
             uint32 _questionTimeout,
             uint32 _expiry
-        ) = abi.decode(_data, (address, address, string, uint32, uint32));
+        ) = abi.decode(
+                _data,
+                (address, address, uint256, string, uint32, uint32)
+            );
 
         if (_reality == address(0)) revert ZeroAddressReality();
         if (_arbitrator == address(0)) revert ZeroAddressArbitrator();
@@ -51,9 +56,10 @@ contract ManualRealityOracle is IOracle, Initializable {
         __template = _template;
         kpiToken = _kpiToken;
         reality = _reality;
+        realityTemplateId = _templateId;
         question = _question;
         questionId = IReality(_reality).askQuestion(
-            0, // shouldn't matter on-chain
+            _templateId,
             _question,
             _arbitrator,
             _questionTimeout,
@@ -80,6 +86,7 @@ contract ManualRealityOracle is IOracle, Initializable {
                 _reality,
                 _questionId,
                 IReality(_reality).getArbitrator(_questionId),
+                realityTemplateId,
                 question,
                 IReality(_reality).getTimeout(_questionId),
                 IReality(_reality).getOpeningTS(_questionId)
