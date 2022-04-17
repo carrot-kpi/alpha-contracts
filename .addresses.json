@@ -1,12 +1,12 @@
 {
     "rinkeby": {
-        "kpiTokenTemplateSetLibrary": "0xeBc2A56ECaFf0be9312A908E61B067551C9Fe20c",
-        "kpiTokensManager": "0x04ED5Fa06142D37692fa74B2662dd222fA2Ea163",
-        "erc20KpiTokensTemplate": "0x7eE7F85DbD0Aa5abdF478fa91F28Af7bB25E0901",
-        "aaveErc20KpiTokensTemplate": "0x26087EB9e3b62A68C3Db83f0D10FF1Af5861b760",
-        "oracleTemplateSetLibrary": "0x3FC1D025bF7969143a2CaF4fF45074362e53A349",
-        "oraclesManager": "0xc335c0a4C0163d19327EbbFaBA90253575E6DD76",
-        "factory": "0xa5678aFDd95BF4b2BF3510CD8E774d224e83639C",
-        "manualRealityEthOracleTemplate": "0x1C8A726ae86dBFA1c0C8249080F655e7A1732dBf"
+        "kpiTokenTemplateSetLibrary": "0x17B518E7cB4Cd6ff0A352C3d0DE2e2D36D7A8fe1",
+        "kpiTokensManager": "0x2B241D2A95641A8660242A644Fbf07a7FC26ee52",
+        "erc20KpiTokensTemplate": "0x238E7Eec073a4FEA9D0de0FF251D01f1A0a08EA3",
+        "aaveErc20KpiTokensTemplate": "0x01C9642ceF457a0796853CE015fAEF788c02A90F",
+        "oracleTemplateSetLibrary": "0xB0AeFAD24D4ebdA15EfC63A6df8ffC5CE2abA43d",
+        "oraclesManager": "0xce86E6ba3F79E5cED48C25Ce2A5C81764d06Cc6E",
+        "factory": "0x0Ef09225113399DCeE3aA20b2C7fEeE4EF76f7D6",
+        "manualRealityEthOracleTemplate": "0x662Cb2e5c2114EF8e907Ce493baBc85CFC687487"
     }
 }
