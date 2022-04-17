@@ -41,8 +41,6 @@ interface IKPIToken {
         view
         returns (IKPITokensManager.Template memory);
 
-    function oracles() external view returns (address[] memory);
-
     function description() external view returns (string memory);
 
     function finalized() external view returns (bool);
@@ -53,4 +51,6 @@ interface IKPIToken {
         returns (bytes memory);
 
     function data() external view returns (bytes memory);
+
+    function oracles() external view returns (address[] memory);
 }
