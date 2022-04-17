@@ -411,7 +411,7 @@ contract AaveERC20KPIToken is
         );
         address[] memory _collateralATokens = new address[](_collateralsLength);
         for (uint256 _i = 0; _i < _collateralsLength; _i++) {
-            Collateral storage _collateral = collaterals[_i];
+            Collateral memory _collateral = collaterals[_i];
             _collateralTokens[_i] = _collateral.token;
             _collateralAmounts[_i] = _collateral.amount;
             _collateralMinimumPayouts[_i] = _collateral.minimumPayout;
@@ -424,7 +424,7 @@ contract AaveERC20KPIToken is
         uint256[] memory _finalProgresses = new uint256[](_oraclesLength);
         uint256[] memory _weights = new uint256[](_oraclesLength);
         for (uint256 _i = 0; _i < _oraclesLength; _i++) {
-            FinalizableOracle storage _oracle = finalizableOracles[_i];
+            FinalizableOracle memory _oracle = finalizableOracles[_i];
             _lowerBounds[_i] = _oracle.lowerBound;
             _higherBounds[_i] = _oracle.higherBound;
             _finalProgresses[_i] = _oracle.finalProgress;
