@@ -54,15 +54,16 @@ task(
             await hre.run("compile");
             const [signer] = await hre.ethers.getSigners();
 
-            const factory = await (
-                await hre.ethers.getContractFactory("KPITokensFactory")
-            )
-                .attach(factoryAddress)
-                .connect(signer);
+            const factory = await await hre.ethers.getContractAt(
+                "KPITokensFactory",
+                factoryAddress,
+                signer
+            );
 
-            const collateralToken = await (
-                await hre.ethers.getContractFactory("ERC20")
-            ).attach(collateralAddress);
+            const collateralToken = await hre.ethers.getContractAt(
+                "ERC20",
+                collateralAddress
+            );
             const collateralTokenDecimals = await collateralToken.decimals();
             const parsedRawCollateralAmount = hre.ethers.utils.parseUnits(
                 collateralAmount,
@@ -97,8 +98,6 @@ task(
                         "uint256[]",
                         "uint256[]",
                         "uint256[]",
-                        "address[]",
-                        "uint256[]",
                         "uint256[]",
                         "bytes[]",
                         "bool",
@@ -107,14 +106,13 @@ task(
                         [oracleTemplateId],
                         [0],
                         [1],
-                        [hre.ethers.constants.AddressZero],
-                        [0],
                         [1],
                         [
                             hre.ethers.utils.defaultAbiCoder.encode(
                                 [
                                     "address",
                                     "address",
+                                    "uint256",
                                     "string",
                                     "uint32",
                                     "uint32",
@@ -122,7 +120,8 @@ task(
                                 [
                                     realityAddress,
                                     arbitratorAddress,
-                                    questionText,
+                                    0,
+                                    `${questionText}␟carrot␟en`,
                                     questionTimeout,
                                     expiry,
                                 ]
@@ -132,13 +131,13 @@ task(
                     ]
                 );
 
-            const kpiTokensManagerFactory = await hre.ethers.getContractFactory(
-                "KPITokensManager"
+            const kpiTokensManagerFactory = await hre.ethers.getContractAt(
+                "KPITokensManager",
+                kpiTokensManagerAddress,
+                signer
             );
-            const predictedKpiTokenAddress = await kpiTokensManagerFactory
-                .attach(kpiTokensManagerAddress)
-                .connect(signer)
-                .predictInstanceAddress(
+            const predictedKpiTokenAddress =
+                await kpiTokensManagerFactory.predictInstanceAddress(
                     kpiTemplateId,
                     description,
                     kpiTokenInitializationData,
