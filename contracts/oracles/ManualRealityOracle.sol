@@ -78,6 +78,7 @@ contract ManualRealityOracle is IOracle, Initializable {
         return
             abi.encode(
                 _reality,
+                _questionId,
                 IReality(_reality).getArbitrator(_questionId),
                 question,
                 IReality(_reality).getTimeout(_questionId),
