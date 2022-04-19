@@ -10,7 +10,7 @@
         "lint:prettier": "prettier -l contracts/**/*.sol && prettier -l test/**/*.js",
         "lint:commit-message": "commitlint -e",
         "lint": "yarn lint:eslint && yarn lint:prettier",
-        "test": "hardhat test",
+        "test": "forge test",
         "test:coverage": "hardhat coverage",
         "test:gasreport": "cross-env GAS_REPORT_ENABLED=true hardhat test",
         "compile": "forge build",
