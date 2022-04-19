@@ -31,6 +31,7 @@ interface IOraclesManager {
     function setJobsRegistry(address _jobsRegistry) external;
 
     function predictInstanceAddress(
+        address _creator,
         uint256 _id,
         bytes memory _initializationData
     ) external view returns (address);
