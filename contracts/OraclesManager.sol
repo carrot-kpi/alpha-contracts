@@ -21,7 +21,7 @@ contract OraclesManager is Ownable, IOraclesManager {
     using OracleTemplateSetLibrary for IOraclesManager.EnumerableTemplateSet;
 
     address public factory;
-    address public jobsRegistry;
+    address public joltMaster;
     IOraclesManager.EnumerableTemplateSet private templates;
 
     error NonExistentTemplate();
@@ -30,22 +30,19 @@ contract OraclesManager is Ownable, IOraclesManager {
     error AlreadyAdded();
     error ZeroAddressTemplate();
     error NotAnUpgrade();
-    error ZeroAddressJobsRegistry();
     error InvalidSpecification();
     error InvalidAutomationParameters();
 
-    constructor(address _factory, address _jobsRegistry) {
+    event SetJoltMaster(address joltMaster);
+
+    constructor(address _factory, address _joltMaster) {
         if (_factory == address(0)) revert ZeroAddressFactory();
         factory = _factory;
-        jobsRegistry = _jobsRegistry;
+        joltMaster = _joltMaster;
     }
 
-    function setJobsRegistry(address _jobsRegistry)
-        external
-        override
-        onlyOwner
-    {
-        jobsRegistry = _jobsRegistry;
+    function setJoltMaster(address _joltMaster) external override onlyOwner {
+        joltMaster = _joltMaster;
     }
 
     function salt(address _creator, bytes calldata _initializationData)
@@ -69,6 +66,7 @@ contract OraclesManager is Ownable, IOraclesManager {
             );
     }
 
+    // TODO: implement tests
     function instantiate(
         address _creator,
         uint256 _id,
@@ -106,10 +104,11 @@ contract OraclesManager is Ownable, IOraclesManager {
         string calldata _newSpecification
     ) external override {
         if (msg.sender != owner()) revert Forbidden();
+        if (bytes(_newSpecification).length == 0) revert InvalidSpecification();
         templates.get(_id).specification = _newSpecification;
     }
 
-    function updgradeTemplate(
+    function upgradeTemplate(
         uint256 _id,
         address _newTemplate,
         uint8 _versionBump,

@@ -28,7 +28,7 @@ interface IOraclesManager {
         uint256[] keys;
     }
 
-    function setJobsRegistry(address _jobsRegistry) external;
+    function setJoltMaster(address _joltMaster) external;
 
     function predictInstanceAddress(
         address _creator,
@@ -50,7 +50,7 @@ interface IOraclesManager {
 
     function removeTemplate(uint256 _id) external;
 
-    function updgradeTemplate(
+    function upgradeTemplate(
         uint256 _id,
         address _newTemplate,
         uint8 _versionBump,
