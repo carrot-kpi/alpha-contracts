@@ -76,18 +76,14 @@ task(
                 hre.ethers.utils.defaultAbiCoder.encode(
                     [
                         "address",
-                        "address[]",
-                        "uint256[]",
-                        "uint256[]",
+                        "tuple(address,uint256,uint256)",
                         "bytes32",
                         "bytes32",
                         "uint256",
                     ],
                     [
                         aavePoolAddress,
-                        [collateralAddress],
-                        [parsedRawCollateralAmount],
-                        [0],
+                        [collateralAddress, parsedRawCollateralAmount, 0],
                         hre.ethers.utils.formatBytes32String(
                             "Manual Reality.eth KPI"
                         ),
@@ -98,40 +94,33 @@ task(
 
             const oraclesInitializationData =
                 hre.ethers.utils.defaultAbiCoder.encode(
+                    ["tuple(uint256,uint256,uint256,uint256,bytes)", "bool"],
                     [
-                        "uint256[]",
-                        "uint256[]",
-                        "uint256[]",
-                        "address[]",
-                        "uint256[]",
-                        "uint256[]",
-                        "bytes[]",
-                        "bool",
-                    ],
-                    [
-                        [oracleTemplateId],
-                        [0],
-                        [1],
-                        [hre.ethers.constants.AddressZero],
-                        [0],
-                        [1],
                         [
-                            hre.ethers.utils.defaultAbiCoder.encode(
-                                [
-                                    "address",
-                                    "address",
-                                    "string",
-                                    "uint32",
-                                    "uint32",
-                                ],
-                                [
-                                    realityAddress,
-                                    arbitratorAddress,
-                                    questionText,
-                                    questionTimeout,
-                                    expiry,
-                                ]
-                            ),
+                            [
+                                oracleTemplateId,
+                                0,
+                                1,
+                                1,
+                                hre.ethers.utils.defaultAbiCoder.encode(
+                                    [
+                                        "address",
+                                        "address",
+                                        "uint256",
+                                        "string",
+                                        "uint32",
+                                        "uint32",
+                                    ],
+                                    [
+                                        realityAddress,
+                                        arbitratorAddress,
+                                        0,
+                                        `${questionText}␟carrot␟en`,
+                                        questionTimeout,
+                                        expiry,
+                                    ]
+                                ),
+                            ],
                         ],
                         false,
                     ]
