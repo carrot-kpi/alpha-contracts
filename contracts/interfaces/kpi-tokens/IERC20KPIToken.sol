@@ -10,6 +10,14 @@ import "./IKPIToken.sol";
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 interface IERC20KPIToken is IKPIToken, IERC20Upgradeable {
+    struct OracleData {
+        uint256 id;
+        uint256 lowerBound;
+        uint256 higherBound;
+        uint256 weight;
+        bytes data;
+    }
+
     struct Collateral {
         address token;
         uint256 amount;

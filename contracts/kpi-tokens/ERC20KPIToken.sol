@@ -69,48 +69,24 @@ contract ERC20KPIToken is
         string calldata _description,
         bytes calldata _data
     ) external override initializer {
-        InitializeArguments memory _arguments = InitializeArguments({
-            creator: _creator,
-            kpiTokensManager: _kpiTokensManager,
-            kpiTokenTemplateId: _kpiTokenTemplateId,
-            description: _description,
-            data: _data
-        });
-
-        if (bytes(_arguments.description).length == 0)
-            revert InvalidDescription();
+        if (bytes(_description).length == 0) revert InvalidDescription();
 
         (
-            address[] memory _collateralTokens,
-            uint256[] memory _collateralAmounts,
-            uint256[] memory _minimumPayouts,
+            Collateral[] memory _collaterals,
             bytes32 _erc20Name,
             bytes32 _erc20Symbol,
             uint256 _erc20Supply
-        ) = abi.decode(
-                _arguments.data,
-                (address[], uint256[], uint256[], bytes32, bytes32, uint256)
-            );
+        ) = abi.decode(_data, (Collateral[], bytes32, bytes32, uint256));
 
-        if (
-            _collateralTokens.length == 0 ||
-            _collateralTokens.length != _collateralAmounts.length ||
-            _collateralAmounts.length != _minimumPayouts.length
-        ) revert InconsistentCollaterals();
-
-        for (uint256 _i = 0; _i < _collateralTokens.length; _i++) {
-            Collateral memory _collateral = Collateral({
-                token: _collateralTokens[_i],
-                amount: _collateralAmounts[_i],
-                minimumPayout: _minimumPayouts[_i]
-            });
+        for (uint256 _i = 0; _i < _collaterals.length; _i++) {
+            Collateral memory _collateral = _collaterals[_i];
             if (
                 _collateral.token == address(0) ||
                 _collateral.amount == 0 ||
                 _collateral.minimumPayout >= _collateral.amount
             ) revert InvalidCollateral();
             IERC20Upgradeable(_collateral.token).safeTransferFrom(
-                _arguments.creator,
+                _creator,
                 address(this),
                 _collateral.amount
             );
@@ -121,17 +97,17 @@ contract ERC20KPIToken is
             string(abi.encodePacked(_erc20Name)),
             string(abi.encodePacked(_erc20Symbol))
         );
-        _mint(_arguments.creator, _erc20Supply);
+        _mint(_creator, _erc20Supply);
 
         initialSupply = _erc20Supply;
-        creator = _arguments.creator;
-        description = _arguments.description;
-        kpiTokensManager = _arguments.kpiTokensManager;
-        kpiTokenTemplateId = _arguments.kpiTokenTemplateId;
+        creator = _creator;
+        description = _description;
+        kpiTokensManager = _kpiTokensManager;
+        kpiTokenTemplateId = _kpiTokenTemplateId;
 
         emit Initialize(
-            _arguments.creator,
-            _arguments.description,
+            _creator,
+            _description,
             collaterals,
             _erc20Name,
             _erc20Symbol,
@@ -143,49 +119,34 @@ contract ERC20KPIToken is
         external
         nonReentrant
     {
-        if (creator == address(0)) revert NotInitialized();
+        address _creator = creator;
+        if (_creator == address(0)) revert NotInitialized();
         if (oraclesInitialized) revert AlreadyInitialized();
 
-        (
-            uint256[] memory _ids,
-            uint256[] memory _lowerBounds,
-            uint256[] memory _higherBounds,
-            uint256[] memory _weights,
-            bytes[] memory _initializationData,
-            bool _andRelationship
-        ) = abi.decode(
-                _data,
-                (uint256[], uint256[], uint256[], uint256[], bytes[], bool)
-            );
+        (OracleData[] memory _oracleDatas, bool _andRelationship) = abi.decode(
+            _data,
+            (OracleData[], bool)
+        );
 
-        if (
-            _ids.length == 0 ||
-            _ids.length != _lowerBounds.length ||
-            _lowerBounds.length != _higherBounds.length ||
-            _higherBounds.length != _weights.length ||
-            _weights.length != _initializationData.length
-        ) revert InconsistentArrayLengths();
-
-        for (uint256 _i = 0; _i < _ids.length; _i++) {
-            uint256 _higherBound = _higherBounds[_i];
-            uint256 _lowerBound = _lowerBounds[_i];
-            uint256 _weight = _weights[_i];
-            if (_higherBound <= _lowerBound) revert InvalidOracleBounds();
-            if (_weight == 0) revert InvalidOracleWeights();
-            totalWeight += _weight;
+        for (uint256 _i = 0; _i < _oracleDatas.length; _i++) {
+            OracleData memory _oracleData = _oracleDatas[_i];
+            if (_oracleData.higherBound <= _oracleData.lowerBound)
+                revert InvalidOracleBounds();
+            if (_oracleData.weight == 0) revert InvalidOracleWeights();
+            totalWeight += _oracleData.weight;
             toBeFinalized++;
             address _instance = IOraclesManager(_oraclesManager).instantiate(
-                creator,
-                _ids[_i],
-                _initializationData[_i]
+                _creator,
+                _oracleData.id,
+                _oracleData.data
             );
             finalizableOracles.push(
                 FinalizableOracle({
                     addrezz: _instance,
-                    lowerBound: _lowerBound,
-                    higherBound: _higherBound,
+                    lowerBound: _oracleData.lowerBound,
+                    higherBound: _oracleData.higherBound,
                     finalProgress: 0,
-                    weight: _weight,
+                    weight: _oracleData.weight,
                     finalized: false
                 })
             );
