@@ -48,22 +48,23 @@ contract OraclesManager is Ownable, IOraclesManager {
         jobsRegistry = _jobsRegistry;
     }
 
-    function salt(bytes calldata _initializationData)
+    function salt(address _creator, bytes calldata _initializationData)
         internal
         pure
         returns (bytes32)
     {
-        return keccak256(abi.encodePacked(_initializationData));
+        return keccak256(abi.encodePacked(_creator, _initializationData));
     }
 
     function predictInstanceAddress(
+        address _creator,
         uint256 _id,
         bytes calldata _initializationData
     ) external view override returns (address) {
         return
             Clones.predictDeterministicAddress(
                 templates.get(_id).addrezz,
-                salt(_initializationData),
+                salt(_creator, _initializationData),
                 address(this)
             );
     }
@@ -76,7 +77,7 @@ contract OraclesManager is Ownable, IOraclesManager {
         if (!IKPITokensFactory(factory).created(msg.sender)) revert Forbidden();
         address _instance = Clones.cloneDeterministic(
             templates.get(_id).addrezz,
-            salt(_initializationData)
+            salt(_creator, _initializationData)
         );
         IOracle(_instance).initialize(
             msg.sender,
