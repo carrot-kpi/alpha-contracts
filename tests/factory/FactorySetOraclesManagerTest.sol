@@ -1,8 +1,6 @@
 pragma solidity 0.8.13;
 
 import {BaseTestSetup} from "../commons/BaseTestSetup.sol";
-import {IKPITokensManager} from "../../contracts/interfaces/IKPITokensManager.sol";
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 /**
  * @title FactorySetOraclesManagerTest
