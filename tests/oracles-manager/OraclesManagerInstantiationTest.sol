@@ -4,12 +4,12 @@ import {BaseTestSetup} from "../commons/BaseTestSetup.sol";
 import {OraclesManager} from "../../contracts/OraclesManager.sol";
 
 /**
- * @title InstantiationTest
- * @dev InstantiationTest contract
+ * @title OraclesManagerInstantiationTest
+ * @dev OraclesManagerInstantiationTest contract
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
-contract InstantiationTest is BaseTestSetup {
+contract OraclesManagerInstantiationTest is BaseTestSetup {
     function testZeroAddressFactory() external {
         CHEAT_CODES.expectRevert(
             abi.encodeWithSignature("ZeroAddressFactory()")

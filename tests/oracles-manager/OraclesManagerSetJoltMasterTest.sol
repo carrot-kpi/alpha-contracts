@@ -4,12 +4,12 @@ import {BaseTestSetup} from "../commons/BaseTestSetup.sol";
 import {OraclesManager} from "../../contracts/OraclesManager.sol";
 
 /**
- * @title SetJoltMasterTest
- * @dev SetJoltMasterTest contract
+ * @title OraclesManagerSetJoltMasterTest
+ * @dev OraclesManagerSetJoltMasterTest contract
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
-contract SetJoltMasterTest is BaseTestSetup {
+contract OraclesManagerSetJoltMasterTest is BaseTestSetup {
     function testNonOwner() external {
         CHEAT_CODES.prank(address(1));
         CHEAT_CODES.expectRevert("Ownable: caller is not the owner");

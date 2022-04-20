@@ -5,12 +5,12 @@ import {OraclesManager} from "../../contracts/OraclesManager.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 /**
- * @title InstantiateTest
- * @dev InstantiateTest contract
+ * @title OraclesManagerInstantiateTest
+ * @dev OraclesManagerInstantiateTest contract
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
-contract InstantiateTest is BaseTestSetup {
+contract OraclesManagerInstantiateTest is BaseTestSetup {
     function testFailNotFromCreatedKpiToken() external {
         // FIXME: why does this fail if I uncomment stuff?
         CHEAT_CODES.expectRevert(); /* abi.encodeWithSignature("Forbidden()") */

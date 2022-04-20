@@ -21,6 +21,10 @@ abstract contract BaseTestSetup is DSTest {
 
     string internal constant MANUAL_REALITY_ETH_SPECIFICATION =
         "QmRvoExBSESXedwqfC1cs4DGaRymnRR1wA9YGoZbqsE8Mf";
+    string internal constant ERC20_KPI_TOKEN_SPECIFICATION =
+        "QmXU4G418hZLL8yxXdjkTFSoH2FdSe6ELgUuSm5fHHJMMN";
+    string internal constant AAVE_ERC20_KPI_TOKEN_SPECIFICATION =
+        "QmPRwBVEPteH9qLKHdPGPPkNYuLzTv6fNACcLSHDUW3j8p";
 
     KPITokensFactory internal factory;
     ERC20KPIToken internal erc20KpiTokenTemplate;
@@ -37,11 +41,11 @@ abstract contract BaseTestSetup is DSTest {
         kpiTokensManager = new KPITokensManager(address(factory));
         kpiTokensManager.addTemplate(
             address(erc20KpiTokenTemplate),
-            "QmXU4G418hZLL8yxXdjkTFSoH2FdSe6ELgUuSm5fHHJMMN"
+            ERC20_KPI_TOKEN_SPECIFICATION
         );
         kpiTokensManager.addTemplate(
             address(aaveErc20KpiTokenTemplate),
-            "QmPRwBVEPteH9qLKHdPGPPkNYuLzTv6fNACcLSHDUW3j8p"
+            AAVE_ERC20_KPI_TOKEN_SPECIFICATION
         );
 
         manualRealityOracleTemplate = new ManualRealityOracle();

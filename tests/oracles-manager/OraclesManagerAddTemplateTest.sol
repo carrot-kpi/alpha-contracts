@@ -6,12 +6,12 @@ import {IOraclesManager} from "../../contracts/interfaces/IOraclesManager.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 /**
- * @title AddTemplateTest
- * @dev AddTemplateTest contract
+ * @title OraclesManagerAddTemplateTest
+ * @dev OraclesManagerAddTemplateTest contract
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
-contract AddTemplateTest is BaseTestSetup {
+contract OraclesManagerAddTemplateTest is BaseTestSetup {
     function testNonOwner() external {
         CHEAT_CODES.prank(address(1));
         CHEAT_CODES.expectRevert(abi.encodeWithSignature("Forbidden()"));

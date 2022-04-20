@@ -5,12 +5,12 @@ import {OraclesManager} from "../../contracts/OraclesManager.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 /**
- * @title PredictInstanceAddressTest
- * @dev PredictInstanceAddressTest contract
+ * @title OraclesManagerPredictInstanceAddressTest
+ * @dev OraclesManagerPredictInstanceAddressTest contract
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
-contract PredictInstanceAddressTest is BaseTestSetup {
+contract OraclesManagerPredictInstanceAddressTest is BaseTestSetup {
     function testSuccess() external {
         bytes memory _initializationData = abi.encodePacked(
             uint256(1),

@@ -1,46 +1,46 @@
 pragma solidity 0.8.13;
 
 import {BaseTestSetup} from "../commons/BaseTestSetup.sol";
-import {OraclesManager} from "../../contracts/OraclesManager.sol";
-import {IOraclesManager} from "../../contracts/interfaces/IOraclesManager.sol";
+import {KPITokensManager} from "../../contracts/KPITokensManager.sol";
+import {IKPITokensManager} from "../../contracts/interfaces/IKPITokensManager.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 /**
- * @title UpgradeTemplateTest
- * @dev UpgradeTemplateTest contract
+ * @title KpiTokensManagerUpgradeTemplateTest
+ * @dev KpiTokensManagerUpgradeTemplateTest contract
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
-contract UpgradeTemplateTest is BaseTestSetup {
+contract KpiTokensManagerUpgradeTemplateTest is BaseTestSetup {
     function testNonOwner() external {
         CHEAT_CODES.prank(address(1));
         CHEAT_CODES.expectRevert(abi.encodeWithSignature("Forbidden()"));
-        oraclesManager.upgradeTemplate(0, address(1), uint8(0), "");
+        kpiTokensManager.upgradeTemplate(0, address(1), uint8(0), "");
     }
 
     function testNonExistentTemplate() external {
         CHEAT_CODES.expectRevert(
             abi.encodeWithSignature("NonExistentTemplate()")
         );
-        oraclesManager.upgradeTemplate(1, address(1), uint8(0), "a");
+        kpiTokensManager.upgradeTemplate(2, address(1), uint8(0), "a");
     }
 
     function testEmptySpecification() external {
         CHEAT_CODES.expectRevert(
             abi.encodeWithSignature("InvalidSpecification()")
         );
-        oraclesManager.upgradeTemplate(0, address(1), uint8(0), "");
+        kpiTokensManager.upgradeTemplate(0, address(1), uint8(0), "");
     }
 
     function testSameSpecification() external {
         uint256 _templateId = 0;
-        IOraclesManager.Template memory _template = oraclesManager.template(
+        IKPITokensManager.Template memory _template = kpiTokensManager.template(
             _templateId
         );
         CHEAT_CODES.expectRevert(
             abi.encodeWithSignature("InvalidSpecification()")
         );
-        oraclesManager.upgradeTemplate(
+        kpiTokensManager.upgradeTemplate(
             _templateId,
             address(1),
             uint8(0),
@@ -52,12 +52,12 @@ contract UpgradeTemplateTest is BaseTestSetup {
         CHEAT_CODES.expectRevert(
             abi.encodeWithSignature("InvalidVersionBump()")
         );
-        oraclesManager.upgradeTemplate(0, address(1), uint8(8), "a");
+        kpiTokensManager.upgradeTemplate(0, address(1), uint8(8), "a");
     }
 
     function testSuccessPatchBump() external {
         uint256 _templateId = 0;
-        IOraclesManager.Template memory _template = oraclesManager.template(
+        IKPITokensManager.Template memory _template = kpiTokensManager.template(
             _templateId
         );
         assertTrue(_template.exists);
@@ -66,13 +66,13 @@ contract UpgradeTemplateTest is BaseTestSetup {
         assertEq(_template.version.patch, 0);
         string memory _newSpecification = "b";
         address _newAddress = address(123);
-        oraclesManager.upgradeTemplate(
+        kpiTokensManager.upgradeTemplate(
             _templateId,
             _newAddress,
             uint8(1),
             _newSpecification
         );
-        _template = oraclesManager.template(_templateId);
+        _template = kpiTokensManager.template(_templateId);
         assertTrue(_template.exists);
         assertEq(_template.addrezz, _newAddress);
         assertEq(_template.specification, _newSpecification);
@@ -83,7 +83,7 @@ contract UpgradeTemplateTest is BaseTestSetup {
 
     function testSuccessMinorBump() external {
         uint256 _templateId = 0;
-        IOraclesManager.Template memory _template = oraclesManager.template(
+        IKPITokensManager.Template memory _template = kpiTokensManager.template(
             _templateId
         );
         assertTrue(_template.exists);
@@ -92,13 +92,13 @@ contract UpgradeTemplateTest is BaseTestSetup {
         assertEq(_template.version.patch, 0);
         string memory _newSpecification = "b";
         address _newAddress = address(123);
-        oraclesManager.upgradeTemplate(
+        kpiTokensManager.upgradeTemplate(
             _templateId,
             _newAddress,
             uint8(2),
             _newSpecification
         );
-        _template = oraclesManager.template(_templateId);
+        _template = kpiTokensManager.template(_templateId);
         assertTrue(_template.exists);
         assertEq(_template.addrezz, _newAddress);
         assertEq(_template.specification, _newSpecification);
@@ -109,7 +109,7 @@ contract UpgradeTemplateTest is BaseTestSetup {
 
     function testSuccessMajorBump() external {
         uint256 _templateId = 0;
-        IOraclesManager.Template memory _template = oraclesManager.template(
+        IKPITokensManager.Template memory _template = kpiTokensManager.template(
             _templateId
         );
         assertTrue(_template.exists);
@@ -118,13 +118,13 @@ contract UpgradeTemplateTest is BaseTestSetup {
         assertEq(_template.version.patch, 0);
         string memory _newSpecification = "b";
         address _newAddress = address(123);
-        oraclesManager.upgradeTemplate(
+        kpiTokensManager.upgradeTemplate(
             _templateId,
             _newAddress,
             uint8(4),
             _newSpecification
         );
-        _template = oraclesManager.template(_templateId);
+        _template = kpiTokensManager.template(_templateId);
         assertTrue(_template.exists);
         assertEq(_template.addrezz, _newAddress);
         assertEq(_template.specification, _newSpecification);

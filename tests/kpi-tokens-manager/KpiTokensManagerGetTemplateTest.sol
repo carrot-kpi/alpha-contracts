@@ -2,34 +2,34 @@ pragma solidity 0.8.13;
 
 import {BaseTestSetup} from "../commons/BaseTestSetup.sol";
 import {OraclesManager} from "../../contracts/OraclesManager.sol";
-import {IOraclesManager} from "../../contracts/interfaces/IOraclesManager.sol";
+import {IKPITokensManager} from "../../contracts/interfaces/IKPITokensManager.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 /**
- * @title GetTemplateTest
- * @dev GetTemplateTest contract
+ * @title KpiTokensManagerGetTemplateTest
+ * @dev KpiTokensManagerGetTemplateTest contract
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
-contract GetTemplateTest is BaseTestSetup {
+contract KpiTokensManagerGetTemplateTest is BaseTestSetup {
     function testNonExistentTemplate() external {
         CHEAT_CODES.expectRevert(
             abi.encodeWithSignature("NonExistentTemplate()")
         );
-        oraclesManager.template(1);
+        kpiTokensManager.template(2);
     }
 
     function testSuccess() external {
         uint256 _templateId = 0;
-        IOraclesManager.Template memory _template = oraclesManager.template(
+        IKPITokensManager.Template memory _template = kpiTokensManager.template(
             _templateId
         );
         assertEq(_template.id, _templateId);
-        assertEq(_template.addrezz, address(manualRealityOracleTemplate));
+        assertEq(_template.addrezz, address(erc20KpiTokenTemplate));
         assertEq(_template.version.major, 1);
         assertEq(_template.version.minor, 0);
         assertEq(_template.version.patch, 0);
-        assertEq(_template.specification, MANUAL_REALITY_ETH_SPECIFICATION);
+        assertEq(_template.specification, ERC20_KPI_TOKEN_SPECIFICATION);
         assertTrue(_template.exists);
     }
 }
