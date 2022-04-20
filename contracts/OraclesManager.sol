@@ -1,13 +1,13 @@
 pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "./interfaces/kpi-tokens/IKPIToken.sol";
-import "./interfaces/oracles/IOracle.sol";
-import "./interfaces/IOraclesManager.sol";
-import "./interfaces/IKPITokensFactory.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {IKPIToken} from "./interfaces/kpi-tokens/IKPIToken.sol";
+import {IOracle} from "./interfaces/oracles/IOracle.sol";
+import {IOraclesManager} from "./interfaces/IOraclesManager.sol";
+import {IKPITokensFactory} from "./interfaces/IKPITokensFactory.sol";
 
 /**
  * @title OraclesManager
