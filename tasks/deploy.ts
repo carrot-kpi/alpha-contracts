@@ -45,22 +45,6 @@ task(
             await aaveErc20KpiToken.deployed();
             console.log("Deployed Aave ERC20 KPI token template");
 
-            const oracleTemplateSetLibraryFactory =
-                await hre.ethers.getContractFactory("OracleTemplateSetLibrary");
-            const oracleTemplateSetLibrary =
-                await oracleTemplateSetLibraryFactory.deploy();
-            await oracleTemplateSetLibrary.deployed();
-            console.log("Deployed oracle template set library");
-
-            const kpiTokenTemplateSetLibraryFactory =
-                await hre.ethers.getContractFactory(
-                    "KpiTokenTemplateSetLibrary"
-                );
-            const kpiTokenTemplateSetLibrary =
-                await kpiTokenTemplateSetLibraryFactory.deploy();
-            await kpiTokenTemplateSetLibrary.deployed();
-            console.log("Deployed KPI token template set library");
-
             const signer = hre.ethers.provider.getSigner(0);
             const predictedFactoryAddress =
                 await hre.ethers.utils.getContractAddress({
@@ -69,13 +53,7 @@ task(
                 });
 
             const kpiTokensManagerFactory = await hre.ethers.getContractFactory(
-                "KPITokensManager",
-                {
-                    libraries: {
-                        KpiTokenTemplateSetLibrary:
-                            kpiTokenTemplateSetLibrary.address,
-                    },
-                }
+                "KPITokensManager"
             );
             const kpiTokensManager = await kpiTokensManagerFactory.deploy(
                 predictedFactoryAddress
@@ -99,13 +77,7 @@ task(
             console.log("Added Aave ERC20 KPI token template");
 
             const oraclesManagerFactory = await hre.ethers.getContractFactory(
-                "OraclesManager",
-                {
-                    libraries: {
-                        OracleTemplateSetLibrary:
-                            oracleTemplateSetLibrary.address,
-                    },
-                }
+                "OraclesManager"
             );
             const oraclesManager = await oraclesManagerFactory.deploy(
                 predictedFactoryAddress,
@@ -148,18 +120,6 @@ task(
 
                 await verifyContractSourceCode(hre, erc20KpiToken.address, []);
 
-                await verifyContractSourceCode(
-                    hre,
-                    kpiTokenTemplateSetLibrary.address,
-                    []
-                );
-
-                await verifyContractSourceCode(
-                    hre,
-                    oracleTemplateSetLibrary.address,
-                    []
-                );
-
                 await verifyContractSourceCode(hre, kpiTokensManager.address, [
                     predictedFactoryAddress,
                 ]);
@@ -188,13 +148,9 @@ task(
             console.log(
                 JSON.stringify(
                     {
-                        kpiTokenTemplateSetLibrary:
-                            kpiTokenTemplateSetLibrary.address,
                         kpiTokensManager: kpiTokensManager.address,
                         erc20KpiTokensTemplate: erc20KpiToken.address,
                         aaveErc20KpiTokensTemplate: aaveErc20KpiToken.address,
-                        oracleTemplateSetLibrary:
-                            oracleTemplateSetLibrary.address,
                         oraclesManager: oraclesManager.address,
                         factory: kpiTokensFactory.address,
                         manualRealityEthOracleTemplate:
