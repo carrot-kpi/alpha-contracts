@@ -92,7 +92,7 @@ contract KPITokensFactory is Ownable, IKPITokensFactory {
         feeReceiver = _feeReceiver;
     }
 
-    function size() external view override returns (uint256) {
+    function kpiTokensAmount() external view override returns (uint256) {
         return kpiTokens.length;
     }
 

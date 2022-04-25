@@ -20,7 +20,7 @@ interface IKPITokensFactory {
 
     function setFeeReceiver(address _feeReceiver) external;
 
-    function size() external view returns (uint256);
+    function kpiTokensAmount() external view returns (uint256);
 
     function enumerate(uint256 _fromIndex, uint256 _toIndex)
         external
