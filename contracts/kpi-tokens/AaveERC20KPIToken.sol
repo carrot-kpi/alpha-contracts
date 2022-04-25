@@ -53,6 +53,7 @@ contract AaveERC20KPIToken is
     error NotInitialized();
     error OraclesNotInitialized();
     error InvalidDescription();
+    error TooManyCollaterals();
 
     event Initialize(
         address creator,
@@ -85,8 +86,11 @@ contract AaveERC20KPIToken is
                 (address, CollateralWithoutAToken[], bytes32, bytes32, uint256)
             );
 
+        uint256 _collateralsLength = _collaterals.length;
+        if (_collateralsLength > 5) revert TooManyCollaterals();
+
         if (_aavePool == address(0)) revert InvalidAavePoolAddress();
-        for (uint256 _i = 0; _i < _collaterals.length; _i++) {
+        for (uint256 _i = 0; _i < _collateralsLength; _i++) {
             CollateralWithoutAToken
                 memory _collateralWithoutAToken = _collaterals[_i];
             Collateral memory _collateral = Collateral({
