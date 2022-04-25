@@ -8,6 +8,7 @@ import {ManualRealityOracle} from "../../contracts/oracles/ManualRealityOracle.s
 import {OraclesManager} from "../../contracts/OraclesManager.sol";
 import {KPITokensFactory} from "../../contracts/KPITokensFactory.sol";
 import {CheatCodes} from "./CheatCodes.sol";
+import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 
 /**
  * @title BaseTestSetup
@@ -26,6 +27,7 @@ abstract contract BaseTestSetup is DSTest {
     string internal constant AAVE_ERC20_KPI_TOKEN_SPECIFICATION =
         "QmPRwBVEPteH9qLKHdPGPPkNYuLzTv6fNACcLSHDUW3j8p";
 
+    ERC20PresetMinterPauser internal firstErc20;
     KPITokensFactory internal factory;
     ERC20KPIToken internal erc20KpiTokenTemplate;
     AaveERC20KPIToken internal aaveErc20KpiTokenTemplate;
@@ -34,6 +36,8 @@ abstract contract BaseTestSetup is DSTest {
     OraclesManager internal oraclesManager;
 
     function setUp() external {
+        firstErc20 = new ERC20PresetMinterPauser("Token 1", "TKN1");
+
         factory = new KPITokensFactory(address(1), address(1), address(this));
 
         erc20KpiTokenTemplate = new ERC20KPIToken();
