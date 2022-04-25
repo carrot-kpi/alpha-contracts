@@ -18,16 +18,25 @@ interface IAaveERC20KPIToken is IKPIToken, IERC20Upgradeable {
         bytes data;
     }
 
-    struct CollateralWithoutAToken {
+    struct InputCollateral {
         address token;
         uint256 amount;
         uint256 minimumPayout;
     }
 
-    struct Collateral {
+    struct ProtocolFeeCollateral {
         address token;
-        address aToken;
         uint256 amount;
+    }
+    
+    struct Fee {
+        address token;
+        uint256 amount;
+    }
+
+    struct Collateral {
+        address aToken;
+        address underlyingToken;
         uint256 minimumPayout;
     }
 

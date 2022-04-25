@@ -54,6 +54,9 @@ contract AaveERC20KPIToken is
     error OraclesNotInitialized();
     error InvalidDescription();
     error TooManyCollaterals();
+    error InvalidName();
+    error InvalidSymbol();
+    error InvalidTotalSupply();
 
     event Initialize(
         address creator,
@@ -73,56 +76,66 @@ contract AaveERC20KPIToken is
         string memory _description,
         bytes memory _data
     ) external override initializer {
-        if (bytes(_description).length == 0) revert InvalidDescription();
+        InitializeArguments memory _args = InitializeArguments({
+            creator: _creator,
+            kpiTokensManager: _kpiTokensManager,
+            kpiTokenTemplateId: _kpiTokenTemplateId,
+            description: _description,
+            data: _data
+        });
+
+        if (bytes(_args.description).length == 0) revert InvalidDescription();
 
         (
             address _aavePool,
-            CollateralWithoutAToken[] memory _collaterals,
+            InputCollateral[] memory _inputCollaterals,
             bytes32 _erc20Name,
             bytes32 _erc20Symbol,
             uint256 _erc20Supply
         ) = abi.decode(
                 _data,
-                (address, CollateralWithoutAToken[], bytes32, bytes32, uint256)
+                (address, InputCollateral[], bytes32, bytes32, uint256)
             );
 
-        uint256 _collateralsLength = _collaterals.length;
-        if (_collateralsLength > 5) revert TooManyCollaterals();
-
+        uint256 _inputCollateralsLength = _inputCollaterals.length;
+        if (_inputCollateralsLength > 5) revert TooManyCollaterals();
         if (_aavePool == address(0)) revert InvalidAavePoolAddress();
-        for (uint256 _i = 0; _i < _collateralsLength; _i++) {
-            CollateralWithoutAToken
-                memory _collateralWithoutAToken = _collaterals[_i];
-            Collateral memory _collateral = Collateral({
-                token: _collateralWithoutAToken.token,
-                amount: _collateralWithoutAToken.amount,
-                aToken: address(0),
-                minimumPayout: _collateralWithoutAToken.minimumPayout
-            });
+        if (_erc20Name == bytes32("")) revert InvalidName();
+        if (_erc20Symbol == bytes32("")) revert InvalidSymbol();
+        if (_erc20Supply == 0) revert InvalidTotalSupply();
+
+        for (uint8 _i = 0; _i < _inputCollateralsLength; _i++) {
+            InputCollateral memory _inputCollateral = _inputCollaterals[_i];
             if (
-                _collateral.token == address(0) ||
-                _collateral.amount == 0 ||
-                _collateral.minimumPayout >= _collateral.amount
+                _inputCollateral.token == address(0) ||
+                _inputCollateral.amount == 0 ||
+                _inputCollateral.minimumPayout >= _inputCollateral.amount
             ) revert InvalidCollateral();
 
+            Collateral memory _collateral = Collateral({
+                aToken: address(0),
+                underlyingToken: _inputCollateral.token,
+                minimumPayout: _inputCollateral.minimumPayout
+            });
+
             address _aTokenAddress = IAavePool(_aavePool)
-                .getReserveData(_collateral.token)
+                .getReserveData(_collateral.underlyingToken)
                 .aTokenAddress;
             if (_aTokenAddress == address(0)) revert InvalidCollateral();
             _collateral.aToken = _aTokenAddress;
 
-            IERC20Upgradeable(_collateral.token).safeTransferFrom(
-                _creator,
+            IERC20Upgradeable(_inputCollateral.token).safeTransferFrom(
+                _args.creator,
                 address(this),
-                _collateral.amount
+                _inputCollateral.amount
             );
-            IERC20Upgradeable(_collateral.token).approve(
+            IERC20Upgradeable(_inputCollateral.token).approve(
                 _aavePool,
-                _collateral.amount
+                _inputCollateral.amount
             );
             IAavePool(_aavePool).supply(
-                _collateral.token,
-                _collateral.amount,
+                _inputCollateral.token,
+                _inputCollateral.amount,
                 address(this),
                 0
             );
@@ -133,18 +146,18 @@ contract AaveERC20KPIToken is
             string(abi.encodePacked(_erc20Name)),
             string(abi.encodePacked(_erc20Symbol))
         );
-        _mint(_creator, _erc20Supply);
+        _mint(_args.creator, _erc20Supply);
 
         aavePool = _aavePool;
         initialSupply = _erc20Supply;
-        creator = _creator;
-        description = _description;
-        kpiTokensManager = _kpiTokensManager;
-        kpiTokenTemplateId = _kpiTokenTemplateId;
+        creator = _args.creator;
+        description = _args.description;
+        kpiTokensManager = _args.kpiTokensManager;
+        kpiTokenTemplateId = _args.kpiTokenTemplateId;
 
         emit Initialize(
-            _creator,
-            _description,
+            _args.creator,
+            _args.description,
             collaterals,
             _erc20Name,
             _erc20Symbol,
@@ -197,14 +210,15 @@ contract AaveERC20KPIToken is
         if (!oraclesInitialized) revert OraclesNotInitialized();
         if (protocolFeeCollected) revert AlreadyInitialized();
 
-        for (uint256 _i = 0; _i < collaterals.length; _i++) {
-            Collateral storage _collateral = collaterals[_i];
-            uint256 _fee = calculateProtocolFee(_collateral.amount);
+        for (uint8 _i = 0; _i < collaterals.length; _i++) {
+            Collateral memory _collateral = collaterals[_i];
+            uint256 _fee = calculateProtocolFee(
+                IERC20Upgradeable(_collateral.aToken).balanceOf(address(this))
+            );
             IERC20Upgradeable(_collateral.aToken).safeTransfer(
                 _feeReceiver,
                 _fee
             );
-            _collateral.amount -= _fee;
         }
 
         protocolFeeCollected = true;
@@ -231,41 +245,30 @@ contract AaveERC20KPIToken is
         if (finalized) revert Forbidden();
 
         FinalizableOracle storage _oracle = finalizableOracle(msg.sender);
+        address _aavePool = aavePool;
         if (_result < _oracle.lowerBound || _result == INVALID_ANSWER) {
             // if oracles are in an 'and' relationship and at least one gives a
             // negative result, give back all the collateral minus the minimum payout
-            // to the creator
-            if (andRelationship) {
-                for (uint256 _i = 0; _i < collaterals.length; _i++) {
-                    Collateral storage _collateral = collaterals[_i];
-                    uint256 _reimboursement = _collateral.amount -
-                        _collateral.minimumPayout;
-                    if (_reimboursement > 0) {
-                        IERC20Upgradeable(_collateral.token).safeTransfer(
-                            creator,
-                            _reimboursement
-                        );
-                        _collateral.amount -= _reimboursement;
-                    }
-                }
+            // to the creator, otherwise calculate the exact amount to give back.
+            bool _andRelationship = andRelationship;
+            for (uint8 _i = 0; _i < collaterals.length; _i++) {
+                Collateral memory _collateral = collaterals[_i];
+                uint256 _collateralAmount = IERC20Upgradeable(
+                    _collateral.aToken
+                ).balanceOf(address(this));
+                uint256 _reimboursement = _andRelationship
+                    ? _collateralAmount - _collateral.minimumPayout
+                    : ((_collateralAmount - _collateral.minimumPayout) *
+                        _oracle.weight) / totalWeight;
+                IAavePool(_aavePool).withdraw(
+                    _collateral.underlyingToken,
+                    _reimboursement,
+                    creator
+                );
+            }
+            if (_andRelationship) {
                 finalized = true;
                 return;
-            } else {
-                // if not in an 'and' relationship, only give back the amount of
-                // collateral tied to the failed condition (minus the minimum payout)
-                for (uint256 _i = 0; _i < collaterals.length; _i++) {
-                    Collateral storage _collateral = collaterals[_i];
-                    uint256 _reimboursement = ((_collateral.amount -
-                        _collateral.minimumPayout) * _oracle.weight) /
-                        totalWeight;
-                    if (_reimboursement > 0) {
-                        IERC20Upgradeable(_collateral.token).safeTransfer(
-                            creator,
-                            _reimboursement
-                        );
-                        _collateral.amount -= _reimboursement;
-                    }
-                }
             }
         } else {
             uint256 _oracleFullRange = _oracle.higherBound - _oracle.lowerBound;
@@ -273,38 +276,30 @@ contract AaveERC20KPIToken is
                 ? _oracleFullRange
                 : _result - _oracle.lowerBound;
             _oracle.finalProgress = _finalOracleProgress;
-            // transfer the unnecessary collateral back to the KPI creator
+            // transfer the unnecessary collateral back to the token creator
+            // if the condition wasn't fully satisfied
             if (_finalOracleProgress < _oracleFullRange) {
                 for (uint256 _i = 0; _i < collaterals.length; _i++) {
-                    Collateral storage _collateral = collaterals[_i];
-                    uint256 _reimboursement = ((_collateral.amount -
+                    Collateral memory _collateral = collaterals[_i];
+                    uint256 _collateralAmount = IERC20Upgradeable(
+                        _collateral.aToken
+                    ).balanceOf(address(this));
+                    uint256 _reimboursement = ((_collateralAmount -
                         _collateral.minimumPayout) *
                         _oracle.weight *
                         (_oracleFullRange - _finalOracleProgress)) /
                         (_oracleFullRange * totalWeight);
-                    if (_reimboursement > 0) {
-                        IERC20Upgradeable(_collateral.token).safeTransfer(
-                            creator,
-                            _reimboursement
-                        );
-                        _collateral.amount -= _reimboursement;
-                    }
+                    IAavePool(_aavePool).withdraw(
+                        _collateral.underlyingToken,
+                        _reimboursement,
+                        creator
+                    );
                 }
             }
         }
 
-        if (--toBeFinalized == 0) {
-            finalized = true;
-            for (uint256 _i = 0; _i < collaterals.length; _i++) {
-                Collateral storage _collateral = collaterals[_i];
-                uint256 _withdrawnAmount = IAavePool(aavePool).withdraw(
-                    _collateral.token,
-                    type(uint256).max,
-                    address(this)
-                );
-                _collateral.amount = _withdrawnAmount;
-            }
-        }
+        _oracle.finalized = true;
+        if (--toBeFinalized == 0) finalized = true;
 
         emit Finalize(msg.sender, _result);
     }
@@ -322,17 +317,24 @@ contract AaveERC20KPIToken is
         uint256 _kpiTokenBalance = balanceOf(msg.sender);
         if (_kpiTokenBalance == 0) revert Forbidden();
         _burn(msg.sender, _kpiTokenBalance);
+        uint256 _supply = totalSupply();
         RedeemedCollateral[]
             memory _redeemedCollaterals = new RedeemedCollateral[](
                 collaterals.length
             );
-        for (uint256 _i = 0; _i < collaterals.length; _i++) {
+        for (uint8 _i = 0; _i < collaterals.length; _i++) {
             Collateral memory _collateral = collaterals[_i];
-            // FIXME: can initial total supply be 0?
-            uint256 _redeemableAmount = (_collateral.amount *
-                _kpiTokenBalance) / initialSupply;
+            uint256 _collateralAmount = IERC20Upgradeable(_collateral.aToken)
+                .balanceOf(address(this));
+            uint256 _redeemableAmount = (_collateralAmount * _kpiTokenBalance) /
+                _supply;
+            IAavePool(aavePool).withdraw(
+                _collateral.underlyingToken,
+                _redeemableAmount,
+                msg.sender
+            );
             _redeemedCollaterals[_i] = RedeemedCollateral({
-                token: _collateral.token,
+                token: _collateral.underlyingToken,
                 amount: _redeemableAmount
             });
         }
@@ -344,19 +346,23 @@ contract AaveERC20KPIToken is
         pure
         returns (bytes memory)
     {
-        (
-            address[] memory _collateralTokens,
-            uint256[] memory _collateralAmounts
-        ) = abi.decode(_data, (address[], uint256[]));
+        ProtocolFeeCollateral[] memory _collaterals = abi.decode(
+            _data,
+            (ProtocolFeeCollateral[])
+        );
 
-        if (_collateralTokens.length != _collateralAmounts.length)
-            revert InconsistentArrayLengths();
+        if (_collaterals.length > 5) revert TooManyCollaterals();
 
-        uint256[] memory _fees = new uint256[](_collateralTokens.length);
-        for (uint256 _i = 0; _i < _collateralTokens.length; _i++)
-            _fees[_i] = calculateProtocolFee(_collateralAmounts[_i]);
+        Fee[] memory _fees = new Fee[](_collaterals.length);
+        for (uint8 _i = 0; _i < _collaterals.length; _i++) {
+            ProtocolFeeCollateral memory _collateral = _collaterals[_i];
+            _fees[_i] = Fee({
+                token: _collateral.token,
+                amount: calculateProtocolFee(_collateral.amount)
+            });
+        }
 
-        return abi.encode(_collateralTokens, _fees);
+        return abi.encode(_fees);
     }
 
     function oracles() external view override returns (address[] memory) {
@@ -369,44 +375,10 @@ contract AaveERC20KPIToken is
     }
 
     function data() external view returns (bytes memory) {
-        uint256 _collateralsLength = collaterals.length;
-        address[] memory _collateralTokens = new address[](_collateralsLength);
-        uint256[] memory _collateralAmounts = new uint256[](_collateralsLength);
-        uint256[] memory _collateralMinimumPayouts = new uint256[](
-            _collateralsLength
-        );
-        address[] memory _collateralATokens = new address[](_collateralsLength);
-        for (uint256 _i = 0; _i < _collateralsLength; _i++) {
-            Collateral memory _collateral = collaterals[_i];
-            _collateralTokens[_i] = _collateral.token;
-            _collateralAmounts[_i] = _collateral.amount;
-            _collateralMinimumPayouts[_i] = _collateral.minimumPayout;
-            _collateralATokens[_i] = _collateral.aToken;
-        }
-
-        uint256 _oraclesLength = finalizableOracles.length;
-        uint256[] memory _lowerBounds = new uint256[](_oraclesLength);
-        uint256[] memory _higherBounds = new uint256[](_oraclesLength);
-        uint256[] memory _finalProgresses = new uint256[](_oraclesLength);
-        uint256[] memory _weights = new uint256[](_oraclesLength);
-        for (uint256 _i = 0; _i < _oraclesLength; _i++) {
-            FinalizableOracle memory _oracle = finalizableOracles[_i];
-            _lowerBounds[_i] = _oracle.lowerBound;
-            _higherBounds[_i] = _oracle.higherBound;
-            _finalProgresses[_i] = _oracle.finalProgress;
-            _weights[_i] = _oracle.weight;
-        }
-
         return
             abi.encode(
-                _collateralTokens,
-                _collateralAmounts,
-                _collateralMinimumPayouts,
-                _collateralATokens,
-                _lowerBounds,
-                _higherBounds,
-                _finalProgresses,
-                _weights,
+                collaterals,
+                finalizableOracles,
                 andRelationship,
                 initialSupply,
                 name(),
