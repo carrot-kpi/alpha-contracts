@@ -101,7 +101,7 @@ contract FactoryCreateTokenTest is BaseTestSetup {
             );
         firstErc20.approve(_predictedKpiTokenAddress, 2);
 
-        assertEq(factory.size(), 0);
+        assertEq(factory.kpiTokensAmount(), 0);
         factory.createToken(
             0,
             "a",
@@ -109,7 +109,7 @@ contract FactoryCreateTokenTest is BaseTestSetup {
             _oraclesInitializationData
         );
 
-        assertEq(factory.size(), 1);
+        assertEq(factory.kpiTokensAmount(), 1);
         assertEq(factory.enumerate(0, 1)[0], _predictedKpiTokenAddress);
     }
 }
