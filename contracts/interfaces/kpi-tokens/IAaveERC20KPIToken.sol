@@ -1,4 +1,4 @@
-pragma solidity >0.8.0;
+pragma solidity >=0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "./IKPIToken.sol";
@@ -28,11 +28,6 @@ interface IAaveERC20KPIToken is IKPIToken, IERC20Upgradeable {
         address aToken;
         address underlyingToken;
         uint256 minimumPayout;
-    }
-
-    struct TokenAmount {
-        address token;
-        uint256 amount;
     }
 
     struct FinalizableOracle {

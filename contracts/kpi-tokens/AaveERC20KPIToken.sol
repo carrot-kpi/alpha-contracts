@@ -8,6 +8,7 @@ import "../interfaces/IOraclesManager.sol";
 import "../interfaces/IKPITokensManager.sol";
 import "../interfaces/external/IAavePool.sol";
 import "../interfaces/kpi-tokens/IAaveERC20KPIToken.sol";
+import {TokenAmount} from "../commons/Types.sol";
 
 /**
  * @title AaveERC20KPIToken

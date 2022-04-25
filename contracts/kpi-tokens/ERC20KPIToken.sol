@@ -7,6 +7,7 @@ import "../interfaces/oracles/IOracle.sol";
 import "../interfaces/IOraclesManager.sol";
 import "../interfaces/IKPITokensManager.sol";
 import "../interfaces/kpi-tokens/IERC20KPIToken.sol";
+import {TokenAmount} from "../commons/Types.sol";
 
 /**
  * @title ERC20KPIToken
