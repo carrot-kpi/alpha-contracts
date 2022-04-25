@@ -50,6 +50,7 @@ contract ERC20KPIToken is
     error NotInitialized();
     error OraclesNotInitialized();
     error InvalidDescription();
+    error TooManyCollaterals();
 
     event Initialize(
         address creator,
@@ -78,7 +79,10 @@ contract ERC20KPIToken is
             uint256 _erc20Supply
         ) = abi.decode(_data, (Collateral[], bytes32, bytes32, uint256));
 
-        for (uint256 _i = 0; _i < _collaterals.length; _i++) {
+        uint256 _collateralsLength = _collaterals.length;
+        if (_collateralsLength > 5) revert TooManyCollaterals();
+
+        for (uint8 _i = 0; _i < _collateralsLength; _i++) {
             Collateral memory _collateral = _collaterals[_i];
             if (
                 _collateral.token == address(0) ||
