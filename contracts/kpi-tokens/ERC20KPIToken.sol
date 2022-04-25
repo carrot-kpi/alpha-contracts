@@ -51,6 +51,9 @@ contract ERC20KPIToken is
     error OraclesNotInitialized();
     error InvalidDescription();
     error TooManyCollaterals();
+    error InvalidName();
+    error InvalidSymbol();
+    error InvalidTotalSupply();
 
     event Initialize(
         address creator,
@@ -70,7 +73,15 @@ contract ERC20KPIToken is
         string calldata _description,
         bytes calldata _data
     ) external override initializer {
-        if (bytes(_description).length == 0) revert InvalidDescription();
+        InitializeArguments memory _args = InitializeArguments({
+            creator: _creator,
+            kpiTokensManager: _kpiTokensManager,
+            kpiTokenTemplateId: _kpiTokenTemplateId,
+            description: _description,
+            data: _data
+        });
+
+        if (bytes(_args.description).length == 0) revert InvalidDescription();
 
         (
             Collateral[] memory _collaterals,
@@ -78,6 +89,12 @@ contract ERC20KPIToken is
             bytes32 _erc20Symbol,
             uint256 _erc20Supply
         ) = abi.decode(_data, (Collateral[], bytes32, bytes32, uint256));
+
+        uint256 _inputCollateralsLength = _collaterals.length;
+        if (_inputCollateralsLength > 5) revert TooManyCollaterals();
+        if (_erc20Name == bytes32("")) revert InvalidName();
+        if (_erc20Symbol == bytes32("")) revert InvalidSymbol();
+        if (_erc20Supply == 0) revert InvalidTotalSupply();
 
         uint256 _collateralsLength = _collaterals.length;
         if (_collateralsLength > 5) revert TooManyCollaterals();
@@ -90,7 +107,7 @@ contract ERC20KPIToken is
                 _collateral.minimumPayout >= _collateral.amount
             ) revert InvalidCollateral();
             IERC20Upgradeable(_collateral.token).safeTransferFrom(
-                _creator,
+                _args.creator,
                 address(this),
                 _collateral.amount
             );
@@ -101,17 +118,17 @@ contract ERC20KPIToken is
             string(abi.encodePacked(_erc20Name)),
             string(abi.encodePacked(_erc20Symbol))
         );
-        _mint(_creator, _erc20Supply);
+        _mint(_args.creator, _erc20Supply);
 
         initialSupply = _erc20Supply;
-        creator = _creator;
-        description = _description;
-        kpiTokensManager = _kpiTokensManager;
-        kpiTokenTemplateId = _kpiTokenTemplateId;
+        creator = _args.creator;
+        description = _args.description;
+        kpiTokensManager = _args.kpiTokensManager;
+        kpiTokenTemplateId = _args.kpiTokenTemplateId;
 
         emit Initialize(
-            _creator,
-            _description,
+            _args.creator,
+            _args.description,
             collaterals,
             _erc20Name,
             _erc20Symbol,
@@ -201,61 +218,45 @@ contract ERC20KPIToken is
         if (_result < _oracle.lowerBound || _result == INVALID_ANSWER) {
             // if oracles are in an 'and' relationship and at least one gives a
             // negative result, give back all the collateral minus the minimum payout
-            // to the creator
-            if (andRelationship) {
-                for (uint256 _i = 0; _i < collaterals.length; _i++) {
-                    Collateral storage _collateral = collaterals[_i];
-                    uint256 _reimboursement = _collateral.amount -
-                        _collateral.minimumPayout;
-                    if (_reimboursement > 0) {
-                        IERC20Upgradeable(_collateral.token).safeTransfer(
-                            creator,
-                            _reimboursement
-                        );
-                        _collateral.amount -= _reimboursement;
-                    }
-                }
+            // to the creator, otherwise calculate the exact amount to give back.
+            bool _andRelationship = andRelationship;
+            for (uint256 _i = 0; _i < collaterals.length; _i++) {
+                Collateral storage _collateral = collaterals[_i];
+                uint256 _reimboursement = _andRelationship
+                    ? _collateral.amount - _collateral.minimumPayout
+                    : ((_collateral.amount - _collateral.minimumPayout) *
+                        _oracle.weight) / totalWeight;
+                IERC20Upgradeable(_collateral.token).safeTransfer(
+                    creator,
+                    _reimboursement
+                );
+                _collateral.amount -= _reimboursement;
+            }
+            if (_andRelationship) {
                 finalized = true;
                 return;
-            } else {
-                // if not in an 'and' relationship, only give back the amount of
-                // collateral tied to the failed condition (minus the minimum payout)
-                for (uint256 _i = 0; _i < collaterals.length; _i++) {
-                    Collateral storage _collateral = collaterals[_i];
-                    uint256 _reimboursement = ((_collateral.amount -
-                        _collateral.minimumPayout) * _oracle.weight) /
-                        totalWeight;
-                    if (_reimboursement > 0) {
-                        IERC20Upgradeable(_collateral.token).safeTransfer(
-                            creator,
-                            _reimboursement
-                        );
-                        _collateral.amount -= _reimboursement;
-                    }
-                }
             }
         } else {
             uint256 _oracleFullRange = _oracle.higherBound - _oracle.lowerBound;
             uint256 _finalOracleProgress = _result >= _oracle.higherBound
-                ? _oracleFullRange
+                ? _oracle.higherBound
                 : _result - _oracle.lowerBound;
             _oracle.finalProgress = _finalOracleProgress;
             // transfer the unnecessary collateral back to the KPI creator
+            // if the condition wasn't fully satisfied
             if (_finalOracleProgress < _oracleFullRange) {
-                for (uint256 _i = 0; _i < collaterals.length; _i++) {
+                for (uint8 _i = 0; _i < collaterals.length; _i++) {
                     Collateral storage _collateral = collaterals[_i];
                     uint256 _reimboursement = ((_collateral.amount -
                         _collateral.minimumPayout) *
                         _oracle.weight *
                         (_oracleFullRange - _finalOracleProgress)) /
                         (_oracleFullRange * totalWeight);
-                    if (_reimboursement > 0) {
-                        IERC20Upgradeable(_collateral.token).safeTransfer(
-                            creator,
-                            _reimboursement
-                        );
-                        _collateral.amount -= _reimboursement;
-                    }
+                    IERC20Upgradeable(_collateral.token).safeTransfer(
+                        creator,
+                        _reimboursement
+                    );
+                    _collateral.amount -= _reimboursement;
                 }
             }
         }
@@ -283,8 +284,7 @@ contract ERC20KPIToken is
                 collaterals.length
             );
         for (uint256 _i = 0; _i < collaterals.length; _i++) {
-            Collateral storage _collateral = collaterals[_i];
-            // FIXME: can initial total supply be 0?
+            Collateral memory _collateral = collaterals[_i];
             uint256 _redeemableAmount = (_collateral.amount *
                 _kpiTokenBalance) / initialSupply;
             IERC20Upgradeable(_collateral.token).safeTransfer(
@@ -304,19 +304,20 @@ contract ERC20KPIToken is
         pure
         returns (bytes memory)
     {
-        (
-            address[] memory _collateralTokens,
-            uint256[] memory _collateralAmounts
-        ) = abi.decode(_data, (address[], uint256[]));
+        TokenAmount[] memory _collaterals = abi.decode(_data, (TokenAmount[]));
 
-        if (_collateralTokens.length != _collateralAmounts.length)
-            revert InconsistentArrayLengths();
+        if (_collaterals.length > 5) revert TooManyCollaterals();
 
-        uint256[] memory _fees = new uint256[](_collateralTokens.length);
-        for (uint256 _i = 0; _i < _collateralTokens.length; _i++)
-            _fees[_i] = calculateProtocolFee(_collateralAmounts[_i]);
+        TokenAmount[] memory _fees = new TokenAmount[](_collaterals.length);
+        for (uint8 _i = 0; _i < _collaterals.length; _i++) {
+            TokenAmount memory _collateral = _collaterals[_i];
+            _fees[_i] = TokenAmount({
+                token: _collateral.token,
+                amount: calculateProtocolFee(_collateral.amount)
+            });
+        }
 
-        return abi.encode(_collateralTokens, _fees);
+        return abi.encode(_fees);
     }
 
     function oracles() external view override returns (address[] memory) {
@@ -329,41 +330,10 @@ contract ERC20KPIToken is
     }
 
     function data() external view returns (bytes memory) {
-        uint256 _collateralsLength = collaterals.length;
-        address[] memory _collateralTokens = new address[](_collateralsLength);
-        uint256[] memory _collateralAmounts = new uint256[](_collateralsLength);
-        uint256[] memory _collateralMinimumPayouts = new uint256[](
-            _collateralsLength
-        );
-        for (uint256 _i = 0; _i < _collateralsLength; _i++) {
-            Collateral storage _collateral = collaterals[_i];
-            _collateralTokens[_i] = _collateral.token;
-            _collateralAmounts[_i] = _collateral.amount;
-            _collateralMinimumPayouts[_i] = _collateral.minimumPayout;
-        }
-
-        uint256 _oraclesLength = finalizableOracles.length;
-        uint256[] memory _lowerBounds = new uint256[](_oraclesLength);
-        uint256[] memory _higherBounds = new uint256[](_oraclesLength);
-        uint256[] memory _finalProgresses = new uint256[](_oraclesLength);
-        uint256[] memory _weights = new uint256[](_oraclesLength);
-        for (uint256 _i = 0; _i < _oraclesLength; _i++) {
-            FinalizableOracle storage _oracle = finalizableOracles[_i];
-            _lowerBounds[_i] = _oracle.lowerBound;
-            _higherBounds[_i] = _oracle.higherBound;
-            _finalProgresses[_i] = _oracle.finalProgress;
-            _weights[_i] = _oracle.weight;
-        }
-
         return
             abi.encode(
-                _collateralTokens,
-                _collateralAmounts,
-                _collateralMinimumPayouts,
-                _lowerBounds,
-                _higherBounds,
-                _finalProgresses,
-                _weights,
+                collaterals,
+                finalizableOracles,
                 andRelationship,
                 initialSupply,
                 name(),

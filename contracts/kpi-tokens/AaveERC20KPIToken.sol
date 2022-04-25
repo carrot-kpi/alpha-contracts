@@ -279,7 +279,7 @@ contract AaveERC20KPIToken is
             // transfer the unnecessary collateral back to the token creator
             // if the condition wasn't fully satisfied
             if (_finalOracleProgress < _oracleFullRange) {
-                for (uint256 _i = 0; _i < collaterals.length; _i++) {
+                for (uint8 _i = 0; _i < collaterals.length; _i++) {
                     Collateral memory _collateral = collaterals[_i];
                     uint256 _collateralAmount = IERC20Upgradeable(
                         _collateral.aToken
@@ -346,17 +346,14 @@ contract AaveERC20KPIToken is
         pure
         returns (bytes memory)
     {
-        ProtocolFeeCollateral[] memory _collaterals = abi.decode(
-            _data,
-            (ProtocolFeeCollateral[])
-        );
+        TokenAmount[] memory _collaterals = abi.decode(_data, (TokenAmount[]));
 
         if (_collaterals.length > 5) revert TooManyCollaterals();
 
-        Fee[] memory _fees = new Fee[](_collaterals.length);
+        TokenAmount[] memory _fees = new TokenAmount[](_collaterals.length);
         for (uint8 _i = 0; _i < _collaterals.length; _i++) {
-            ProtocolFeeCollateral memory _collateral = _collaterals[_i];
-            _fees[_i] = Fee({
+            TokenAmount memory _collateral = _collaterals[_i];
+            _fees[_i] = TokenAmount({
                 token: _collateral.token,
                 amount: calculateProtocolFee(_collateral.amount)
             });

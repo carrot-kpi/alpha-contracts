@@ -24,20 +24,15 @@ interface IAaveERC20KPIToken is IKPIToken, IERC20Upgradeable {
         uint256 minimumPayout;
     }
 
-    struct ProtocolFeeCollateral {
-        address token;
-        uint256 amount;
-    }
-    
-    struct Fee {
-        address token;
-        uint256 amount;
-    }
-
     struct Collateral {
         address aToken;
         address underlyingToken;
         uint256 minimumPayout;
+    }
+
+    struct TokenAmount {
+        address token;
+        uint256 amount;
     }
 
     struct FinalizableOracle {

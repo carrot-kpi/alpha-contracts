@@ -24,6 +24,11 @@ interface IERC20KPIToken is IKPIToken, IERC20Upgradeable {
         uint256 minimumPayout;
     }
 
+    struct TokenAmount {
+        address token;
+        uint256 amount;
+    }
+
     struct FinalizableOracle {
         address addrezz;
         uint256 lowerBound;
