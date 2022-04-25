@@ -22,7 +22,7 @@ contract KPITokensFactory is Ownable, IKPITokensFactory {
     address public oraclesManager;
     address public feeReceiver;
     mapping(address => bool) public created;
-    address[] kpiTokens;
+    address[] internal kpiTokens;
 
     error Forbidden();
     error ZeroAddressKpiTokensManager();
