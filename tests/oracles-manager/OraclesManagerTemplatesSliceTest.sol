@@ -6,20 +6,20 @@ import {IOraclesManager} from "../../contracts/interfaces/IOraclesManager.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 /**
- * @title OraclesManagerTemplatesSliceTest
- * @dev OraclesManagerTemplatesSliceTest contract
+ * @title OraclesManagerEnumerateTest
+ * @dev OraclesManagerEnumerateTest contract
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
-contract OraclesManagerTemplatesSliceTest is BaseTestSetup {
+contract OraclesManagerEnumerateTest is BaseTestSetup {
     function testNoTemplates() external {
         oraclesManager = new OraclesManager(address(factory), address(0));
         CHEAT_CODES.expectRevert(abi.encodeWithSignature("InvalidIndices()"));
-        oraclesManager.templatesSlice(0, 1);
+        oraclesManager.enumerate(0, 1);
     }
 
     function testOneTemplateSuccess() external {
-        assertEq(oraclesManager.templatesSlice(0, 1).length, 1);
+        assertEq(oraclesManager.enumerate(0, 1).length, 1);
     }
 
     function testMultipleTemplatesSuccess() external {
@@ -32,16 +32,16 @@ contract OraclesManagerTemplatesSliceTest is BaseTestSetup {
         oraclesManager.addTemplate(address(12), false, "g");
         oraclesManager.addTemplate(address(12), false, "h");
         oraclesManager.addTemplate(address(12), false, "i");
-        assertEq(oraclesManager.templatesSlice(0, 10).length, 10);
+        assertEq(oraclesManager.enumerate(0, 10).length, 10);
     }
 
     function testInconsistentIndices() external {
         CHEAT_CODES.expectRevert(abi.encodeWithSignature("InvalidIndices()"));
-        oraclesManager.templatesSlice(10, 5);
+        oraclesManager.enumerate(10, 5);
     }
 
     function testOneTemplateFail() external {
         CHEAT_CODES.expectRevert(abi.encodeWithSignature("InvalidIndices()"));
-        oraclesManager.templatesSlice(0, 10);
+        oraclesManager.enumerate(0, 10);
     }
 }

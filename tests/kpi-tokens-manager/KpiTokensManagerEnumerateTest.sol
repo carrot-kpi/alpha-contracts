@@ -6,20 +6,20 @@ import {IKPITokensManager} from "../../contracts/interfaces/IKPITokensManager.so
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 /**
- * @title KpiTokensManagerTemplatesSliceTest
- * @dev KpiTokensManagerTemplatesSliceTest contract
+ * @title KpiTokensManagerEnumerateTest
+ * @dev KpiTokensManagerEnumerateTest contract
  * @author Federico Luzzi - <fedeluzzi00@gmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
-contract KpiTokensManagerTemplatesSliceTest is BaseTestSetup {
+contract KpiTokensManagerEnumerateTest is BaseTestSetup {
     function testNoTemplates() external {
         kpiTokensManager = new KPITokensManager(address(factory));
         CHEAT_CODES.expectRevert(abi.encodeWithSignature("InvalidIndices()"));
-        kpiTokensManager.templatesSlice(0, 1);
+        kpiTokensManager.enumerate(0, 1);
     }
 
     function testOneTemplateSuccess() external {
-        assertEq(kpiTokensManager.templatesSlice(0, 1).length, 1);
+        assertEq(kpiTokensManager.enumerate(0, 1).length, 1);
     }
 
     function testMultipleTemplatesSuccess() external {
@@ -32,16 +32,16 @@ contract KpiTokensManagerTemplatesSliceTest is BaseTestSetup {
         kpiTokensManager.addTemplate(address(12), "g");
         kpiTokensManager.addTemplate(address(12), "h");
         kpiTokensManager.addTemplate(address(12), "i");
-        assertEq(kpiTokensManager.templatesSlice(0, 10).length, 10);
+        assertEq(kpiTokensManager.enumerate(0, 10).length, 10);
     }
 
     function testInconsistentIndices() external {
         CHEAT_CODES.expectRevert(abi.encodeWithSignature("InvalidIndices()"));
-        kpiTokensManager.templatesSlice(10, 5);
+        kpiTokensManager.enumerate(10, 5);
     }
 
     function testOneTemplateFail() external {
         CHEAT_CODES.expectRevert(abi.encodeWithSignature("InvalidIndices()"));
-        kpiTokensManager.templatesSlice(0, 10);
+        kpiTokensManager.enumerate(0, 10);
     }
 }

@@ -179,7 +179,7 @@ contract KPITokensManager is Ownable, IKPITokensManager {
         return templates.keys.length;
     }
 
-    function templatesSlice(uint256 _fromIndex, uint256 _toIndex)
+    function enumerate(uint256 _fromIndex, uint256 _toIndex)
         external
         view
         override

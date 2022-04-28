@@ -203,7 +203,7 @@ contract OraclesManager is Ownable, IOraclesManager {
         return templates.keys.length;
     }
 
-    function templatesSlice(uint256 _fromIndex, uint256 _toIndex)
+    function enumerate(uint256 _fromIndex, uint256 _toIndex)
         external
         view
         override

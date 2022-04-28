@@ -66,7 +66,7 @@ interface IOraclesManager {
 
     function templatesAmount() external view returns (uint256);
 
-    function templatesSlice(uint256 _fromIndex, uint256 _toIndex)
+    function enumerate(uint256 _fromIndex, uint256 _toIndex)
         external
         view
         returns (Template[] memory);
