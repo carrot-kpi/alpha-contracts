@@ -22,6 +22,7 @@ contract ManualRealityOracle is IOracle, Initializable {
 
     error Forbidden();
     error ZeroAddressKpiToken();
+    error InvalidTemplate();
     error ZeroAddressReality();
     error ZeroAddressArbitrator();
     error InvalidQuestion();
@@ -34,6 +35,7 @@ contract ManualRealityOracle is IOracle, Initializable {
         bytes calldata _data
     ) external override initializer {
         if (_kpiToken == address(0)) revert ZeroAddressKpiToken();
+        if (!_template.exists) revert InvalidTemplate();
 
         (
             address _reality,
