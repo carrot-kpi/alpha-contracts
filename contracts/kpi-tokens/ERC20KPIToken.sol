@@ -55,13 +55,15 @@ contract ERC20KPIToken is
     error InvalidName();
     error InvalidSymbol();
     error InvalidTotalSupply();
+    error InvalidCreator();
+    error InvalidKpiTokensManager();
 
     event Initialize(
         address creator,
         string description,
         Collateral[] collaterals,
-        bytes32 name,
-        bytes32 symbol,
+        string name,
+        string symbol,
         uint256 supply
     );
     event Finalize(address oracle, uint256 result);
@@ -82,25 +84,24 @@ contract ERC20KPIToken is
             data: _data
         });
 
+        if (_creator == address(0)) revert InvalidCreator();
+        if (_kpiTokensManager == address(0)) revert InvalidKpiTokensManager();
         if (bytes(_args.description).length == 0) revert InvalidDescription();
 
         (
             Collateral[] memory _collaterals,
-            bytes32 _erc20Name,
-            bytes32 _erc20Symbol,
+            string memory _erc20Name,
+            string memory _erc20Symbol,
             uint256 _erc20Supply
-        ) = abi.decode(_data, (Collateral[], bytes32, bytes32, uint256));
+        ) = abi.decode(_args.data, (Collateral[], string, string, uint256));
 
         uint256 _inputCollateralsLength = _collaterals.length;
         if (_inputCollateralsLength > 5) revert TooManyCollaterals();
-        if (_erc20Name == bytes32("")) revert InvalidName();
-        if (_erc20Symbol == bytes32("")) revert InvalidSymbol();
+        if (bytes(_erc20Name).length == 0) revert InvalidName();
+        if (bytes(_erc20Symbol).length == 0) revert InvalidSymbol();
         if (_erc20Supply == 0) revert InvalidTotalSupply();
 
-        uint256 _collateralsLength = _collaterals.length;
-        if (_collateralsLength > 5) revert TooManyCollaterals();
-
-        for (uint8 _i = 0; _i < _collateralsLength; _i++) {
+        for (uint8 _i = 0; _i < _inputCollateralsLength; _i++) {
             Collateral memory _collateral = _collaterals[_i];
             if (
                 _collateral.token == address(0) ||
@@ -115,10 +116,7 @@ contract ERC20KPIToken is
             collaterals.push(_collateral);
         }
 
-        __ERC20_init(
-            string(abi.encodePacked(_erc20Name)),
-            string(abi.encodePacked(_erc20Symbol))
-        );
+        __ERC20_init(_erc20Name, _erc20Symbol);
         _mint(_args.creator, _erc20Supply);
 
         initialSupply = _erc20Supply;
