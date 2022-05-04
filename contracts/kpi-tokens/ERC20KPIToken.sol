@@ -57,6 +57,7 @@ contract ERC20KPIToken is
     error InvalidTotalSupply();
     error InvalidCreator();
     error InvalidKpiTokensManager();
+    error ZeroAddressOraclesManager();
 
     event Initialize(
         address creator,
@@ -141,6 +142,7 @@ contract ERC20KPIToken is
     {
         address _creator = creator;
         if (_creator == address(0)) revert NotInitialized();
+        if (_oraclesManager == address(0)) revert ZeroAddressOraclesManager();
         if (oraclesInitialized) revert AlreadyInitialized();
 
         (OracleData[] memory _oracleDatas, bool _andRelationship) = abi.decode(
@@ -157,7 +159,7 @@ contract ERC20KPIToken is
             toBeFinalized++;
             address _instance = IOraclesManager(_oraclesManager).instantiate(
                 _creator,
-                _oracleData.id,
+                _oracleData.templateId,
                 _oracleData.data
             );
             finalizableOracles.push(

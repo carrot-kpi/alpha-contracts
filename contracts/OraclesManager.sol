@@ -214,9 +214,8 @@ contract OraclesManager is Ownable, IOraclesManager {
         uint256 _range = _toIndex - _fromIndex;
         IOraclesManager.Template[]
             memory _templates = new IOraclesManager.Template[](_range);
-        for (uint256 _i = _fromIndex; _i < _fromIndex + _range; _i++) {
-            _templates[_i] = templates.map[templates.keys[_i]];
-        }
+        for (uint256 _i = 0; _i < _range; _i++)
+            _templates[_i] = templates.map[templates.keys[_fromIndex + _i]];
         return _templates;
     }
 }

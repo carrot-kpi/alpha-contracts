@@ -70,6 +70,7 @@ abstract contract BaseTestSetup is DSTest {
 
     function createKpiToken(string memory _description, string memory _question)
         internal
+        returns (ERC20KPIToken)
     {
         IERC20KPIToken.Collateral[]
             memory _collaterals = new IERC20KPIToken.Collateral[](1);
@@ -80,8 +81,8 @@ abstract contract BaseTestSetup is DSTest {
         });
         bytes memory _erc20KpiTokenInitializationData = abi.encode(
             _collaterals,
-            bytes32("Test"),
-            bytes32("TST"),
+            "Test",
+            "TST",
             100 ether
         );
 
@@ -104,7 +105,7 @@ abstract contract BaseTestSetup is DSTest {
         IERC20KPIToken.OracleData[]
             memory _oracleDatas = new IERC20KPIToken.OracleData[](1);
         _oracleDatas[0] = IERC20KPIToken.OracleData({
-            id: 0,
+            templateId: 0,
             lowerBound: 0,
             higherBound: 1,
             weight: 1,
@@ -131,5 +132,14 @@ abstract contract BaseTestSetup is DSTest {
             _erc20KpiTokenInitializationData,
             _oraclesInitializationData
         );
+
+        uint256 kpiTokensAmount = factory.kpiTokensAmount();
+        return
+            ERC20KPIToken(
+                factory.enumerate(
+                    kpiTokensAmount > 0 ? kpiTokensAmount - 1 : kpiTokensAmount,
+                    kpiTokensAmount > 0 ? kpiTokensAmount : 1
+                )[0]
+            );
     }
 }

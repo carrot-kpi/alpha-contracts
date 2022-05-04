@@ -56,8 +56,8 @@ contract FactoryCreateTokenTest is BaseTestSetup {
         });
         bytes memory _erc20KpiTokenInitializationData = abi.encode(
             _collaterals,
-            bytes32("Test"),
-            bytes32("TST"),
+            "Test",
+            "TST",
             100 ether
         );
 
@@ -80,7 +80,7 @@ contract FactoryCreateTokenTest is BaseTestSetup {
         IERC20KPIToken.OracleData[]
             memory _oracleDatas = new IERC20KPIToken.OracleData[](1);
         _oracleDatas[0] = IERC20KPIToken.OracleData({
-            id: 0,
+            templateId: 0,
             lowerBound: 0,
             higherBound: 1,
             weight: 1,

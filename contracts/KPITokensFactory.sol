@@ -106,8 +106,8 @@ contract KPITokensFactory is Ownable, IKPITokensFactory {
             revert InvalidIndices();
         uint256 _range = _toIndex - _fromIndex;
         address[] memory _kpiTokens = new address[](_range);
-        for (uint256 _i = _fromIndex; _i < _fromIndex + _range; _i++)
-            _kpiTokens[_i] = kpiTokens[_i];
+        for (uint256 _i = 0; _i < _range; _i++)
+            _kpiTokens[_i] = kpiTokens[_fromIndex + _i];
         return _kpiTokens;
     }
 }

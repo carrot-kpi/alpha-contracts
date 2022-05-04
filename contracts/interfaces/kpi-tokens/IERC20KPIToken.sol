@@ -11,7 +11,7 @@ import "./IKPIToken.sol";
  */
 interface IERC20KPIToken is IKPIToken, IERC20Upgradeable {
     struct OracleData {
-        uint256 id;
+        uint256 templateId;
         uint256 lowerBound;
         uint256 higherBound;
         uint256 weight;
