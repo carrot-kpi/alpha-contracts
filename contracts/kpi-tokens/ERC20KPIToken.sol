@@ -49,7 +49,6 @@ contract ERC20KPIToken is
     error InvalidOracleWeights();
     error AlreadyInitialized();
     error NotInitialized();
-    error OraclesNotInitialized();
     error InvalidDescription();
     error TooManyCollaterals();
     error InvalidName();
@@ -58,6 +57,7 @@ contract ERC20KPIToken is
     error InvalidCreator();
     error InvalidKpiTokensManager();
     error ZeroAddressOraclesManager();
+    error InvalidMinimumPayoutAfterFee();
 
     event Initialize(
         address creator,
@@ -179,7 +179,7 @@ contract ERC20KPIToken is
     }
 
     function collectProtocolFees(address _feeReceiver) external nonReentrant {
-        if (!oraclesInitialized) revert OraclesNotInitialized();
+        if (!oraclesInitialized) revert NotInitialized();
         if (protocolFeeCollected) revert AlreadyInitialized();
 
         for (uint256 _i = 0; _i < collaterals.length; _i++) {
@@ -189,6 +189,8 @@ contract ERC20KPIToken is
                 _feeReceiver,
                 _fee
             );
+            if (_collateral.amount - _fee <= _collateral.minimumPayout)
+                revert InvalidMinimumPayoutAfterFee();
             _collateral.amount -= _fee;
         }
 

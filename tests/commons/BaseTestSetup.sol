@@ -29,6 +29,7 @@ abstract contract BaseTestSetup is DSTest {
         "QmPRwBVEPteH9qLKHdPGPPkNYuLzTv6fNACcLSHDUW3j8p";
 
     ERC20PresetMinterPauser internal firstErc20;
+    ERC20PresetMinterPauser internal secondErc20;
     KPITokensFactory internal factory;
     ERC20KPIToken internal erc20KpiTokenTemplate;
     AaveERC20KPIToken internal aaveErc20KpiTokenTemplate;
@@ -38,6 +39,7 @@ abstract contract BaseTestSetup is DSTest {
 
     function setUp() external {
         firstErc20 = new ERC20PresetMinterPauser("Token 1", "TKN1");
+        secondErc20 = new ERC20PresetMinterPauser("Token 2", "TKN2");
 
         factory = new KPITokensFactory(address(1), address(1), address(this));
 
