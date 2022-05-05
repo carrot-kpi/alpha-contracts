@@ -58,6 +58,7 @@ contract ERC20KPIToken is
     error InvalidKpiTokensManager();
     error ZeroAddressOraclesManager();
     error InvalidMinimumPayoutAfterFee();
+    error DuplicatedCollateral();
 
     event Initialize(
         address creator,
@@ -104,6 +105,7 @@ contract ERC20KPIToken is
 
         for (uint8 _i = 0; _i < _inputCollateralsLength; _i++) {
             Collateral memory _collateral = _collaterals[_i];
+            // FIXME: add checks for duplicates
             if (
                 _collateral.token == address(0) ||
                 _collateral.amount == 0 ||
@@ -314,6 +316,11 @@ contract ERC20KPIToken is
         TokenAmount[] memory _fees = new TokenAmount[](_collaterals.length);
         for (uint8 _i = 0; _i < _collaterals.length; _i++) {
             TokenAmount memory _collateral = _collaterals[_i];
+            if (_collateral.token == address(0) || _collateral.amount == 0)
+                revert InvalidCollateral();
+            for (uint8 _j = _i + 1; _j < _collaterals.length; _j++)
+                if (_collateral.token == _collaterals[_j].token)
+                    revert DuplicatedCollateral();
             _fees[_i] = TokenAmount({
                 token: _collateral.token,
                 amount: calculateProtocolFee(_collateral.amount)
