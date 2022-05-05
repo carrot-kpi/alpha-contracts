@@ -331,6 +331,7 @@ contract ERC20KPIToken is
     }
 
     function oracles() external view override returns (address[] memory) {
+        if (!oraclesInitialized) revert NotInitialized();
         address[] memory _oracleAddresses = new address[](
             finalizableOracles.length
         );
