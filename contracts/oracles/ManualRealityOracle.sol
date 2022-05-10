@@ -73,8 +73,11 @@ contract ManualRealityOracle is IOracle, Initializable {
     function finalize() external {
         bytes32 _questionId = questionId; // gas optimization
         address _reality = reality; // gas optimization
-        if (finalized || !IReality(_reality).isFinalized(_questionId))
-            revert Forbidden();
+        if (
+            finalized ||
+            !IReality(_reality).isFinalized(_questionId) ||
+            IKPIToken(kpiToken).finalized()
+        ) revert Forbidden();
         IKPIToken(kpiToken).finalize(
             uint256(IReality(_reality).resultFor(_questionId))
         );

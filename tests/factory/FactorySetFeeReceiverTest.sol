@@ -23,7 +23,7 @@ contract FactorySetFeeReceiverTest is BaseTestSetup {
     }
 
     function testSuccess() external {
-        assertEq(factory.feeReceiver(), address(this));
+        assertEq(factory.feeReceiver(), feeReceiver);
         address _newFeeReceiver = address(2);
         factory.setFeeReceiver(_newFeeReceiver);
         assertEq(factory.feeReceiver(), _newFeeReceiver);

@@ -24,6 +24,7 @@ contract ERC20KPIToken is
 
     uint256 internal immutable INVALID_ANSWER =
         0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    uint256 internal immutable MULTIPLIER = 64;
 
     bool internal oraclesInitialized;
     bool internal protocolFeeCollected;
@@ -152,13 +153,12 @@ contract ERC20KPIToken is
             (OracleData[], bool)
         );
 
-        for (uint256 _i = 0; _i < _oracleDatas.length; _i++) {
+        for (uint16 _i = 0; _i < _oracleDatas.length; _i++) {
             OracleData memory _oracleData = _oracleDatas[_i];
             if (_oracleData.higherBound <= _oracleData.lowerBound)
                 revert InvalidOracleBounds();
             if (_oracleData.weight == 0) revert InvalidOracleWeights();
             totalWeight += _oracleData.weight;
-            toBeFinalized++;
             address _instance = IOraclesManager(_oraclesManager).instantiate(
                 _creator,
                 _oracleData.templateId,
@@ -176,6 +176,7 @@ contract ERC20KPIToken is
             );
         }
 
+        toBeFinalized = uint16(_oracleDatas.length);
         andRelationship = _andRelationship;
         oraclesInitialized = true;
     }
@@ -217,20 +218,29 @@ contract ERC20KPIToken is
     }
 
     function finalize(uint256 _result) external override nonReentrant {
-        if (finalized) revert Forbidden();
+        if (!oraclesInitialized) revert NotInitialized();
 
         FinalizableOracle storage _oracle = finalizableOracle(msg.sender);
-        if (_result < _oracle.lowerBound || _result == INVALID_ANSWER) {
+        if (finalized || _oracle.finalized) revert Forbidden();
+
+        if (_result <= _oracle.lowerBound || _result == INVALID_ANSWER) {
             // if oracles are in an 'and' relationship and at least one gives a
             // negative result, give back all the collateral minus the minimum payout
             // to the creator, otherwise calculate the exact amount to give back.
             bool _andRelationship = andRelationship;
             for (uint256 _i = 0; _i < collaterals.length; _i++) {
                 Collateral storage _collateral = collaterals[_i];
-                uint256 _reimboursement = _andRelationship
-                    ? _collateral.amount - _collateral.minimumPayout
-                    : ((_collateral.amount - _collateral.minimumPayout) *
-                        _oracle.weight) / totalWeight;
+                uint256 _reimboursement;
+                if (_andRelationship)
+                    _reimboursement =
+                        _collateral.amount -
+                        _collateral.minimumPayout;
+                else {
+                    uint256 _numerator = ((_collateral.amount -
+                        _collateral.minimumPayout) * _oracle.weight) <<
+                        MULTIPLIER;
+                    _reimboursement = (_numerator / totalWeight) >> MULTIPLIER;
+                }
                 IERC20Upgradeable(_collateral.token).safeTransfer(
                     creator,
                     _reimboursement
@@ -239,6 +249,9 @@ contract ERC20KPIToken is
             }
             if (_andRelationship) {
                 finalized = true;
+                for (uint256 _i = 0; _i < finalizableOracles.length; _i++)
+                    finalizableOracles[_i].finalized = true;
+                toBeFinalized = 0;
                 return;
             }
         } else {
@@ -252,11 +265,14 @@ contract ERC20KPIToken is
             if (_finalOracleProgress < _oracleFullRange) {
                 for (uint8 _i = 0; _i < collaterals.length; _i++) {
                     Collateral storage _collateral = collaterals[_i];
-                    uint256 _reimboursement = ((_collateral.amount -
+                    uint256 _numerator = ((_collateral.amount -
                         _collateral.minimumPayout) *
                         _oracle.weight *
-                        (_oracleFullRange - _finalOracleProgress)) /
-                        (_oracleFullRange * totalWeight);
+                        (_oracleFullRange - _finalOracleProgress)) <<
+                        MULTIPLIER;
+                    uint256 _denominator = _oracleFullRange * totalWeight;
+                    uint256 _reimboursement = (_numerator / _denominator) >>
+                        MULTIPLIER;
                     IERC20Upgradeable(_collateral.token).safeTransfer(
                         creator,
                         _reimboursement
@@ -266,6 +282,7 @@ contract ERC20KPIToken is
             }
         }
 
+        _oracle.finalized = true;
         if (--toBeFinalized == 0) finalized = true;
 
         emit Finalize(msg.sender, _result);
