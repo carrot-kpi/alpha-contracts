@@ -300,15 +300,16 @@ contract ERC20KPIToken is
         if (!finalized) revert Forbidden();
         uint256 _kpiTokenBalance = balanceOf(msg.sender);
         if (_kpiTokenBalance == 0) revert Forbidden();
-        _burn(msg.sender, _kpiTokenBalance);
         RedeemedCollateral[]
             memory _redeemedCollaterals = new RedeemedCollateral[](
                 collaterals.length
             );
-        for (uint256 _i = 0; _i < collaterals.length; _i++) {
-            Collateral memory _collateral = collaterals[_i];
+        uint256 _totalSupply = totalSupply();
+        for (uint8 _i = 0; _i < collaterals.length; _i++) {
+            Collateral storage _collateral = collaterals[_i];
             uint256 _redeemableAmount = (_collateral.amount *
-                _kpiTokenBalance) / initialSupply;
+                _kpiTokenBalance) / _totalSupply;
+            _collateral.amount -= _redeemableAmount;
             IERC20Upgradeable(_collateral.token).safeTransfer(
                 msg.sender,
                 _redeemableAmount
@@ -318,6 +319,7 @@ contract ERC20KPIToken is
                 amount: _redeemableAmount
             });
         }
+        _burn(msg.sender, _kpiTokenBalance);
         emit Redeem(_kpiTokenBalance, _redeemedCollaterals);
     }
 
