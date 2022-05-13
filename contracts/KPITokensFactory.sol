@@ -21,7 +21,7 @@ contract KPITokensFactory is Ownable, IKPITokensFactory {
     address public kpiTokensManager;
     address public oraclesManager;
     address public feeReceiver;
-    mapping(address => bool) public created;
+    mapping(address => bool) public allowOraclesCreation;
     address[] internal kpiTokens;
 
     error Forbidden();
@@ -64,11 +64,12 @@ contract KPITokensFactory is Ownable, IKPITokensFactory {
             _description,
             _initializationData
         );
-        created[_instance] = true;
+        allowOraclesCreation[_instance] = true;
         IKPIToken(_instance).initializeOracles(
             oraclesManager,
             _oraclesInitializationData
         );
+        allowOraclesCreation[_instance] = false;
         IKPIToken(_instance).collectProtocolFees(feeReceiver);
         kpiTokens.push(_instance);
     }

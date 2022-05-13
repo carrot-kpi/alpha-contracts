@@ -14,7 +14,7 @@ interface IKPITokensFactory {
         bytes memory _oraclesInitializationData
     ) external;
 
-    function created(address _address) external returns (bool);
+    function allowOraclesCreation(address _address) external returns (bool);
 
     function setKpiTokensManager(address _kpiTokensManager) external;
 

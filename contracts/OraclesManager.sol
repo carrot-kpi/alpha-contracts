@@ -80,8 +80,8 @@ contract OraclesManager is Ownable, IOraclesManager {
         uint256 _id,
         bytes calldata _initializationData
     ) external override returns (address) {
-        bool _created = IKPITokensFactory(factory).created(msg.sender);
-        if (!_created) revert Forbidden();
+        if (!IKPITokensFactory(factory).allowOraclesCreation(msg.sender))
+            revert Forbidden();
         IOraclesManager.Template storage _template = storageTemplate(_id);
         address _instance = Clones.cloneDeterministic(
             _template.addrezz,

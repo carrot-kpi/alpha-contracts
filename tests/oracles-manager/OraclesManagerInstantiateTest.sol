@@ -33,7 +33,10 @@ contract OraclesManagerInstantiateTest is BaseTestSetup {
         );
         CHEAT_CODES.mockCall(
             address(factory),
-            abi.encodeWithSignature("created(address)", address(this)),
+            abi.encodeWithSignature(
+                "allowOraclesCreation(address)",
+                address(this)
+            ),
             abi.encode(true)
         );
         address _instance = oraclesManager.instantiate(
