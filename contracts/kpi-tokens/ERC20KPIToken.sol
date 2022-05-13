@@ -106,12 +106,14 @@ contract ERC20KPIToken is
 
         for (uint8 _i = 0; _i < _inputCollateralsLength; _i++) {
             Collateral memory _collateral = _collaterals[_i];
-            // FIXME: add checks for duplicates
             if (
                 _collateral.token == address(0) ||
                 _collateral.amount == 0 ||
                 _collateral.minimumPayout >= _collateral.amount
             ) revert InvalidCollateral();
+            for (uint8 _j = _i + 1; _j < _collaterals.length; _j++)
+                if (_collateral.token == _collaterals[_j].token)
+                    revert DuplicatedCollateral();
             IERC20Upgradeable(_collateral.token).safeTransferFrom(
                 _args.creator,
                 address(this),

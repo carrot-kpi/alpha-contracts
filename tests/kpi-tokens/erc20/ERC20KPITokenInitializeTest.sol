@@ -173,6 +173,36 @@ contract ERC20KPITokenInitializeTest is BaseTestSetup {
         );
     }
 
+    function testDuplicatedCollaterals() external {
+        ERC20KPIToken kpiTokenInstance = ERC20KPIToken(
+            Clones.clone(address(erc20KpiTokenTemplate))
+        );
+
+        IERC20KPIToken.Collateral[]
+            memory collaterals = new IERC20KPIToken.Collateral[](2);
+        collaterals[0] = IERC20KPIToken.Collateral({
+            token: address(10000),
+            amount: 200,
+            minimumPayout: 0
+        });
+        collaterals[1] = IERC20KPIToken.Collateral({
+            token: address(10000),
+            amount: 100,
+            minimumPayout: 0
+        });
+
+        CHEAT_CODES.expectRevert(
+            abi.encodeWithSignature("DuplicatedCollateral()")
+        );
+        kpiTokenInstance.initialize(
+            address(1),
+            address(1),
+            0,
+            "a",
+            abi.encode(collaterals, "Token", "TKN", 100 ether)
+        );
+    }
+
     function testZeroAddressCollateral() external {
         ERC20KPIToken kpiTokenInstance = ERC20KPIToken(
             Clones.clone(address(erc20KpiTokenTemplate))
