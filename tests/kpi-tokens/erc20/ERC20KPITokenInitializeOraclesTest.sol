@@ -86,6 +86,33 @@ contract ERC20KPITokenInitializeOraclesTest is BaseTestSetup {
         );
     }
 
+    function testTooManyOracles() external {
+        ERC20KPIToken kpiTokenInstance = initializeKpiToken();
+        IERC20KPIToken.OracleData[]
+            memory oracleData = new IERC20KPIToken.OracleData[](6);
+        for (uint8 i = 0; i < 6; i++) {
+            oracleData[i] = IERC20KPIToken.OracleData({
+                templateId: 0,
+                lowerBound: 0,
+                higherBound: 0,
+                weight: 1,
+                data: abi.encode(
+                    address(2), // fake reality.eth address
+                    address(this), // arbitrator
+                    0, // template id
+                    "a", // question
+                    200, // question timeout
+                    block.timestamp + 200 // expiry
+                )
+            });
+        }
+        CHEAT_CODES.expectRevert(abi.encodeWithSignature("TooManyOracles()"));
+        kpiTokenInstance.initializeOracles(
+            address(oraclesManager),
+            abi.encode(oracleData, true)
+        );
+    }
+
     function testSameOracleBounds() external {
         ERC20KPIToken kpiTokenInstance = initializeKpiToken();
         IERC20KPIToken.OracleData[]
@@ -229,7 +256,7 @@ contract ERC20KPITokenInitializeOraclesTest is BaseTestSetup {
 
         CHEAT_CODES.clearMockedCalls();
     }
-    
+
     function testSuccessNoAndSingleOracle() external {
         ERC20KPIToken kpiTokenInstance = initializeKpiToken();
         IERC20KPIToken.OracleData[]
@@ -377,7 +404,7 @@ contract ERC20KPITokenInitializeOraclesTest is BaseTestSetup {
 
         CHEAT_CODES.clearMockedCalls();
     }
-    
+
     function testSuccessNoAndMultipleOracles() external {
         ERC20KPIToken kpiTokenInstance = initializeKpiToken();
         IERC20KPIToken.OracleData[]

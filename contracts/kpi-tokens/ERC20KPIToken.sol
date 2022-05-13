@@ -52,6 +52,7 @@ contract ERC20KPIToken is
     error NotInitialized();
     error InvalidDescription();
     error TooManyCollaterals();
+    error TooManyOracles();
     error InvalidName();
     error InvalidSymbol();
     error InvalidTotalSupply();
@@ -154,6 +155,8 @@ contract ERC20KPIToken is
             _data,
             (OracleData[], bool)
         );
+
+        if (_oracleDatas.length > 5) revert TooManyOracles();
 
         for (uint16 _i = 0; _i < _oracleDatas.length; _i++) {
             OracleData memory _oracleData = _oracleDatas[_i];
