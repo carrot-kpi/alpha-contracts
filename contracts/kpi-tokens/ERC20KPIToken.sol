@@ -9,12 +9,21 @@ import "../interfaces/IKPITokensManager.sol";
 import "../interfaces/kpi-tokens/IERC20KPIToken.sol";
 import {TokenAmount} from "../commons/Types.sol";
 
-/**
- * @title ERC20KPIToken
- * @dev ERC20KPIToken contract
- * @author Federico Luzzi - <federico.luzzi@protonmail.com>
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
+/// SPDX-License-Identifier: GPL-3.0-or-later
+/// @title ERC20KPIToken
+/// @dev A KPI token template imlementation. The template produces ERC20 tokens
+/// that can be distributed arbitrarily to communities or specific entities in order
+/// to incentivize them to reach certain KPIs. Backing these tokens there are potentially
+/// a multitude of other ERC20 tokens (up to 5), the release of which is linked to
+/// reaching the predetermined KPIs or not. In order to check if these KPIs are reached
+/// on-chain, oracles oracles are employed, and based on the results conveyed back to
+/// the KPI token template, the collaterals are either unlocked or sent back to the
+/// original KPI token creator. Interesting logic is additionally tied to the conditions
+/// and collaterals, such as the possibility to have a minimum payout (a per-collateral
+/// sum that will always be paid out to KPI token holders regardless of the fact that
+/// KPIs are reached or not), weighted KPIs and multiple detached resolution or all-in-one
+/// reaching of KPIs (explained more in details later).
+/// @author Federico Luzzi - <federico.luzzi@protonmail.com>
 contract ERC20KPIToken is
     ERC20Upgradeable,
     IERC20KPIToken,
@@ -73,6 +82,23 @@ contract ERC20KPIToken is
     event Finalize(address oracle, uint256 result);
     event Redeem(uint256 burned, RedeemedCollateral[] redeemed);
 
+    /// @dev Initializes the template through the passed in data. This function is
+    /// generally invoked by the factory,
+    /// in turn invoked by a KPI token creator.
+    /// @param _creator Since the factory is assumed to be the caller of this function,
+    /// it must forward the original caller (msg.sender, the KPI token creator) here.
+    /// @param _kpiTokensManager The factory-forwarded address of the KPI tokens manager.
+    /// @param _kpiTokenTemplateId The id of the template.
+    /// @param _description An IPFS cid pointing to a structured JSON describing what the
+    /// @param _data An ABI-encoded structure forwarded by the factory from the KPI token
+    /// creator, containing the initialization parameters for the ERC20 KPI token template.
+    /// In particular the structure is formed in the following way:
+    /// - `Collateral[] memory _collaterals`: an array of `Collateral` structs conveying
+    ///   information about the collaterals to be used (a limit of maximum 5 different
+    ///   collateral is enforced, and duplicates are not allowed).
+    /// - `string memory _erc20Name`: The `name` of the created ERC20 token.
+    /// - `string memory _erc20Symbol`: The `symbol` of the created ERC20 token.
+    /// - `string memory _erc20Supply`: The initial supply of the created ERC20 token.
     function initialize(
         address _creator,
         address _kpiTokensManager,
@@ -142,6 +168,36 @@ contract ERC20KPIToken is
         );
     }
 
+    /// @dev Initializes the oracles tied to this KPI token (both the actual oracle
+    /// instantiation and configuration data needed to interpret the relayed result
+    /// at the KPI-token level). This function is generally invoked by the factory,
+    /// in turn invoked by a KPI token creator.
+    /// @param _oraclesManager The factory-forwarded address of the oracles manager.
+    /// @param _data An ABI-encoded structure forwarded by the factory from the KPI token
+    /// creator, containing the initialization parameters for the chosen oracle templates.
+    /// In particular the structure is formed in the following way:
+    /// - `OracleData[] memory _oracleDatas`: data about the oracle, such as:
+    ///     - `uint256 _templateId`: The id of the chosed oracle template.
+    ///     - `uint256 _lowerBound`: The number at which the oracle's reported result is
+    ///       interpreted in a failed KPI (not reached). If the oracle linked to this lower
+    ///       bound reports a final number above this, we know the KPI is at least partially
+    ///       reached.
+    ///     - `uint256 _higherBound`: The number at which the oracle's reported result
+    ///       is interpreted in a full verification of the KPI (fully reached). If the
+    ///       oracle linked to this higher bound reports a final number equal or greater
+    ///       than this, we know the KPI has fully been reached.
+    ///     - `uint256 _weight`: The KPI weight determines the importance of it and how
+    ///       much of the collateral a specific KPI "governs". If for example we have 2
+    ///       KPIs A and B with respective weights 1 and 2, a third of the deposited
+    ///       collaterals goes towards incentivizing A, while the remaining 2/3rds go
+    ///       to B (i.e. B is valued as a more critical KPI to reach compared to A, and
+    ///       collaterals reflect this).
+    ///     - `uint256 _data`: ABI-encoded, oracle-specific data used to effectively
+    ///       instantiate the oracle in charge of monitoring this KPI and reporting the
+    ///       final result on-chain.
+    /// - `bool _andRelationship`: Whether all KPIs should be at least partly reached in
+    ///   order to unlock collaterals for KPI token holders to redeem (minus the minimum
+    ///   payout amount, which is unlocked under any circumstance).
     function initializeOracles(address _oraclesManager, bytes calldata _data)
         external
         nonReentrant
@@ -186,6 +242,10 @@ contract ERC20KPIToken is
         oraclesInitialized = true;
     }
 
+    /// @dev Collects the protocol fee from the collaterals backing the KPI token.
+    /// In the specific case, the fee is taken as a percentage of the ERC20
+    /// collaterals backing the KPI token.
+    /// @param _feeReceiver The address to which the collected fees must be sent.
     function collectProtocolFees(address _feeReceiver) external nonReentrant {
         if (!oraclesInitialized) revert NotInitialized();
         if (protocolFeeCollected) revert AlreadyInitialized();
@@ -205,6 +265,10 @@ contract ERC20KPIToken is
         protocolFeeCollected = true;
     }
 
+    /// @dev Given an input address, returns a storage pointer to the
+    /// `FinalizableOracle` struct associated with it. It reverts if
+    /// the association does not exists.
+    /// @param _address The finalizable oracle address.
     function finalizableOracle(address _address)
         internal
         view
@@ -222,6 +286,37 @@ contract ERC20KPIToken is
         revert Forbidden();
     }
 
+    /// @dev Finalizes a condition linked with the KPI token. Exclusively
+    /// callable by oracles linked with the KPI token in order to report the
+    /// final outcome for a KPI once everything has played out "in the real world".
+    /// Based on the reported results and the template configuration, collateral is
+    /// either reserved to be redeemed by KPI token holders when full finalization is
+    /// reached (i.e. when all the oracles have reported their final result), or sent
+    /// back to the original KPI token creator (for example when KPIs have not been
+    /// met, minus any present minimum payout). The possible scenarios are the following:
+    ///
+    /// If a result is either invalid or below the lower bound set for the KPI:
+    /// - If an "all or none" approach has been chosen at the KPI token initialization
+    /// time, all the collateral is sent back to the KPI token creator and the KPI token
+    /// expires worthless on the spot.
+    /// - If no "all or none" condition has been set, the KPI contracts calculates how
+    /// much of the collaterals the specific condition "governed" (through the weighting
+    /// mechanism), subtracts any minimum payout for these and sends back the right amount
+    /// of collateral to the KPI token creator.
+    ///
+    /// If a result is in the specified range (and NOT above the higher bound) set for
+    /// the KPI, the same calculations happen and some of the collateral gets sent back
+    /// to the KPI token creator depending on how far we were from reaching the full KPI
+    /// progress.
+    ///
+    /// If a result is at or above the higher bound set for the KPI token, pretty much
+    /// nothing happens to the collateral, which is fully assigned to the KPI token holders
+    /// and which will become redeemable once the finalization process has ended for all
+    /// the oracles assigned to the KPI token.
+    ///
+    /// Once all the oracles associated with the KPI token have reported their end result and
+    /// finalize, the remaining collateral, if any, becomes redeemable by KPI token holders.
+    /// @param _result The oracle end result.
     function finalize(uint256 _result) external override nonReentrant {
         if (!oraclesInitialized) revert NotInitialized();
 
@@ -293,6 +388,9 @@ contract ERC20KPIToken is
         emit Finalize(msg.sender, _result);
     }
 
+    /// @dev Given a collateral amount, calculates the protocol fee as a percentage of it.
+    /// @param _amount The collateral amount end result.
+    /// @return The protocol fee amount.
     function calculateProtocolFee(uint256 _amount)
         internal
         pure
@@ -301,6 +399,10 @@ contract ERC20KPIToken is
         return (_amount * 30) / 10_000;
     }
 
+    /// @dev Only callable by KPI token holders, lets them redeem any collateral
+    /// left in the contract after finalization, proportional to their balance
+    /// compared to the total supply and left collateral amount. If the KPI token
+    /// has expired worthless, this simply burns the user's KPI tokens.
     function redeem() external override nonReentrant {
         if (!finalized) revert Forbidden();
         uint256 _kpiTokenBalance = balanceOf(msg.sender);
@@ -328,6 +430,11 @@ contract ERC20KPIToken is
         emit Redeem(_kpiTokenBalance, _redeemedCollaterals);
     }
 
+    /// @dev Given ABI-encoded data about the collaterals a user intends to use
+    /// to create a KPI token, gives back a fee breakdown detailing how much
+    /// fees will be taken from the collaterals. The ABI-encoded params must be
+    /// a `TokenAmount` array (with a maximum of 5 elements).
+    /// @return An ABI-encoded fee breakdown represented by a `TokenAmount` array.
     function protocolFee(bytes calldata _data)
         external
         pure
@@ -354,6 +461,8 @@ contract ERC20KPIToken is
         return abi.encode(_fees);
     }
 
+    /// @dev View function to query all the oracles associated with the KPI token at once.
+    /// @return The oracles array.
     function oracles() external view override returns (address[] memory) {
         if (!oraclesInitialized) revert NotInitialized();
         address[] memory _oracleAddresses = new address[](
@@ -364,6 +473,10 @@ contract ERC20KPIToken is
         return _oracleAddresses;
     }
 
+    /// @dev View function returning all the most important data about the KPI token, in
+    /// an ABI-encoded structure. The structure includes collaterals, finalizable oracles,
+    /// "all-or-none" flag, initial supply of the ERC20 KPI token, along with name and symbol.
+    /// @return The ABI-encoded data.
     function data() external view returns (bytes memory) {
         return
             abi.encode(
@@ -376,6 +489,8 @@ contract ERC20KPIToken is
             );
     }
 
+    /// @dev View function returning info about the template used to instantiate this KPI token.
+    /// @return The template struct.
     function template()
         external
         view
