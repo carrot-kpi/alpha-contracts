@@ -6,7 +6,7 @@ import {OraclesManager} from "../../contracts/OraclesManager.sol";
 /**
  * @title OraclesManagerInstantiationTest
  * @dev OraclesManagerInstantiationTest contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 contract OraclesManagerInstantiationTest is BaseTestSetup {

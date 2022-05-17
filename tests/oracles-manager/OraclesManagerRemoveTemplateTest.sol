@@ -8,7 +8,7 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 /**
  * @title OraclesManagerRemoveTemplateTest
  * @dev OraclesManagerRemoveTemplateTest contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 contract OraclesManagerRemoveTemplateTest is BaseTestSetup {

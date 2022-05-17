@@ -7,7 +7,7 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 /**
  * @title OraclesManagerPredictInstanceAddressTest
  * @dev OraclesManagerPredictInstanceAddressTest contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 contract OraclesManagerPredictInstanceAddressTest is BaseTestSetup {

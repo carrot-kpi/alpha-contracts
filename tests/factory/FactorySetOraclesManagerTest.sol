@@ -5,7 +5,7 @@ import {BaseTestSetup} from "../commons/BaseTestSetup.sol";
 /**
  * @title FactorySetOraclesManagerTest
  * @dev FactorySetOraclesManagerTest contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 contract FactorySetOraclesManagerTest is BaseTestSetup {

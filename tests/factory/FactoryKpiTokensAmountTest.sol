@@ -11,7 +11,7 @@ import {OraclesManager} from "../../contracts/OraclesManager.sol";
 /**
  * @title FactoryKpiTokensAmountTest
  * @dev FactoryKpiTokensAmountTest contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 contract FactoryKpiTokensAmountTest is BaseTestSetup {

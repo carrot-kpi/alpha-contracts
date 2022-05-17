@@ -7,7 +7,7 @@ import {IERC20KPIToken} from "../../../../contracts/interfaces/kpi-tokens/IERC20
 /**
  * @title ERC20KPITokenBelowLowerBoundFinalizeTest
  * @dev ERC20KPITokenBelowLowerBoundFinalizeTest contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {

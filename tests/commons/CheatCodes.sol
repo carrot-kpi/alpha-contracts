@@ -3,7 +3,7 @@ pragma solidity 0.8.13;
 /**
  * @title CheatCodes
  * @dev CheatCodes contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 interface CheatCodes {

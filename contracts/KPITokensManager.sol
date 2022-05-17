@@ -11,7 +11,7 @@ import {IKPITokensManager} from "./interfaces/IKPITokensManager.sol";
 /**
  * @title KPITokensManager
  * @dev KPITokensManager contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 contract KPITokensManager is Ownable, IKPITokensManager {

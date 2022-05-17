@@ -12,7 +12,7 @@ import {TokenAmount} from "../commons/Types.sol";
 /**
  * @title ERC20KPIToken
  * @dev ERC20KPIToken contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 contract ERC20KPIToken is

@@ -10,7 +10,7 @@ import {TokenAmount} from "../../../contracts/commons/Types.sol";
 /**
  * @title ERC20KPITokenGetProtocolFeesTest
  * @dev ERC20KPITokenGetProtocolFeesTest contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 contract ERC20KPITokenGetProtocolFeesTest is BaseTestSetup {

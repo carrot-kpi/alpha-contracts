@@ -10,7 +10,7 @@ import {TokenAmount} from "../../../contracts/commons/Types.sol";
 /**
  * @title ERC20KPITokenGetOraclesTest
  * @dev ERC20KPITokenGetOraclesTest contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 contract ERC20KPITokenGetOraclesTest is BaseTestSetup {

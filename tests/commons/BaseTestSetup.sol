@@ -14,7 +14,7 @@ import {IERC20KPIToken} from "../../contracts/interfaces/kpi-tokens/IERC20KPITok
 /**
  * @title BaseTestSetup
  * @dev BaseTestSetup contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 abstract contract BaseTestSetup is DSTest {

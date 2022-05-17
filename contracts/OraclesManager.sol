@@ -9,12 +9,15 @@ import {IOracle} from "./interfaces/oracles/IOracle.sol";
 import {IOraclesManager} from "./interfaces/IOraclesManager.sol";
 import {IKPITokensFactory} from "./interfaces/IKPITokensFactory.sol";
 
-/**
- * @title OraclesManager
- * @dev OraclesManager contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
+/// SPDX-License-Identifier: GPL-3.0-or-later
+/// @title Oracles manager
+/// @notice The oracles manager contract acts as a template
+/// registry for oracle implementations. Additionally, templates
+/// can also only be instantiated by the manager itself,
+/// exclusively by request of the factory. All templates-related functions are governance-gated
+/// (addition, removal, upgrade of templates and more) and the governance contract must be the
+/// owner of the oracles manager.
+/// @author Federico Luzzi - <federico.luzzi@protonmail.com>
 contract OraclesManager is Ownable, IOraclesManager {
     using SafeERC20 for IERC20;
 

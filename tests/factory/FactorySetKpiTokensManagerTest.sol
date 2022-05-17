@@ -5,7 +5,7 @@ import {BaseTestSetup} from "../commons/BaseTestSetup.sol";
 /**
  * @title FactorySetKpiTokensManagerTest
  * @dev FactorySetKpiTokensManagerTest contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 contract FactorySetKpiTokensManagerTest is BaseTestSetup {

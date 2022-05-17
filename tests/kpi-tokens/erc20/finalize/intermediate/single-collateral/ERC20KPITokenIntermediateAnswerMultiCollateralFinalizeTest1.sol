@@ -7,7 +7,7 @@ import {IERC20KPIToken} from "../../../../../../contracts/interfaces/kpi-tokens/
 /**
  * @title ERC20KPITokenIntermediateAnswerMultiCollateralFinalizeTest1
  * @dev ERC20KPITokenIntermediateAnswerMultiCollateralFinalizeTest1 contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 contract ERC20KPITokenIntermediateAnswerMultiCollateralFinalizeTest1 is

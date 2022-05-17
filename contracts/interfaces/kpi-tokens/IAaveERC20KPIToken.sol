@@ -6,7 +6,7 @@ import "./IKPIToken.sol";
 /**
  * @title IERC20KPIToken
  * @dev IERC20KPIToken contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 interface IAaveERC20KPIToken is IKPIToken, IERC20Upgradeable {

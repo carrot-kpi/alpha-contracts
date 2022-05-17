@@ -9,7 +9,7 @@ import {IERC20KPIToken} from "../../../contracts/interfaces/kpi-tokens/IERC20KPI
 /**
  * @title ERC20KPITokenCollectProtocoFeeTest
  * @dev ERC20KPITokenCollectProtocoFeeTest contract
- * @author Federico Luzzi - <fedeluzzi00@gmail.com>
+ * @author Federico Luzzi - <federico.luzzi@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0
  */
 contract ERC20KPITokenCollectProtocoFeeTest is BaseTestSetup {
