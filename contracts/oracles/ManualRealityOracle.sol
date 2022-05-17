@@ -1,9 +1,10 @@
 pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "../interfaces/oracles/IOracle.sol";
-import "../interfaces/kpi-tokens/IKPIToken.sol";
-import "../interfaces/external/IReality.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {IOracle} from "../interfaces/oracles/IOracle.sol";
+import {IOraclesManager} from "../interfaces/IOraclesManager.sol";
+import {IKPIToken} from "../interfaces/kpi-tokens/IKPIToken.sol";
+import {IReality} from "../interfaces/external/IReality.sol";
 
 /**
  * @title ManualRealityOracle
