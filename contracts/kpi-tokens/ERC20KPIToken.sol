@@ -317,11 +317,12 @@ contract ERC20KPIToken is
     /// Once all the oracles associated with the KPI token have reported their end result and
     /// finalize, the remaining collateral, if any, becomes redeemable by KPI token holders.
     /// @param _result The oracle end result.
-    // FIXME: what happens here if one of the collateral tokens is paused?
-    // Is the oracle reporting lost? Maybe avoid automatically sending back the collateral
-    // to the KPI token creator and split the accounting and actual collaterals sending in
-    // two distinct functions, since it's of utmost importance to register the oracle
-    // result at this stage.
+    // FIXME: what happens here if one of the collateral tokens is paused or anyway if at least one
+    // of the collaterals transfers reverts?
+    // The oracle reporting is pretty much lost/undoable and collateral might remain locked forever.
+    // A solution could be avoiding automatic transfer back of the collateral to the KPI token creator
+    // by splitting the accounting and actual collaterals transfers in two distinct functions,
+    // since it's of utmost importance to register the oracle result at this stage.
     function finalize(uint256 _result) external override nonReentrant {
         if (!oraclesInitialized) revert NotInitialized();
 
