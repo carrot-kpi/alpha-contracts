@@ -11,7 +11,7 @@ import {IKPITokensFactory} from "./interfaces/IKPITokensFactory.sol";
 
 /// SPDX-License-Identifier: GPL-3.0-or-later
 /// @title Oracles manager
-/// @notice The oracles manager contract acts as a template
+/// @dev The oracles manager contract acts as a template
 /// registry for oracle implementations. Additionally, templates
 /// can also only be instantiated by the manager itself,
 /// exclusively by request of the factory. All templates-related functions are governance-gated
@@ -48,6 +48,12 @@ contract OraclesManager is Ownable, IOraclesManager {
         factory = _factory;
     }
 
+    /// @dev Calculates the salt value used in CREATE2 when
+    /// instantiating new templates. the salt is calculated as
+    /// keccak256(abi.encodePacked(`_creator`, `_initializationData`)).
+    /// @param _creator The KPI token creator.
+    /// @param _initializationData The template-specific ABI-encoded initialization data.
+    /// @return The salt value.
     function salt(address _creator, bytes calldata _initializationData)
         internal
         pure
@@ -56,6 +62,12 @@ contract OraclesManager is Ownable, IOraclesManager {
         return keccak256(abi.encodePacked(_creator, _initializationData));
     }
 
+    /// @dev Predicts an oracle template instance address based on the input data.
+    /// @param _creator The KPI token creator.
+    /// @param _id The id of the template that is to be instantiated.
+    /// @param _initializationData The template-specific ABI-encoded initialization data.
+    /// @return The address at which the template with the given input
+    /// parameters will be instantiated.
     function predictInstanceAddress(
         address _creator,
         uint256 _id,
@@ -71,6 +83,14 @@ contract OraclesManager is Ownable, IOraclesManager {
             );
     }
 
+    /// @dev Instantiates a given template using EIP 1167 minimal proxies.
+    /// The input data will both be used to choose the instantiated template
+    /// and to feed it initialization data.
+    /// @param _creator The KPI token creator.
+    /// @param _id The id of the template that is to be instantiated.
+    /// @param _initializationData The template-specific ABI-encoded initialization data.
+    /// @return The address at which the template with the given input
+    /// parameters has been instantiated.
     function instantiate(
         address _creator,
         uint256 _id,
@@ -91,6 +111,12 @@ contract OraclesManager is Ownable, IOraclesManager {
         return _instance;
     }
 
+    /// @dev Adds a template to the registry. This function can only be called
+    /// by the contract owner (governance).
+    /// @param _template The template's address.
+    /// @param _automatable Whether the template is automatable or not.
+    /// @param _specification An IPFS cid pointing to a structured JSON
+    /// describing the template.
     function addTemplate(
         address _template,
         bool _automatable,
@@ -130,6 +156,11 @@ contract OraclesManager is Ownable, IOraclesManager {
         revert NoKeyForTemplate();
     }
 
+    /// @dev Updates a template specification. The specification is an IPFS cid
+    /// pointing to a structured JSON file containing data about the template.
+    /// This function can only be called by the contract owner (governance).
+    /// @param _id The template's id.
+    /// @param _newSpecification the updated specification for the template with id `_id`.
     function updateTemplateSpecification(
         uint256 _id,
         string calldata _newSpecification
@@ -140,6 +171,11 @@ contract OraclesManager is Ownable, IOraclesManager {
         emit UpdateTemplateSpecification(_id, _newSpecification);
     }
 
+    /// @dev Upgrades a template. This function can only be called by the contract owner (governance).
+    /// @param _id The id of the template that needs to be upgraded.
+    /// @param _newTemplate The new address of the template.
+    /// @param _versionBump A bitmask describing the version bump to be applied (major, minor, patch).
+    /// @param _newSpecification The updated specification for the upgraded template.
     function upgradeTemplate(
         uint256 _id,
         address _newTemplate,
@@ -174,6 +210,9 @@ contract OraclesManager is Ownable, IOraclesManager {
         );
     }
 
+    /// @dev Gets a template from storage.
+    /// @param _id The id of the template that needs to be fetched.
+    /// @return The template from storage with id `_id`.
     function storageTemplate(uint256 _id)
         internal
         view
@@ -184,6 +223,9 @@ contract OraclesManager is Ownable, IOraclesManager {
         return _template;
     }
 
+    /// @dev Gets a template.
+    /// @param _id The id of the template that needs to be fetched.
+    /// @return The template with id `_id`.
     function template(uint256 _id)
         external
         view
@@ -195,10 +237,16 @@ contract OraclesManager is Ownable, IOraclesManager {
         return _template;
     }
 
+    /// @dev Gets the amount of all registered templates.
+    /// @return The templates amount.
     function templatesAmount() external view override returns (uint256) {
         return templates.keys.length;
     }
 
+    /// @dev Gets a templates slice based on indexes.
+    /// @param _fromIndex The index from which to get templates.
+    /// @param _toIndex The maximum index to which to get templates.
+    /// @return A templates array representing the slice taken through the given indexes.
     function enumerate(uint256 _fromIndex, uint256 _toIndex)
         external
         view
