@@ -14,9 +14,10 @@ import {IKPITokensFactory} from "./interfaces/IKPITokensFactory.sol";
 /// @dev The oracles manager contract acts as a template
 /// registry for oracle implementations. Additionally, templates
 /// can also only be instantiated by the manager itself,
-/// exclusively by request of the factory. All templates-related functions are governance-gated
-/// (addition, removal, upgrade of templates and more) and the governance contract must be the
-/// owner of the oracles manager.
+/// exclusively by request of a KPI token being created. All
+/// templates-related functions are governance-gated
+/// (addition, removal, upgrade of templates and more) and the
+/// governance contract must be the owner of the oracles manager.
 /// @author Federico Luzzi - <federico.luzzi@protonmail.com>
 contract OraclesManager is Ownable, IOraclesManager {
     using SafeERC20 for IERC20;
@@ -138,6 +139,9 @@ contract OraclesManager is Ownable, IOraclesManager {
         emit AddTemplate(_template, _automatable, _specification);
     }
 
+    /// @dev Removes a template from the registry. This function can only be called
+    /// by the contract owner (governance).
+    /// @param _id The id of the template that must be removed.
     function removeTemplate(uint256 _id) external override {
         if (msg.sender != owner()) revert Forbidden();
         IOraclesManager.Template storage _templateFromStorage = storageTemplate(
@@ -223,7 +227,7 @@ contract OraclesManager is Ownable, IOraclesManager {
         return _template;
     }
 
-    /// @dev Gets a template.
+    /// @dev Gets a template by id.
     /// @param _id The id of the template that needs to be fetched.
     /// @return The template with id `_id`.
     function template(uint256 _id)
