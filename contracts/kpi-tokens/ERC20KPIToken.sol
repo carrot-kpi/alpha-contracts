@@ -10,7 +10,7 @@ import {IERC20KPIToken} from "../interfaces/kpi-tokens/IERC20KPIToken.sol";
 import {TokenAmount} from "../commons/Types.sol";
 
 /// SPDX-License-Identifier: GPL-3.0-or-later
-/// @title ERC20KPIToken
+/// @title ERC20 KPI token template implementation
 /// @dev A KPI token template imlementation. The template produces ERC20 tokens
 /// that can be distributed arbitrarily to communities or specific entities in order
 /// to incentivize them to reach certain KPIs. Backing these tokens there are potentially
