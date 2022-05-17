@@ -238,7 +238,7 @@ contract KPITokensManager is Ownable, IKPITokensManager {
     /// @dev Gets a templates slice based on indexes.
     /// @param _fromIndex The index from which to get templates.
     /// @param _toIndex The maximum index to which to get templates.
-    /// @return A templates array representing the slice taken through the given indexes.
+    /// @return A templates array representing the slice taken between the given indexes.
     function enumerate(uint256 _fromIndex, uint256 _toIndex)
         external
         view
