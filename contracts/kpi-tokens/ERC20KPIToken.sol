@@ -1,12 +1,12 @@
 pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "../interfaces/oracles/IOracle.sol";
-import "../interfaces/IOraclesManager.sol";
-import "../interfaces/IKPITokensManager.sol";
-import "../interfaces/kpi-tokens/IERC20KPIToken.sol";
+import {IERC20Upgradeable, ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {IOracle} from "../interfaces/oracles/IOracle.sol";
+import {IOraclesManager} from "../interfaces/IOraclesManager.sol";
+import {IKPITokensManager} from "../interfaces/IKPITokensManager.sol";
+import {IERC20KPIToken} from "../interfaces/kpi-tokens/IERC20KPIToken.sol";
 import {TokenAmount} from "../commons/Types.sol";
 
 /// SPDX-License-Identifier: GPL-3.0-or-later
