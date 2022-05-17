@@ -10,7 +10,7 @@ import {OraclesManager} from "../../contracts/OraclesManager.sol";
  * SPDX-License-Identifier: GPL-3.0
  */
 contract OraclesManagerSetJoltMasterTest is BaseTestSetup {
-    function testNonOwner() external {
+    /* function testNonOwner() external {
         CHEAT_CODES.prank(address(1));
         CHEAT_CODES.expectRevert("Ownable: caller is not the owner");
         oraclesManager.setJoltMaster(address(0));
@@ -30,5 +30,5 @@ contract OraclesManagerSetJoltMasterTest is BaseTestSetup {
         assertEq(oraclesManager.joltMaster(), address(0));
         oraclesManager.setJoltMaster(address(1));
         assertEq(oraclesManager.joltMaster(), address(1));
-    }
+    } */
 }

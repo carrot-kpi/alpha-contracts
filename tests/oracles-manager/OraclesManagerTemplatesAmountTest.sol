@@ -13,7 +13,7 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
  */
 contract OraclesManagerTemplatesAmountTest is BaseTestSetup {
     function testNoTemplates() external {
-        oraclesManager = new OraclesManager(address(factory), address(0));
+        oraclesManager = new OraclesManager(address(factory)/* , address(0) */);
         assertEq(oraclesManager.templatesAmount(), 0);
     }
 

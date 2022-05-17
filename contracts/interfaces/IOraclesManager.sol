@@ -28,8 +28,6 @@ interface IOraclesManager {
         uint256[] keys;
     }
 
-    function setJoltMaster(address _joltMaster) external;
-
     function predictInstanceAddress(
         address _creator,
         uint256 _id,

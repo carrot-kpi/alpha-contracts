@@ -19,7 +19,6 @@ contract OraclesManager is Ownable, IOraclesManager {
     using SafeERC20 for IERC20;
 
     address public factory;
-    address public joltMaster;
     IOraclesManager.EnumerableTemplateSet private templates;
 
     error NonExistentTemplate();
@@ -31,7 +30,6 @@ contract OraclesManager is Ownable, IOraclesManager {
     error InvalidVersionBump();
     error InvalidIndices();
 
-    event SetJoltMaster(address joltMaster);
     event AddTemplate(address template, bool automatable, string specification);
     event RemoveTemplate(uint256 id);
     event UpdateTemplateSpecification(uint256 id, string _specification);
@@ -42,14 +40,9 @@ contract OraclesManager is Ownable, IOraclesManager {
         string newSpecification
     );
 
-    constructor(address _factory, address _joltMaster) {
+    constructor(address _factory) {
         if (_factory == address(0)) revert ZeroAddressFactory();
         factory = _factory;
-        joltMaster = _joltMaster;
-    }
-
-    function setJoltMaster(address _joltMaster) external override onlyOwner {
-        joltMaster = _joltMaster;
     }
 
     function salt(address _creator, bytes calldata _initializationData)
