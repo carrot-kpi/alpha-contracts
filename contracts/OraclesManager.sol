@@ -1,8 +1,6 @@
 pragma solidity 0.8.13;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {IKPIToken} from "./interfaces/kpi-tokens/IKPIToken.sol";
 import {IOracle} from "./interfaces/oracles/IOracle.sol";
@@ -20,8 +18,6 @@ import {IKPITokensFactory} from "./interfaces/IKPITokensFactory.sol";
 /// governance contract must be the owner of the oracles manager.
 /// @author Federico Luzzi - <federico.luzzi@protonmail.com>
 contract OraclesManager is Ownable, IOraclesManager {
-    using SafeERC20 for IERC20;
-
     address public factory;
     IOraclesManager.EnumerableTemplateSet private templates;
 

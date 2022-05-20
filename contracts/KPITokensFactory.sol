@@ -1,13 +1,11 @@
 pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "./interfaces/IKPITokensFactory.sol";
-import "./interfaces/IKPITokensManager.sol";
-import "./interfaces/IOraclesManager.sol";
-import "./interfaces/kpi-tokens/IKPIToken.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {IKPITokensFactory} from "./interfaces/IKPITokensFactory.sol";
+import {IKPITokensManager} from "./interfaces/IKPITokensManager.sol";
+import {IOraclesManager} from "./interfaces/IOraclesManager.sol";
+import {IKPIToken} from "./interfaces/kpi-tokens/IKPIToken.sol";
 
 /// SPDX-License-Identifier: GPL-3.0-or-later
 /// @title KPI tokens factory
@@ -19,8 +17,6 @@ import "./interfaces/kpi-tokens/IKPIToken.sol";
 /// are included to query the storage of the contract.
 /// @author Federico Luzzi - <federico.luzzi@protonmail.com>
 contract KPITokensFactory is Ownable, IKPITokensFactory {
-    using SafeERC20 for IERC20;
-
     address public kpiTokensManager;
     address public oraclesManager;
     address public feeReceiver;
