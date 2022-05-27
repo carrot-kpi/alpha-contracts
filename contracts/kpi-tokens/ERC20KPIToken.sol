@@ -387,15 +387,16 @@ contract ERC20KPIToken is ERC20Upgradeable, IERC20KPIToken, ReentrancyGuard {
             Collateral memory _collateral = collaterals[_i];
             if (_collateral.token == _token) {
                 IERC20Upgradeable(_token).safeTransfer(
-                    creator,
+                    _receiver,
                     IERC20Upgradeable(_collateral.token).balanceOf(
                         address(this)
                     ) - _collateral.amount
                 );
+                return;
             }
         }
         IERC20Upgradeable(_token).safeTransfer(
-            creator,
+            _receiver,
             IERC20Upgradeable(_token).balanceOf(address(this))
         );
     }
