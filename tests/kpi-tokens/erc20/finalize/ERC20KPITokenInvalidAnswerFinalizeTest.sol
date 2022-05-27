@@ -1,4 +1,4 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {BaseTestSetup} from "../../../commons/BaseTestSetup.sol";
 import {ERC20KPIToken} from "../../../../contracts/kpi-tokens/ERC20KPIToken.sol";
@@ -118,7 +118,7 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testInvalidAnswerAndRelationshipSingleOracleNonZeroMinimumPayout()
@@ -225,7 +225,7 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testInvalidAnswerOrRelationshipSingleOracleZeroMinimumPayout()
@@ -332,7 +332,7 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testInvalidAnswerOrRelationshipSingleOracleNonZeroMinimumPayout()
@@ -439,7 +439,7 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testInvalidAnswerAndRelationshipMultipleOraclesZeroMinimumPayout()
@@ -562,7 +562,7 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[1].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testInvalidAnswerAndRelationshipMultipleOraclesNonZeroMinimumPayout()
@@ -685,7 +685,7 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[1].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testInvalidAnswerAndRelationshipSingleOracleZeroMinimumPayoutMultiCollateral()
@@ -802,8 +802,8 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
-        assertEq(secondErc20.balanceOf(address(this)), 2.991 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testInvalidAnswerAndRelationshipSingleOracleNonZeroMinimumPayoutMultiCollateral()
@@ -920,8 +920,8 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
-        assertEq(secondErc20.balanceOf(address(this)), 30.904 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testInvalidAnswerOrRelationshipSingleOracleZeroMinimumPayoutMultiCollateral()
@@ -1038,8 +1038,8 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
-        assertEq(secondErc20.balanceOf(address(this)), 4.4865 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testInvalidAnswerOrRelationshipSingleOracleNonZeroMinimumPayoutMultiCollateral()
@@ -1156,8 +1156,8 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 0.994 ether);
-        assertEq(secondErc20.balanceOf(address(this)), 17.94 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testInvalidAnswerAndRelationshipMultipleOraclesZeroMinimumPayoutMultiCollateral()
@@ -1290,8 +1290,8 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[1].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
-        assertEq(secondErc20.balanceOf(address(this)), 23.1304 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testInvalidAnswerAndRelationshipMultipleOraclesNonZeroMinimumPayoutMultiCollateral()
@@ -1424,10 +1424,7 @@ contract ERC20KPITokenInvalidAnswerFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[1].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
-        assertEq(
-            secondErc20.balanceOf(address(this)),
-            289.329399999999999999 ether
-        );
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 }

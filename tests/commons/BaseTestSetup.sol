@@ -1,4 +1,4 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {DSTest} from "ds-test/test.sol";
 import {ERC20KPIToken} from "../../contracts/kpi-tokens/ERC20KPIToken.sol";
@@ -8,7 +8,7 @@ import {ManualRealityOracle} from "../../contracts/oracles/ManualRealityOracle.s
 import {OraclesManager} from "../../contracts/OraclesManager.sol";
 import {KPITokensFactory} from "../../contracts/KPITokensFactory.sol";
 import {CheatCodes} from "./CheatCodes.sol";
-import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
+import {ERC20PresetMinterPauser} from "oz/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 import {IERC20KPIToken} from "../../contracts/interfaces/kpi-tokens/IERC20KPIToken.sol";
 
 /**

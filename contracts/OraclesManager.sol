@@ -1,7 +1,7 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {Ownable} from "oz/access/Ownable.sol";
+import {Clones} from "oz/proxy/Clones.sol";
 import {IKPIToken} from "./interfaces/kpi-tokens/IKPIToken.sol";
 import {IOracle} from "./interfaces/oracles/IOracle.sol";
 import {IOraclesManager} from "./interfaces/IOraclesManager.sol";

@@ -1,9 +1,9 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {BaseTestSetup} from "../../commons/BaseTestSetup.sol";
 import {ERC20KPIToken} from "../../../contracts/kpi-tokens/ERC20KPIToken.sol";
 import {IOraclesManager} from "../../../contracts/interfaces/IOraclesManager.sol";
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {Clones} from "oz/proxy/Clones.sol";
 import {IERC20KPIToken} from "../../../contracts/interfaces/kpi-tokens/IERC20KPIToken.sol";
 
 /**

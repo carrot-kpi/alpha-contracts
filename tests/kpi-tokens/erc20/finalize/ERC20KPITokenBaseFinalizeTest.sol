@@ -1,9 +1,9 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {BaseTestSetup} from "../../../commons/BaseTestSetup.sol";
 import {ERC20KPIToken} from "../../../../contracts/kpi-tokens/ERC20KPIToken.sol";
 import {IERC20KPIToken} from "../../../../contracts/interfaces/kpi-tokens/IERC20KPIToken.sol";
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {Clones} from "oz/proxy/Clones.sol";
 
 /**
  * @title ERC20KPITokenBaseFinalizeTest
@@ -124,7 +124,7 @@ contract ERC20KPITokenBaseFinalizeTest is BaseTestSetup {
         kpiTokenInstance.finalize(5);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
 
         (
             IERC20KPIToken.Collateral[] memory onChainCollaterals,

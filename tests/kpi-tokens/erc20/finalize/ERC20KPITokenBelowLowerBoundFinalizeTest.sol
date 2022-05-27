@@ -1,4 +1,4 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {BaseTestSetup} from "../../../commons/BaseTestSetup.sol";
 import {ERC20KPIToken} from "../../../../contracts/kpi-tokens/ERC20KPIToken.sol";
@@ -115,7 +115,7 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testBelowLowerBoundAndRelationshipSingleOracleNonZeroMinimumPayout()
@@ -222,7 +222,7 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testBelowLowerBoundOrRelationshipSingleOracleZeroMinimumPayout()
@@ -329,7 +329,7 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testBelowLowerBoundOrRelationshipSingleOracleNonZeroMinimumPayout()
@@ -436,7 +436,7 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testBelowLowerBoundAndRelationshipMultipleOraclesZeroMinimumPayout()
@@ -559,7 +559,7 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[1].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testBelowLowerBoundAndRelationshipMultipleOraclesNonZeroMinimumPayout()
@@ -682,7 +682,7 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[1].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
     }
 
     function testBelowLowerBoundAndRelationshipSingleOracleZeroMinimumPayoutMultiCollateral()
@@ -799,8 +799,8 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
-        assertEq(secondErc20.balanceOf(address(this)), 4);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testBelowLowerBoundAndRelationshipSingleOracleNonZeroMinimumPayoutMultiCollateral()
@@ -917,8 +917,8 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
-        assertEq(secondErc20.balanceOf(address(this)), 0.979 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testBelowLowerBoundOrRelationshipSingleOracleZeroMinimumPayoutMultiCollateral()
@@ -1035,8 +1035,8 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
-        assertEq(secondErc20.balanceOf(address(this)), 0.997 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testBelowLowerBoundOrRelationshipSingleOracleNonZeroMinimumPayoutMultiCollateral()
@@ -1153,8 +1153,8 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
-        assertEq(secondErc20.balanceOf(address(this)), 2.2895 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testBelowLowerBoundAndRelationshipMultipleOraclesZeroMinimumPayoutMultiCollateral()
@@ -1287,8 +1287,8 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[1].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 2);
-        assertEq(secondErc20.balanceOf(address(this)), 22.931 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testBelowLowerBoundAndRelationshipMultipleOraclesNonZeroMinimumPayoutMultiCollateral()
@@ -1421,7 +1421,7 @@ contract ERC20KPITokenBelowLowerBoundFinalizeTest is BaseTestSetup {
         assertTrue(onChainFinalizableOracles[1].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
-        assertEq(secondErc20.balanceOf(address(this)), 7.481061607 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0 ether);
     }
 }

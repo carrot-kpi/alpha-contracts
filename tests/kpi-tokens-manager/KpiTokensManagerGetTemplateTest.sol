@@ -1,9 +1,9 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {BaseTestSetup} from "../commons/BaseTestSetup.sol";
 import {OraclesManager} from "../../contracts/OraclesManager.sol";
 import {IKPITokensManager} from "../../contracts/interfaces/IKPITokensManager.sol";
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {Clones} from "oz/proxy/Clones.sol";
 
 /**
  * @title KpiTokensManagerGetTemplateTest

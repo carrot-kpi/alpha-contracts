@@ -1,4 +1,4 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {BaseTestSetup} from "../../../commons/BaseTestSetup.sol";
 import {ERC20KPIToken} from "../../../../contracts/kpi-tokens/ERC20KPIToken.sol";

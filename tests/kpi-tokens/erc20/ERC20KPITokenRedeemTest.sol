@@ -1,8 +1,8 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {BaseTestSetup} from "../../commons/BaseTestSetup.sol";
 import {ERC20KPIToken} from "../../../contracts/kpi-tokens/ERC20KPIToken.sol";
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {Clones} from "oz/proxy/Clones.sol";
 import {IERC20KPIToken} from "../../../contracts/interfaces/kpi-tokens/IERC20KPIToken.sol";
 
 /**
@@ -451,10 +451,7 @@ contract ERC20KPITokenRedeemTest is BaseTestSetup {
 
         assertEq(onChainCollaterals.length, 1);
         assertEq(onChainCollaterals[0].amount, 7.311333333333333334 ether);
-        assertEq(
-            firstErc20.balanceOf(address(this)),
-            14.622666666666666666 ether
-        );
+        assertEq(firstErc20.balanceOf(address(this)), 0);
 
         assertEq(firstErc20.balanceOf(holder), 0 ether);
         CHEAT_CODES.prank(holder);
@@ -909,10 +906,7 @@ contract ERC20KPITokenRedeemTest is BaseTestSetup {
 
         assertEq(onChainCollaterals.length, 1);
         assertEq(onChainCollaterals[0].amount, 36.556666666666666667 ether);
-        assertEq(
-            firstErc20.balanceOf(address(this)),
-            73.113333333333333333 ether
-        );
+        assertEq(firstErc20.balanceOf(address(this)), 0);
 
         CHEAT_CODES.prank(holder1);
         kpiTokenInstance.redeem();

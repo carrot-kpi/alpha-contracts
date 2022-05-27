@@ -1,9 +1,8 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
-import {IERC20Upgradeable, ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import {IOracle} from "../interfaces/oracles/IOracle.sol";
+import {IERC20Upgradeable, ERC20Upgradeable} from "oz-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {SafeERC20Upgradeable} from "oz-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {ReentrancyGuard} from "oz/security/ReentrancyGuard.sol";
 import {IOraclesManager} from "../interfaces/IOraclesManager.sol";
 import {IKPITokensManager} from "../interfaces/IKPITokensManager.sol";
 import {IERC20KPIToken} from "../interfaces/kpi-tokens/IERC20KPIToken.sol";
@@ -24,11 +23,7 @@ import {TokenAmount} from "../commons/Types.sol";
 /// KPIs are reached or not), weighted KPIs and multiple detached resolution or all-in-one
 /// reaching of KPIs (explained more in details later).
 /// @author Federico Luzzi - <federico.luzzi@protonmail.com>
-contract ERC20KPIToken is
-    ERC20Upgradeable,
-    IERC20KPIToken,
-    ReentrancyGuardUpgradeable
-{
+contract ERC20KPIToken is ERC20Upgradeable, IERC20KPIToken, ReentrancyGuard {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     uint256 internal immutable INVALID_ANSWER =
@@ -200,7 +195,6 @@ contract ERC20KPIToken is
     ///   payout amount, which is unlocked under any circumstance).
     function initializeOracles(address _oraclesManager, bytes calldata _data)
         external
-        nonReentrant
     {
         address _creator = creator;
         if (_creator == address(0)) revert NotInitialized();
@@ -335,6 +329,7 @@ contract ERC20KPIToken is
             // to the creator, otherwise calculate the exact amount to give back.
             bool _andRelationship = andRelationship;
             for (uint256 _i = 0; _i < collaterals.length; _i++) {
+                // FIXME: will using a memory collateral here save gas? Below too
                 Collateral storage _collateral = collaterals[_i];
                 uint256 _reimboursement;
                 if (_andRelationship)
@@ -347,10 +342,6 @@ contract ERC20KPIToken is
                         MULTIPLIER;
                     _reimboursement = (_numerator / totalWeight) >> MULTIPLIER;
                 }
-                IERC20Upgradeable(_collateral.token).safeTransfer(
-                    creator,
-                    _reimboursement
-                );
                 _collateral.amount -= _reimboursement;
             }
             if (_andRelationship) {
@@ -379,10 +370,6 @@ contract ERC20KPIToken is
                     uint256 _denominator = _oracleFullRange * totalWeight;
                     uint256 _reimboursement = (_numerator / _denominator) >>
                         MULTIPLIER;
-                    IERC20Upgradeable(_collateral.token).safeTransfer(
-                        creator,
-                        _reimboursement
-                    );
                     _collateral.amount -= _reimboursement;
                 }
             }
@@ -392,6 +379,25 @@ contract ERC20KPIToken is
         if (--toBeFinalized == 0) finalized = true;
 
         emit Finalize(msg.sender, _result);
+    }
+
+    function recoverERC20(address _token, address _receiver) external {
+        if (msg.sender != creator) revert Forbidden();
+        for (uint8 _i = 0; _i < collaterals.length; _i++) {
+            Collateral memory _collateral = collaterals[_i];
+            if (_collateral.token == _token) {
+                IERC20Upgradeable(_token).safeTransfer(
+                    creator,
+                    IERC20Upgradeable(_collateral.token).balanceOf(
+                        address(this)
+                    ) - _collateral.amount
+                );
+            }
+        }
+        IERC20Upgradeable(_token).safeTransfer(
+            creator,
+            IERC20Upgradeable(_token).balanceOf(address(this))
+        );
     }
 
     /// @dev Given a collateral amount, calculates the protocol fee as a percentage of it.

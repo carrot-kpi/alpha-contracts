@@ -1,4 +1,4 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {BaseTestSetup} from "../../../../../commons/BaseTestSetup.sol";
 import {ERC20KPIToken} from "../../../../../../contracts/kpi-tokens/ERC20KPIToken.sol";
@@ -127,8 +127,8 @@ contract ERC20KPITokenIntermediateAnswerMultiCollateralFinalizeTest1 is
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 1);
-        assertEq(secondErc20.balanceOf(address(this)), 1.4955 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testIntermediateBoundAndRelationshipSingleOracleNonZeroMinimumPayoutMultiCollateral()
@@ -245,8 +245,8 @@ contract ERC20KPITokenIntermediateAnswerMultiCollateralFinalizeTest1 is
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(firstErc20.balanceOf(address(this)), 7.176 ether);
-        assertEq(secondErc20.balanceOf(address(this)), 8.1552 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0);
+        assertEq(secondErc20.balanceOf(address(this)), 0);
     }
 
     function testIntermediateBoundOrRelationshipSingleOracleZeroMinimumPayoutMultiCollateral()
@@ -351,7 +351,6 @@ contract ERC20KPITokenIntermediateAnswerMultiCollateralFinalizeTest1 is
                 )
             );
 
-        assertEq(firstErc20.balanceOf(address(this)), 0.997 ether);
         assertTrue(kpiTokenInstance.finalized());
 
         assertEq(onChainCollaterals.length, 2);
@@ -364,8 +363,8 @@ contract ERC20KPITokenIntermediateAnswerMultiCollateralFinalizeTest1 is
 
         assertTrue(onChainFinalizableOracles[0].finalized);
 
-        assertEq(firstErc20.balanceOf(address(this)), 0.997 ether);
-        // assertEq(secondErc20.balanceOf(address(this)), 1.994 ether);
+        assertEq(firstErc20.balanceOf(address(this)), 0 ether);
+        assertEq(secondErc20.balanceOf(address(this)), 0 ether);
     }
 
     function testIntermediateBoundOrRelationshipSingleOracleNonZeroMinimumPayoutMultiCollateral()
@@ -482,13 +481,7 @@ contract ERC20KPITokenIntermediateAnswerMultiCollateralFinalizeTest1 is
         assertTrue(onChainFinalizableOracles[0].finalized);
 
         assertTrue(kpiTokenInstance.finalized());
-        assertEq(
-            firstErc20.balanceOf(address(this)),
-            16.527418478260869565 ether
-        );
-        assertEq(
-            secondErc20.balanceOf(address(this)),
-            564.192505434782608695 ether
-        );
+        assertEq(firstErc20.balanceOf(address(this)), 0 ether);
+        assertEq(secondErc20.balanceOf(address(this)), 0 ether);
     }
 }

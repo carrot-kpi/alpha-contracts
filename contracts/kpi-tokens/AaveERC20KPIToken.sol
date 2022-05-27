@@ -1,7 +1,7 @@
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
-import {IERC20Upgradeable, ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {IERC20Upgradeable, ERC20Upgradeable} from "oz-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {SafeERC20Upgradeable} from "oz-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
 import {IOraclesManager} from "../interfaces/IOraclesManager.sol";
 import {IKPITokensManager} from "../interfaces/IKPITokensManager.sol";
