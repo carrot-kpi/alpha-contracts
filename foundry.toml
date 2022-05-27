@@ -1,18 +1,32 @@
 [default]
 src = 'contracts'
-test = 'tests'
 out = 'artifacts'
-libs = ['node_modules']
+libs = ['node_modules', 'lib']
+remappings = [
+    'ds-test/=lib/ds-test/src/',
+    'oz/=lib/openzeppelin-contracts/contracts/',
+    'oz-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/',
+    'solmate/=lib/solmate/src/',
+]
+
+[production]
 optimizer = true
 optimizer_runs = 200
 via_ir = true
-remappings = [
-    'ds-test/=lib/ds-test/src/',
-]
 
-[optimizer_details]
+[production.optimizer_details]
 constantOptimizer = true
 yul = true
 
-[optimizer_details.yulDetails]
+[production.optimizer_details.yulDetails]
 optimizerSteps = 'dhfoDgvulfnTUtnIf'
+
+[test]
+test = 'tests'
+optimizer = false
+optimizer_runs = 0
+via_ir = false
+
+[test.optimizer_details]
+constantOptimizer = false
+yul = false
