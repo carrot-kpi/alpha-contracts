@@ -13,4 +13,4 @@ jobs:
               with:
                   version: nightly
             - name: Run tests
-              run: forge test -vvv
+              run: FOUNDRY_PROFILE=test forge test -vvv
