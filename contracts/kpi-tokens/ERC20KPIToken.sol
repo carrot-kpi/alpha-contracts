@@ -251,9 +251,15 @@ contract ERC20KPIToken is ERC20Upgradeable, IERC20KPIToken, ReentrancyGuard {
                 _feeReceiver,
                 _fee
             );
-            if (_collateral.amount - _fee <= _collateral.minimumPayout)
+            uint256 _amountMinusFees;
+            unchecked {
+                _amountMinusFees = _collateral.amount - _fee;
+            }
+            if (_amountMinusFees <= _collateral.minimumPayout)
                 revert InvalidMinimumPayoutAfterFee();
-            _collateral.amount -= _fee;
+            unchecked {
+                _collateral.amount -= _fee;
+            }
         }
 
         protocolFeeCollected = true;
@@ -332,17 +338,21 @@ contract ERC20KPIToken is ERC20Upgradeable, IERC20KPIToken, ReentrancyGuard {
                 // FIXME: will using a memory collateral here save gas? Below too
                 Collateral storage _collateral = collaterals[_i];
                 uint256 _reimboursement;
-                if (_andRelationship)
-                    _reimboursement =
-                        _collateral.amount -
-                        _collateral.minimumPayout;
-                else {
+                if (_andRelationship) {
+                    unchecked {
+                        _reimboursement =
+                            _collateral.amount -
+                            _collateral.minimumPayout;
+                    }
+                } else {
                     uint256 _numerator = ((_collateral.amount -
                         _collateral.minimumPayout) * _oracle.weight) <<
                         MULTIPLIER;
                     _reimboursement = (_numerator / totalWeight) >> MULTIPLIER;
                 }
-                _collateral.amount -= _reimboursement;
+                unchecked {
+                    _collateral.amount -= _reimboursement;
+                }
             }
             if (_andRelationship) {
                 finalized = true;
@@ -352,10 +362,14 @@ contract ERC20KPIToken is ERC20Upgradeable, IERC20KPIToken, ReentrancyGuard {
                 return;
             }
         } else {
-            uint256 _oracleFullRange = _oracle.higherBound - _oracle.lowerBound;
-            uint256 _finalOracleProgress = _result >= _oracle.higherBound
-                ? _oracle.higherBound
-                : _result - _oracle.lowerBound;
+            uint256 _oracleFullRange;
+            uint256 _finalOracleProgress;
+            unchecked {
+                _oracleFullRange = _oracle.higherBound - _oracle.lowerBound;
+                _finalOracleProgress = _result >= _oracle.higherBound
+                    ? _oracle.higherBound
+                    : _result - _oracle.lowerBound;
+            }
             _oracle.finalProgress = _finalOracleProgress;
             // transfer the unnecessary collateral back to the KPI creator
             // if the condition wasn't fully satisfied
@@ -386,11 +400,15 @@ contract ERC20KPIToken is ERC20Upgradeable, IERC20KPIToken, ReentrancyGuard {
         for (uint8 _i = 0; _i < collaterals.length; _i++) {
             Collateral memory _collateral = collaterals[_i];
             if (_collateral.token == _token) {
+                uint256 _balance = IERC20Upgradeable(_collateral.token)
+                    .balanceOf(address(this));
+                uint256 _reimboursement;
+                unchecked {
+                    _reimboursement = _balance - _collateral.amount;
+                }
                 IERC20Upgradeable(_token).safeTransfer(
                     _receiver,
-                    IERC20Upgradeable(_collateral.token).balanceOf(
-                        address(this)
-                    ) - _collateral.amount
+                    _reimboursement
                 );
                 return;
             }
@@ -409,7 +427,9 @@ contract ERC20KPIToken is ERC20Upgradeable, IERC20KPIToken, ReentrancyGuard {
         pure
         returns (uint256)
     {
-        return (_amount * 30) / 10_000;
+        unchecked {
+            return (_amount * 3_000) / 1_000_000;
+        }
     }
 
     /// @dev Only callable by KPI token holders, lets them redeem any collateral
@@ -427,9 +447,13 @@ contract ERC20KPIToken is ERC20Upgradeable, IERC20KPIToken, ReentrancyGuard {
         uint256 _totalSupply = totalSupply();
         for (uint8 _i = 0; _i < collaterals.length; _i++) {
             Collateral storage _collateral = collaterals[_i];
-            uint256 _redeemableAmount = (_collateral.amount *
-                _kpiTokenBalance) / _totalSupply;
-            _collateral.amount -= _redeemableAmount;
+            uint256 _redeemableAmount;
+            unchecked {
+                _redeemableAmount =
+                    (_collateral.amount * _kpiTokenBalance) /
+                    _totalSupply;
+                _collateral.amount -= _redeemableAmount;
+            }
             IERC20Upgradeable(_collateral.token).safeTransfer(
                 msg.sender,
                 _redeemableAmount
