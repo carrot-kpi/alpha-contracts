@@ -13,6 +13,7 @@
         "test": "FOUNDRY_PROFILE=test forge test",
         "test:coverage": "hardhat coverage",
         "test:gasreport": "FOUNDRY_PROFILE=test forge test --gas-report",
+        "test:snapshot": "FOUNDRY_PROFILE=test forge snapshot",
         "compile": "forge build",
         "compile:production": "FOUNDRY_PROFILE=production forge build",
         "prepare": "husky install",
